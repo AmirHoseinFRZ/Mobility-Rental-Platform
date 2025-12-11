@@ -247,33 +247,41 @@ The platform follows a microservices architecture pattern with:
 
 ```
 mobility-rental-platform/
-├── backend/
-│   ├── api-gateway/
-│   ├── user-service/
-│   ├── vehicle-service/
-│   ├── booking-service/
-│   ├── pricing-service/
-│   ├── payment-service/
-│   ├── location-service/
-│   ├── review-service/
-│   ├── driver-service/
-│   ├── maintenance-service/
-│   └── common-lib/
-├── frontend/
-│   ├── web-app/
-│   └── admin-dashboard/
-├── infrastructure/
-│   ├── docker/
-│   ├── kubernetes/ (optional)
-│   ├── monitoring/
-│   └── logging/
-├── database/
-│   ├── migrations/
-│   └── schemas/
-└── docs/
-    ├── api/
-    ├── architecture/
-    └── deployment/
+├── backend/                     ✅ COMPLETE (100%)
+│   ├── api-gateway/            # Port 8080 - Spring Cloud Gateway
+│   ├── user-service/           # Port 8081 - User management
+│   ├── vehicle-service/        # Port 8082 - Vehicle inventory (PostGIS)
+│   ├── booking-service/        # Port 8083 - Booking management
+│   ├── pricing-service/        # Port 8084 - Dynamic pricing
+│   ├── driver-service/         # Port 8085 - Driver management (PostGIS)
+│   ├── review-service/         # Port 8086 - Reviews & ratings
+│   ├── location-service/       # Port 8087 - Location services (PostGIS)
+│   ├── maintenance-service/    # Port 8088 - Maintenance tracking
+│   ├── common-lib/             # Shared utilities
+│   ├── pom.xml                 # Root Maven POM
+│   └── README.md               # Backend documentation
+├── frontend/                    ✅ COMPLETE (100%)
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   ├── pages/              # Page components (9 pages)
+│   │   ├── context/            # React Context (Auth)
+│   │   └── services/           # API service layer
+│   ├── public/                 # Static files
+│   ├── package.json            # Dependencies
+│   ├── Dockerfile              # Docker build
+│   ├── nginx.conf              # Production server config
+│   └── README.md               # Frontend documentation
+├── infrastructure/              ✅ COMPLETE (100%)
+│   └── docker/
+│       ├── postgres/           # PostgreSQL + PostGIS
+│       ├── rabbitmq/           # RabbitMQ configuration
+│       ├── redis/              # Redis configuration
+│       └── README.md           # Infrastructure guide
+├── docker-compose.yml          ✅ Infrastructure services
+├── env.example                 # Environment variables template
+├── README.md                   # This file
+├── BACKEND_COMPLETE.md         # Backend completion summary
+└── FINAL_IMPLEMENTATION_SUMMARY.md  # Complete project summary
 ```
 
 ## Deployment Architecture
@@ -443,19 +451,58 @@ mobility-rental-platform/
 
 ### Prerequisites
 - Docker and Docker Compose installed
-- Java Development Kit (JDK 11 or higher)
-- Node.js and npm
-- PostgreSQL client tools
+- Java Development Kit (JDK 17 or higher)
+- Node.js 18+ and npm
+- Maven 3.9+
 - Git
 
 ### Quick Start
-1. Clone the repository
-2. Configure environment variables
-3. Run `docker-compose up` to start infrastructure
-4. Initialize databases and run migrations
-5. Start backend services
-6. Start frontend application
-7. Access the platform via browser
+
+#### 1. Clone Repository
+```bash
+git clone https://github.com/AmirHoseinFRZ/Mobility-Rental-Platform.git
+cd Mobility-Rental-Platform
+```
+
+#### 2. Start Infrastructure (PostgreSQL, RabbitMQ, Redis)
+```bash
+docker-compose up -d
+```
+
+#### 3. Build and Run Backend Services
+```bash
+cd backend
+mvn clean install
+
+# Start API Gateway (Port 8080) - REQUIRED
+cd api-gateway && mvn spring-boot:run
+
+# Start other services (in separate terminals)
+cd user-service && mvn spring-boot:run       # Port 8081
+cd vehicle-service && mvn spring-boot:run    # Port 8082
+cd booking-service && mvn spring-boot:run    # Port 8083
+cd pricing-service && mvn spring-boot:run    # Port 8084
+cd driver-service && mvn spring-boot:run     # Port 8085
+cd review-service && mvn spring-boot:run     # Port 8086
+```
+
+#### 4. Start Frontend Application
+```bash
+cd frontend
+npm install
+npm start
+```
+
+#### 5. Access the Application
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:8080
+- **Swagger Docs**: http://localhost:808{1-8}/api/{service}/swagger-ui.html
+- **RabbitMQ Management**: http://localhost:15672
+
+### Default Credentials
+- **Database**: mobility_user / mobility_password
+- **RabbitMQ**: mobility_user / mobility_password
+- **Redis**: mobility_redis_password
 
 ## Support and Documentation
 

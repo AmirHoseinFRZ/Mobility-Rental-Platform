@@ -7,59 +7,43 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 /**
- * Feign client for existing Payment Service (external/already implemented)
- * This is a black box interface - actual implementation exists separately
+ * Feign Client for Payment Gateway Service (Black Box)
+ * 
+ * This is an interface to your existing payment gateway.
+ * The payment service should be registered with Eureka or accessed directly via URL.
  */
 @FeignClient(name = "payment-service", path = "/api/payments")
 public interface PaymentClient {
     
     /**
-     * Create a new payment transaction
-     * @param request Payment request details
-     * @return Payment response with transaction ID
+     * Create a payment transaction
+     * 
+     * @param request Payment transaction request
+     * @return Transaction details with transaction ID
      */
-    @PostMapping("/create")
-    ApiResponse<PaymentResponse> createPayment(@RequestBody PaymentRequest request);
+    @PostMapping("/transaction/create")
+    ApiResponse<TransactionResponse> createTransaction(@RequestBody TransactionRequest request);
     
     /**
-     * Get payment status by transaction ID
-     * @param transactionId Transaction ID
-     * @return Payment details
+     * Verify a payment transaction
+     * 
+     * @param transactionId Transaction ID to verify
+     * @return Verification result with transaction status
      */
-    @GetMapping("/{transactionId}")
-    ApiResponse<PaymentResponse> getPaymentStatus(@PathVariable("transactionId") String transactionId);
+    @PostMapping("/transaction/verify")
+    ApiResponse<TransactionResponse> verifyTransaction(@RequestParam String transactionId);
     
-    /**
-     * Process payment
-     * @param transactionId Transaction ID
-     * @return Updated payment status
-     */
-    @PostMapping("/{transactionId}/process")
-    ApiResponse<PaymentResponse> processPayment(@PathVariable("transactionId") String transactionId);
+    // DTOs for Payment Gateway Integration
     
-    /**
-     * Refund payment
-     * @param transactionId Transaction ID
-     * @param amount Refund amount
-     * @return Refund status
-     */
-    @PostMapping("/{transactionId}/refund")
-    ApiResponse<PaymentResponse> refundPayment(
-            @PathVariable("transactionId") String transactionId,
-            @RequestParam("amount") BigDecimal amount);
-    
-    /**
-     * Payment request DTO
-     */
-    class PaymentRequest {
+    class TransactionRequest {
         private Long userId;
         private Long bookingId;
         private BigDecimal amount;
         private String currency;
-        private String paymentMethod; // CREDIT_CARD, DEBIT_CARD, WALLET, etc.
         private String description;
+        private String callbackUrl;
         
-        // Getters and setters
+        // Getters and Setters
         public Long getUserId() { return userId; }
         public void setUserId(Long userId) { this.userId = userId; }
         
@@ -71,59 +55,43 @@ public interface PaymentClient {
         
         public String getCurrency() { return currency; }
         public void setCurrency(String currency) { this.currency = currency; }
-        
-        public String getPaymentMethod() { return paymentMethod; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
         
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
+        
+        public String getCallbackUrl() { return callbackUrl; }
+        public void setCallbackUrl(String callbackUrl) { this.callbackUrl = callbackUrl; }
     }
     
-    /**
-     * Payment response DTO
-     */
-    class PaymentResponse {
+    class TransactionResponse {
         private String transactionId;
-        private Long userId;
-        private Long bookingId;
+        private String status; // PENDING, COMPLETED, FAILED, CANCELLED
         private BigDecimal amount;
         private String currency;
-        private String status; // PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
-        private String paymentMethod;
-        private String gatewayResponse;
-        private java.time.LocalDateTime createdAt;
-        private java.time.LocalDateTime completedAt;
+        private String paymentUrl; // URL to redirect user for payment
+        private String message;
+        private Long timestamp;
         
-        // Getters and setters
+        // Getters and Setters
         public String getTransactionId() { return transactionId; }
         public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
-        
-        public Long getUserId() { return userId; }
-        public void setUserId(Long userId) { this.userId = userId; }
-        
-        public Long getBookingId() { return bookingId; }
-        public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
-        
-        public BigDecimal getAmount() { return amount; }
-        public void setAmount(BigDecimal amount) { this.amount = amount; }
-        
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
         
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
         
-        public String getPaymentMethod() { return paymentMethod; }
-        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
         
-        public String getGatewayResponse() { return gatewayResponse; }
-        public void setGatewayResponse(String gatewayResponse) { this.gatewayResponse = gatewayResponse; }
+        public String getCurrency() { return currency; }
+        public void setCurrency(String currency) { this.currency = currency; }
         
-        public java.time.LocalDateTime getCreatedAt() { return createdAt; }
-        public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
+        public String getPaymentUrl() { return paymentUrl; }
+        public void setPaymentUrl(String paymentUrl) { this.paymentUrl = paymentUrl; }
         
-        public java.time.LocalDateTime getCompletedAt() { return completedAt; }
-        public void setCompletedAt(java.time.LocalDateTime completedAt) { this.completedAt = completedAt; }
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public Long getTimestamp() { return timestamp; }
+        public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
     }
 }
-

@@ -1,0 +1,107 @@
+import axios from 'axios';
+
+// API Base URL - uses API Gateway
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add JWT token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error.response?.data || error.message);
+  }
+);
+
+// ==================== AUTH SERVICES ====================
+export const authService = {
+  register: (userData) => api.post('/api/users/register', userData),
+  login: (credentials) => api.post('/api/users/login', credentials),
+  getUserById: (id) => api.get(`/api/users/${id}`),
+  updateProfile: (id, userData) => api.put(`/api/users/${id}`, userData),
+};
+
+// ==================== VEHICLE SERVICES ====================
+export const vehicleService = {
+  getAllVehicles: (params) => api.get('/api/vehicles', { params }),
+  getVehicleById: (id) => api.get(`/api/vehicles/${id}`),
+  getAvailableVehicles: () => api.get('/api/vehicles/available'),
+  searchByLocation: (searchData) => api.post('/api/vehicles/search/location', searchData),
+  getNearestVehicles: (lat, lon, limit) => 
+    api.get(`/api/vehicles/nearest?latitude=${lat}&longitude=${lon}&limit=${limit}`),
+};
+
+// ==================== BOOKING SERVICES ====================
+export const bookingService = {
+  createBooking: (bookingData) => api.post('/api/bookings', bookingData),
+  getBookingById: (id) => api.get(`/api/bookings/${id}`),
+  getUserBookings: (userId) => api.get(`/api/bookings/user/${userId}`),
+  confirmBooking: (id) => api.patch(`/api/bookings/${id}/confirm`),
+  startBooking: (id) => api.patch(`/api/bookings/${id}/start`),
+  completeBooking: (id) => api.patch(`/api/bookings/${id}/complete`),
+  cancelBooking: (id, reason) => api.patch(`/api/bookings/${id}/cancel?reason=${reason}`),
+};
+
+// ==================== PRICING SERVICES ====================
+export const pricingService = {
+  calculatePrice: (priceData) => api.post('/api/pricing/calculate', priceData),
+  applyDiscount: (code) => api.post(`/api/pricing/apply-discount/${code}`),
+};
+
+// ==================== PAYMENT SERVICES ====================
+export const paymentService = {
+  createTransaction: (transactionData) => 
+    api.post('/api/payments/transaction/create', transactionData),
+  verifyTransaction: (transactionId) => 
+    api.post(`/api/payments/transaction/verify?transactionId=${transactionId}`),
+};
+
+// ==================== DRIVER SERVICES ====================
+export const driverService = {
+  registerDriver: (driverData) => api.post('/api/drivers', driverData),
+  getDriverById: (id) => api.get(`/api/drivers/${id}`),
+  getAvailableDrivers: () => api.get('/api/drivers/available'),
+  findNearestDrivers: (lat, lon, limit) => 
+    api.get(`/api/drivers/nearest?latitude=${lat}&longitude=${lon}&limit=${limit}`),
+  updateLocation: (id, lat, lon) => 
+    api.patch(`/api/drivers/${id}/location?latitude=${lat}&longitude=${lon}`),
+  updateStatus: (id, status) => 
+    api.patch(`/api/drivers/${id}/status?status=${status}`),
+};
+
+// ==================== REVIEW SERVICES ====================
+export const reviewService = {
+  createReview: (reviewData) => api.post('/api/reviews', reviewData),
+  getVehicleReviews: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}`),
+  getDriverReviews: (driverId) => api.get(`/api/reviews/driver/${driverId}`),
+  getVehicleRating: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}/rating`),
+  getDriverRating: (driverId) => api.get(`/api/reviews/driver/${driverId}/rating`),
+};
+
+export default api;
+

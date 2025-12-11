@@ -1,0 +1,37 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: location-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/location_service
+    username: ${DB_USERNAME:mobility_user}
+    password: ${DB_PASSWORD:mobility_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
+  cloud:
+    discovery:
+      enabled: ${DISCOVERY_ENABLED:true}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+

@@ -1,0 +1,335 @@
+{
+  "rabbit_version": "3.13.0",
+  "rabbitmq_version": "3.13.0",
+  "product_name": "RabbitMQ",
+  "product_version": "3.13.0",
+  "users": [],
+  "vhosts": [
+    {
+      "name": "mobility_vhost"
+    }
+  ],
+  "permissions": [],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "mobility-cluster"
+    }
+  ],
+  "policies": [
+    {
+      "vhost": "mobility_vhost",
+      "name": "ha-all",
+      "pattern": ".*",
+      "apply-to": "all",
+      "definition": {
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic"
+      },
+      "priority": 0
+    }
+  ],
+  "queues": [
+    {
+      "name": "booking.created",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "booking.confirmed",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "booking.cancelled",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "booking.completed",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "payment.processing",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "payment.completed",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "payment.failed",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "vehicle.status.updated",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 3600000,
+        "x-max-length": 50000
+      }
+    },
+    {
+      "name": "vehicle.location.updated",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 3600000,
+        "x-max-length": 100000
+      }
+    },
+    {
+      "name": "driver.assigned",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "driver.location.updated",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 3600000,
+        "x-max-length": 100000
+      }
+    },
+    {
+      "name": "user.registered",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "review.created",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "maintenance.scheduled",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-length": 5000
+      }
+    },
+    {
+      "name": "dead.letter.queue",
+      "vhost": "mobility_vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "mobility.events",
+      "vhost": "mobility_vhost",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "mobility.direct",
+      "vhost": "mobility_vhost",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "dead.letter.exchange",
+      "vhost": "mobility_vhost",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "booking.created",
+      "destination_type": "queue",
+      "routing_key": "booking.created",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "booking.confirmed",
+      "destination_type": "queue",
+      "routing_key": "booking.confirmed",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "booking.cancelled",
+      "destination_type": "queue",
+      "routing_key": "booking.cancelled",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "booking.completed",
+      "destination_type": "queue",
+      "routing_key": "booking.completed",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "payment.processing",
+      "destination_type": "queue",
+      "routing_key": "payment.processing",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "payment.completed",
+      "destination_type": "queue",
+      "routing_key": "payment.completed",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "payment.failed",
+      "destination_type": "queue",
+      "routing_key": "payment.failed",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "vehicle.status.updated",
+      "destination_type": "queue",
+      "routing_key": "vehicle.status.*",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "vehicle.location.updated",
+      "destination_type": "queue",
+      "routing_key": "vehicle.location.*",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "driver.assigned",
+      "destination_type": "queue",
+      "routing_key": "driver.assigned",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "driver.location.updated",
+      "destination_type": "queue",
+      "routing_key": "driver.location.*",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "user.registered",
+      "destination_type": "queue",
+      "routing_key": "user.registered",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "review.created",
+      "destination_type": "queue",
+      "routing_key": "review.created",
+      "arguments": {}
+    },
+    {
+      "source": "mobility.events",
+      "vhost": "mobility_vhost",
+      "destination": "maintenance.scheduled",
+      "destination_type": "queue",
+      "routing_key": "maintenance.scheduled",
+      "arguments": {}
+    },
+    {
+      "source": "dead.letter.exchange",
+      "vhost": "mobility_vhost",
+      "destination": "dead.letter.queue",
+      "destination_type": "queue",
+      "routing_key": "dead.letter",
+      "arguments": {}
+    }
+  ]
+}
+

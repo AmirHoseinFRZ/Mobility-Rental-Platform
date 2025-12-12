@@ -64,3 +64,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingsToComplete(@Param("now") LocalDateTime now);
 }
 
+

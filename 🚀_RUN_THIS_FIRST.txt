@@ -1,0 +1,165 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║     🚀 MOBILITY RENTAL PLATFORM - ONE-COMMAND STARTUP 🚀                 ║
+║                                                                           ║
+║                         WELCOME! START HERE ↓                            ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│  WINDOWS USERS - Run this command in PowerShell:                         │
+│                                                                           │
+│     .\start-all.ps1                                                       │
+│                                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│  LINUX / MAC USERS - Run these commands in Terminal:                     │
+│                                                                           │
+│     chmod +x start-all.sh stop-all.sh                                    │
+│     ./start-all.sh                                                        │
+│                                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+  WHAT HAPPENS WHEN YOU RUN THE SCRIPT?
+═══════════════════════════════════════════════════════════════════════════
+
+  ✅ Checks: Docker, Java, Maven, Node.js (tells you if missing)
+  ✅ Starts: PostgreSQL + RabbitMQ + Redis (in Docker)
+  ✅ Builds: All 9 backend microservices (Maven)
+  ✅ Starts: All backend services (separate windows/processes)
+  ✅ Starts: React frontend application
+  ✅ Opens: http://localhost:3000 in your browser
+
+  Total Time:
+    • First run:       5-8 minutes
+    • Subsequent runs: 2-3 minutes
+
+
+═══════════════════════════════════════════════════════════════════════════
+  AFTER STARTUP - ACCESS YOUR APPLICATION
+═══════════════════════════════════════════════════════════════════════════
+
+  🌐 Frontend:        http://localhost:3000
+  🔌 API Gateway:     http://localhost:8080
+  🐰 RabbitMQ Admin:  http://localhost:15672
+       Username: mobility_user
+       Password: mobility_password
+
+
+═══════════════════════════════════════════════════════════════════════════
+  STOPPING EVERYTHING
+═══════════════════════════════════════════════════════════════════════════
+
+  Windows:    .\stop-all.ps1
+  Linux/Mac:  ./stop-all.sh
+
+
+═══════════════════════════════════════════════════════════════════════════
+  DOCUMENTATION - READ THESE FOR MORE INFO
+═══════════════════════════════════════════════════════════════════════════
+
+  📄 START_HERE.md              ← Quick visual guide
+  📄 QUICK_START_GUIDE.md       ← Detailed instructions
+  📄 WHAT_YOU_GET.md            ← Complete feature list
+  📄 STARTUP_SCRIPTS_INFO.md    ← Technical documentation
+  📄 README.md                  ← Project overview
+
+
+═══════════════════════════════════════════════════════════════════════════
+  PREREQUISITES - MAKE SURE YOU HAVE THESE INSTALLED
+═══════════════════════════════════════════════════════════════════════════
+
+  ☑ Docker Desktop      →  https://www.docker.com/products/docker-desktop
+  ☑ Java JDK 17+        →  https://adoptium.net/
+  ☑ Maven 3.9+          →  https://maven.apache.org/download.cgi
+  ☑ Node.js 18+         →  https://nodejs.org/
+
+  (The script will check these automatically!)
+
+
+═══════════════════════════════════════════════════════════════════════════
+  WHAT YOU GET - 13 SERVICES IN TOTAL
+═══════════════════════════════════════════════════════════════════════════
+
+  Infrastructure (3):
+    • PostgreSQL (with PostGIS)
+    • RabbitMQ
+    • Redis
+
+  Backend Microservices (9):
+    • API Gateway         (Port 8080)
+    • User Service        (Port 8081)
+    • Vehicle Service     (Port 8082)
+    • Booking Service     (Port 8083)
+    • Pricing Service     (Port 8084)
+    • Driver Service      (Port 8085)
+    • Review Service      (Port 8086)
+    • Location Service    (Port 8087)
+    • Maintenance Service (Port 8088)
+
+  Frontend (1):
+    • React Application   (Port 3000)
+
+
+═══════════════════════════════════════════════════════════════════════════
+  FIRST-TIME USERS - TRY THIS FLOW
+═══════════════════════════════════════════════════════════════════════════
+
+  1. Run the startup script (see commands above)
+  2. Wait for browser to open at http://localhost:3000
+  3. Click "Register" and create an account
+  4. Login with your credentials
+  5. Search for vehicles (try "New York")
+  6. Click on a vehicle to see details
+  7. Book a vehicle (choose dates, with/without driver)
+  8. Complete payment
+  9. View your booking in "My Bookings"
+  10. Leave a review!
+
+
+═══════════════════════════════════════════════════════════════════════════
+  TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════
+
+  Problem: Script won't run (Windows)
+  Solution: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+  Problem: Permission denied (Linux/Mac)
+  Solution: chmod +x start-all.sh
+
+  Problem: Port already in use
+  Solution: Stop the service using that port, or run stop-all script
+
+  Problem: Docker not running
+  Solution: Start Docker Desktop and wait for it to initialize
+
+  For more help: See QUICK_START_GUIDE.md
+
+
+═══════════════════════════════════════════════════════════════════════════
+  NEED HELP?
+═══════════════════════════════════════════════════════════════════════════
+
+  📖 Read:  START_HERE.md (easiest to follow)
+  📖 Read:  QUICK_START_GUIDE.md (comprehensive)
+  📖 Check: Service logs (Windows: in service windows, Linux/Mac: logs/ folder)
+  📖 View:  README.md (project documentation)
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                     🎉 READY TO START? 🎉                                ║
+║                                                                           ║
+║                  Run the command for your OS:                            ║
+║                                                                           ║
+║                  Windows:    .\start-all.ps1                             ║
+║                  Linux/Mac:  ./start-all.sh                              ║
+║                                                                           ║
+║              Your platform will be ready in minutes!                     ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+

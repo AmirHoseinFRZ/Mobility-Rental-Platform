@@ -77,3 +77,4 @@ public class PricingRule extends BaseEntity {
     private Integer priority = 0; // Higher priority rules override lower
 }
 
+

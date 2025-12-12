@@ -49,3 +49,4 @@ public class VehicleResponse {
     private Double distanceKm; // Distance from search location
 }
 
+

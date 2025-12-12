@@ -34,3 +34,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findKycVerifiedUsersByRole(UserRole role);
 }
 
+

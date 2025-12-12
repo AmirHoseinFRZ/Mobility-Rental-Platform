@@ -20,3 +20,4 @@ public interface VehicleClient {
             @RequestParam("status") VehicleStatus status);
 }
 
+

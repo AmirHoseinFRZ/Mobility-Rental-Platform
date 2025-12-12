@@ -35,3 +35,4 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     List<Discount> findAllActiveDiscounts(@Param("now") LocalDateTime now);
 }
 
+

@@ -34,3 +34,4 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
     List<PricingRule> findAllActiveRules();
 }
 
+

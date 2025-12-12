@@ -75,3 +75,4 @@ echo "📝 Logs are available in: ./logs/"
 echo "🛑 To stop all services, run: ./scripts/stop-all-backend.sh"
 echo ""
 
+

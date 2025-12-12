@@ -50,3 +50,4 @@ echo "⚠️  To stop infrastructure and DELETE ALL DATA:"
 echo "   docker-compose down -v"
 echo ""
 
+

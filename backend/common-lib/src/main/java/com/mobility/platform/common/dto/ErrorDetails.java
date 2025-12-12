@@ -24,3 +24,4 @@ public class ErrorDetails {
     private String stackTrace;
 }
 
+

@@ -106,3 +106,4 @@ public class Vehicle extends BaseEntity {
     private Integer totalReviews = 0;
 }
 
+

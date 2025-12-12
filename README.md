@@ -1,5 +1,38 @@
 # Mobility Rental Platform
 
+[![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)]()
+[![Backend](https://img.shields.io/badge/backend-Spring%20Boot-green)]()
+[![Frontend](https://img.shields.io/badge/frontend-React-blue)]()
+[![Database](https://img.shields.io/badge/database-PostgreSQL%20%2B%20PostGIS-blue)]()
+
+## 🚀 Quick Start - One Command to Rule Them All!
+
+Start the **entire platform** (Infrastructure + Backend + Frontend) with a single command:
+
+### Windows (PowerShell)
+```powershell
+.\start-all.ps1
+```
+
+### Linux / Mac
+```bash
+chmod +x start-all.sh
+./start-all.sh
+```
+
+**That's it!** The script will:
+- ✅ Check all prerequisites
+- ✅ Start infrastructure (PostgreSQL, RabbitMQ, Redis)
+- ✅ Build and start all 9 backend microservices
+- ✅ Start the React frontend
+- ✅ Open http://localhost:3000 in your browser
+
+⏱️ **First run**: ~5-8 minutes | **Subsequent runs**: ~2-3 minutes
+
+📚 **Detailed guide**: See [START_HERE.md](START_HERE.md) or [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)
+
+---
+
 ## Project Overview
 
 A production-scale mobility rental platform that enables users to rent various mobility vehicles (bikes, scooters, cars, etc.) with flexible rental options - primarily self-service (without driver) and optionally with driver service.
@@ -456,7 +489,43 @@ mobility-rental-platform/
 - Maven 3.9+
 - Git
 
-### Quick Start
+### Quick Start (Recommended)
+
+#### 🚀 Automated Startup - Everything at Once
+
+**Windows:**
+```powershell
+.\start-all.ps1
+```
+
+**Linux/Mac:**
+```bash
+chmod +x start-all.sh
+./start-all.sh
+```
+
+This single command:
+- ✅ Checks all prerequisites
+- ✅ Sets up environment files
+- ✅ Starts infrastructure (PostgreSQL + RabbitMQ + Redis)
+- ✅ Builds all backend services
+- ✅ Starts all 9 microservices
+- ✅ Starts the React frontend
+- ✅ Opens the app in your browser
+
+**To stop everything:**
+```powershell
+.\stop-all.ps1      # Windows
+./stop-all.sh       # Linux/Mac
+```
+
+📚 **See [START_HERE.md](START_HERE.md) for detailed instructions**
+
+---
+
+### Manual Setup (Alternative)
+
+If you prefer to start services manually:
 
 #### 1. Clone Repository
 ```bash
@@ -493,11 +562,17 @@ npm install
 npm start
 ```
 
-#### 5. Access the Application
-- **Frontend**: http://localhost:3000
+### Access Points
+
+#### Frontend & API
+- **Frontend Application**: http://localhost:3000
 - **API Gateway**: http://localhost:8080
 - **Swagger Docs**: http://localhost:808{1-8}/api/{service}/swagger-ui.html
+
+#### Infrastructure
 - **RabbitMQ Management**: http://localhost:15672
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
 
 ### Default Credentials
 - **Database**: mobility_user / mobility_password

@@ -22,3 +22,4 @@ public class LocationSearchRequest {
     private Boolean requiresDriver;
 }
 
+

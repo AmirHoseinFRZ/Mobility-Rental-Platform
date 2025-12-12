@@ -1,185 +1,117 @@
-# ============================================================================
-# Mobility Rental Platform - Complete Startup Script (Windows PowerShell)
-# ============================================================================
-# This script starts:
-# 1. Infrastructure (PostgreSQL, RabbitMQ, Redis)
-# 2. All Backend Microservices
-# 3. Frontend React Application
-# ============================================================================
+# Mobility Rental Platform - Complete Startup Script
+# Run this script to start everything: Infrastructure + Backend + Frontend
+
+param()
 
 $ErrorActionPreference = "Continue"
-$Host.UI.RawUI.WindowTitle = "Mobility Rental Platform - Starting..."
 
-# Colors for output
-function Write-ColorOutput($ForegroundColor) {
-    $fc = $host.UI.RawUI.ForegroundColor
-    $host.UI.RawUI.ForegroundColor = $ForegroundColor
-    if ($args) {
-        Write-Output $args
-    }
-    $host.UI.RawUI.ForegroundColor = $fc
-}
-
-function Write-Header($message) {
-    Write-Host ""
-    Write-ColorOutput Yellow "═══════════════════════════════════════════════════════════════"
-    Write-ColorOutput Yellow "  $message"
-    Write-ColorOutput Yellow "═══════════════════════════════════════════════════════════════"
-    Write-Host ""
-}
-
-function Write-Step($message) {
-    Write-ColorOutput Cyan "➜ $message"
-}
-
-function Write-Success($message) {
-    Write-ColorOutput Green "✓ $message"
-}
-
-function Write-Error-Message($message) {
-    Write-ColorOutput Red "✗ $message"
-}
-
-function Write-Info($message) {
-    Write-ColorOutput White "  $message"
-}
-
-# ============================================================================
-# STEP 1: Pre-flight Checks
-# ============================================================================
-Write-Header "PRE-FLIGHT CHECKS"
-
-Write-Step "Checking required tools..."
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Mobility Rental Platform - Starting All Services" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
 
 # Check Docker
+Write-Host "Checking Docker..." -ForegroundColor Cyan
 if (!(Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "Docker is not installed or not in PATH"
-    Write-Info "Please install Docker Desktop from: https://www.docker.com/products/docker-desktop"
+    Write-Host "ERROR: Docker is not installed" -ForegroundColor Red
+    Write-Host "Please install Docker Desktop from: https://www.docker.com/products/docker-desktop" -ForegroundColor White
     exit 1
 }
-Write-Success "Docker found"
-
-# Check Docker Compose
-if (!(Get-Command docker-compose -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "Docker Compose is not installed or not in PATH"
-    exit 1
-}
-Write-Success "Docker Compose found"
+Write-Host "✓ Docker found" -ForegroundColor Green
 
 # Check Java
+Write-Host "Checking Java..." -ForegroundColor Cyan
 if (!(Get-Command java -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "Java is not installed or not in PATH"
-    Write-Info "Please install Java JDK 17+ from: https://adoptium.net/"
+    Write-Host "ERROR: Java is not installed" -ForegroundColor Red
+    Write-Host "Please install Java JDK 17+ from: https://adoptium.net/" -ForegroundColor White
     exit 1
 }
-$javaVersion = java -version 2>&1 | Select-String "version" | ForEach-Object { $_ -replace '.*version "([^"]+)".*', '$1' }
-Write-Success "Java found: $javaVersion"
+Write-Host "✓ Java found" -ForegroundColor Green
 
 # Check Maven
+Write-Host "Checking Maven..." -ForegroundColor Cyan
 if (!(Get-Command mvn -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "Maven is not installed or not in PATH"
-    Write-Info "Please install Maven from: https://maven.apache.org/download.cgi"
+    Write-Host "ERROR: Maven is not installed" -ForegroundColor Red
+    Write-Host "Please install Maven from: https://maven.apache.org/download.cgi" -ForegroundColor White
     exit 1
 }
-$mavenVersion = mvn -version | Select-String "Apache Maven" | ForEach-Object { $_ -replace 'Apache Maven ', '' }
-Write-Success "Maven found: $mavenVersion"
+Write-Host "✓ Maven found" -ForegroundColor Green
 
 # Check Node.js
+Write-Host "Checking Node.js..." -ForegroundColor Cyan
 if (!(Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "Node.js is not installed or not in PATH"
-    Write-Info "Please install Node.js 18+ from: https://nodejs.org/"
+    Write-Host "ERROR: Node.js is not installed" -ForegroundColor Red
+    Write-Host "Please install Node.js 18+ from: https://nodejs.org/" -ForegroundColor White
     exit 1
 }
-$nodeVersion = node --version
-Write-Success "Node.js found: $nodeVersion"
+Write-Host "✓ Node.js found" -ForegroundColor Green
 
-# Check npm
-if (!(Get-Command npm -ErrorAction SilentlyContinue)) {
-    Write-Error-Message "npm is not installed"
-    exit 1
-}
-$npmVersion = npm --version
-Write-Success "npm found: v$npmVersion"
+Write-Host ""
+Write-Host "All prerequisites are available!" -ForegroundColor Green
+Write-Host ""
 
-Write-Success "All required tools are available!"
+# Create environment files
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Setting up environment files" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
 
-# ============================================================================
-# STEP 2: Create Environment Files
-# ============================================================================
-Write-Header "ENVIRONMENT SETUP"
-
-Write-Step "Setting up environment files..."
-
-# Create backend .env if not exists
-if (!(Test-Path ".env")) {
-    if (Test-Path "env.example") {
-        Copy-Item "env.example" ".env"
-        Write-Success "Created .env file from env.example"
-    }
+if (!(Test-Path ".env") -and (Test-Path "env.example")) {
+    Copy-Item "env.example" ".env"
+    Write-Host "✓ Created .env file" -ForegroundColor Green
 }
 
-# Create frontend .env if not exists
-if (!(Test-Path "frontend\.env")) {
-    if (Test-Path "frontend\env.example") {
-        Copy-Item "frontend\env.example" "frontend\.env"
-        Write-Success "Created frontend/.env file"
-    }
+if (!(Test-Path "frontend\.env") -and (Test-Path "frontend\env.example")) {
+    Copy-Item "frontend\env.example" "frontend\.env"
+    Write-Host "✓ Created frontend/.env file" -ForegroundColor Green
 }
 
-# ============================================================================
-# STEP 3: Start Infrastructure
-# ============================================================================
-Write-Header "STARTING INFRASTRUCTURE"
+# Start Infrastructure
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Starting Infrastructure (PostgreSQL, RabbitMQ, Redis)" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
 
-Write-Step "Starting PostgreSQL, RabbitMQ, and Redis..."
 docker-compose up -d
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error-Message "Failed to start infrastructure"
+    Write-Host "ERROR: Failed to start infrastructure" -ForegroundColor Red
     exit 1
 }
 
-Write-Success "Infrastructure containers started"
-Write-Step "Waiting for services to be ready (30 seconds)..."
+Write-Host "✓ Infrastructure containers started" -ForegroundColor Green
+Write-Host "Waiting for services to be ready (30 seconds)..." -ForegroundColor Cyan
 Start-Sleep -Seconds 30
 
-# Check if containers are running
-$postgresRunning = docker ps --filter "name=postgres" --filter "status=running" -q
-$rabbitmqRunning = docker ps --filter "name=rabbitmq" --filter "status=running" -q
-$redisRunning = docker ps --filter "name=redis" --filter "status=running" -q
-
-if ($postgresRunning) { Write-Success "PostgreSQL is running" } else { Write-Error-Message "PostgreSQL failed to start" }
-if ($rabbitmqRunning) { Write-Success "RabbitMQ is running" } else { Write-Error-Message "RabbitMQ failed to start" }
-if ($redisRunning) { Write-Success "Redis is running" } else { Write-Error-Message "Redis failed to start" }
-
-# ============================================================================
-# STEP 4: Build Backend
-# ============================================================================
-Write-Header "BUILDING BACKEND"
-
-Write-Step "Building all microservices with Maven..."
-Write-Info "This may take a few minutes on first run..."
+# Build Backend
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Building Backend Services" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "This may take a few minutes on first run..." -ForegroundColor White
+Write-Host ""
 
 Set-Location backend
-$buildOutput = mvn clean install -DskipTests 2>&1
+mvn clean install -DskipTests
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error-Message "Maven build failed"
-    Write-Info "Check the output above for errors"
+    Write-Host "ERROR: Maven build failed" -ForegroundColor Red
     Set-Location ..
     exit 1
 }
 
-Write-Success "Backend build completed successfully"
+Write-Host "✓ Backend build completed" -ForegroundColor Green
 Set-Location ..
 
-# ============================================================================
-# STEP 5: Start Backend Services
-# ============================================================================
-Write-Header "STARTING BACKEND SERVICES"
-
-Write-Info "Starting microservices in separate windows..."
-Write-Info "Each service will open in its own PowerShell window"
+# Start Backend Services
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Starting Backend Services" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
 
 $services = @(
     @{Name="API Gateway"; Port=8080; Path="backend\api-gateway"},
@@ -194,98 +126,93 @@ $services = @(
 )
 
 foreach ($service in $services) {
-    Write-Step "Starting $($service.Name) on port $($service.Port)..."
+    Write-Host "Starting $($service.Name) on port $($service.Port)..." -ForegroundColor Cyan
     
-    $command = "Set-Location '$PWD\$($service.Path)'; `$Host.UI.RawUI.WindowTitle='$($service.Name) - Port $($service.Port)'; Write-Host ''; Write-Host '═══════════════════════════════════════════════════════════════' -ForegroundColor Yellow; Write-Host '  $($service.Name) - Port $($service.Port)' -ForegroundColor Yellow; Write-Host '═══════════════════════════════════════════════════════════════' -ForegroundColor Yellow; Write-Host ''; mvn spring-boot:run; Read-Host 'Press Enter to close'"
+    $servicePath = Join-Path $PWD $service.Path
+    $title = "$($service.Name) - Port $($service.Port)"
     
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", $command
+    $scriptBlock = "cd '$servicePath'; `$Host.UI.RawUI.WindowTitle='$title'; Write-Host ''; Write-Host '$title' -ForegroundColor Yellow; Write-Host ''; mvn spring-boot:run"
+    
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $scriptBlock
     
     Start-Sleep -Seconds 2
-    Write-Success "$($service.Name) window opened"
+    Write-Host "✓ $($service.Name) window opened" -ForegroundColor Green
 }
 
-Write-Info "Waiting for services to initialize (45 seconds)..."
+Write-Host ""
+Write-Host "Waiting for services to initialize (45 seconds)..." -ForegroundColor Cyan
 Start-Sleep -Seconds 45
 
-# ============================================================================
-# STEP 6: Install Frontend Dependencies
-# ============================================================================
-Write-Header "SETTING UP FRONTEND"
+# Setup Frontend
+Write-Host ""
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  Setting up Frontend" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
 
 Set-Location frontend
 
-# Check if node_modules exists
 if (!(Test-Path "node_modules")) {
-    Write-Step "Installing frontend dependencies..."
-    Write-Info "This may take a few minutes on first run..."
+    Write-Host "Installing frontend dependencies..." -ForegroundColor Cyan
+    Write-Host "This may take a few minutes on first run..." -ForegroundColor White
     
     npm install
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Error-Message "npm install failed"
+        Write-Host "ERROR: npm install failed" -ForegroundColor Red
         Set-Location ..
         exit 1
     }
     
-    Write-Success "Frontend dependencies installed"
+    Write-Host "✓ Frontend dependencies installed" -ForegroundColor Green
 } else {
-    Write-Success "Frontend dependencies already installed"
+    Write-Host "✓ Frontend dependencies already installed" -ForegroundColor Green
 }
 
-# ============================================================================
-# STEP 7: Start Frontend
-# ============================================================================
-Write-Step "Starting React development server..."
+# Start Frontend
+Write-Host ""
+Write-Host "Starting React development server..." -ForegroundColor Cyan
 
-$command = "Set-Location '$PWD'; `$Host.UI.RawUI.WindowTitle='React Frontend - Port 3000'; Write-Host ''; Write-Host '═══════════════════════════════════════════════════════════════' -ForegroundColor Yellow; Write-Host '  React Frontend - Port 3000' -ForegroundColor Yellow; Write-Host '═══════════════════════════════════════════════════════════════' -ForegroundColor Yellow; Write-Host ''; npm start; Read-Host 'Press Enter to close'"
+$frontendPath = $PWD
+$scriptBlock = "cd '$frontendPath'; `$Host.UI.RawUI.WindowTitle='React Frontend - Port 3000'; Write-Host ''; Write-Host 'React Frontend - Port 3000' -ForegroundColor Yellow; Write-Host ''; npm start"
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", $command
+Start-Process powershell -ArgumentList "-NoExit", "-Command", $scriptBlock
 
 Set-Location ..
 
-Write-Success "Frontend window opened"
+Write-Host "✓ Frontend window opened" -ForegroundColor Green
 
-# ============================================================================
-# STEP 8: Summary
-# ============================================================================
-Write-Header "STARTUP COMPLETE!"
-
-Write-Success "All services are starting up!"
+# Summary
 Write-Host ""
-Write-Info "📊 Service URLs:"
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host "  STARTUP COMPLETE!" -ForegroundColor Yellow
+Write-Host "================================================================" -ForegroundColor Yellow
 Write-Host ""
-Write-ColorOutput Cyan "  Frontend Application:"
-Write-Info "    ➜ http://localhost:3000"
+Write-Host "All services are starting up!" -ForegroundColor Green
 Write-Host ""
-Write-ColorOutput Cyan "  API Gateway:"
-Write-Info "    ➜ http://localhost:8080"
+Write-Host "Service URLs:" -ForegroundColor Cyan
 Write-Host ""
-Write-ColorOutput Cyan "  Infrastructure:"
-Write-Info "    ➜ PostgreSQL:      localhost:5432"
-Write-Info "    ➜ RabbitMQ Admin:  http://localhost:15672 (user: mobility_user, pass: mobility_password)"
-Write-Info "    ➜ Redis:           localhost:6379"
+Write-Host "  Frontend Application:" -ForegroundColor White
+Write-Host "    http://localhost:3000" -ForegroundColor Green
 Write-Host ""
-Write-ColorOutput Cyan "  Backend Services:"
-Write-Info "    ➜ User Service:        http://localhost:8081"
-Write-Info "    ➜ Vehicle Service:     http://localhost:8082"
-Write-Info "    ➜ Booking Service:     http://localhost:8083"
-Write-Info "    ➜ Pricing Service:     http://localhost:8084"
-Write-Info "    ➜ Driver Service:      http://localhost:8085"
-Write-Info "    ➜ Review Service:      http://localhost:8086"
-Write-Info "    ➜ Location Service:    http://localhost:8087"
-Write-Info "    ➜ Maintenance Service: http://localhost:8088"
+Write-Host "  API Gateway:" -ForegroundColor White
+Write-Host "    http://localhost:8080" -ForegroundColor Green
 Write-Host ""
-Write-ColorOutput Yellow "═══════════════════════════════════════════════════════════════"
+Write-Host "  Infrastructure:" -ForegroundColor White
+Write-Host "    PostgreSQL:      localhost:5432" -ForegroundColor Green
+Write-Host "    RabbitMQ Admin:  http://localhost:15672" -ForegroundColor Green
+Write-Host "    Redis:           localhost:6379" -ForegroundColor Green
 Write-Host ""
-Write-ColorOutput Green "✓ Your application should open automatically in your browser"
-Write-ColorOutput Green "✓ Each service is running in a separate PowerShell window"
-Write-ColorOutput Green "✓ To stop all services, run: .\stop-all.ps1"
+Write-Host "RabbitMQ Credentials: mobility_user / mobility_password" -ForegroundColor White
 Write-Host ""
-Write-Info "Note: It may take 1-2 minutes for all services to be fully ready"
-Write-Info "      Check individual service windows for startup status"
+Write-Host "================================================================" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "✓ Your application should open automatically in your browser" -ForegroundColor Green
+Write-Host "✓ Each service is running in a separate PowerShell window" -ForegroundColor Green
+Write-Host "✓ To stop all services, run: .\stop-all.ps1" -ForegroundColor Green
+Write-Host ""
+Write-Host "Note: It may take 1-2 minutes for all services to be fully ready" -ForegroundColor White
 Write-Host ""
 
-# Keep this window open
 Write-Host "Press any key to close this window (services will continue running)..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-

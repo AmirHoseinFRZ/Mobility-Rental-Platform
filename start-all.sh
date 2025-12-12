@@ -293,3 +293,6 @@ print_info "  - Check status: ps aux | grep spring-boot"
 print_info "  - Stop all: ./stop-all.sh"
 echo ""
 
+
+
+

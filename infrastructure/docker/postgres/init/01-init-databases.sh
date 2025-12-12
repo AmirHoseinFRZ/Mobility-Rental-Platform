@@ -48,3 +48,6 @@ fi
 echo "PostGIS extension enabled successfully for all databases!"
 
 
+
+
+

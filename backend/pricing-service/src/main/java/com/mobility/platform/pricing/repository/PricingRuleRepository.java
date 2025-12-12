@@ -35,3 +35,6 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
 }
 
 
+
+
+

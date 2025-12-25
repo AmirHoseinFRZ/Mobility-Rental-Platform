@@ -59,12 +59,19 @@ if ! command -v docker &> /dev/null; then
 fi
 print_success "Docker found"
 
-# Check Docker Compose
-if ! command -v docker-compose &> /dev/null; then
+# Check Docker Compose (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+    print_success "Docker Compose found (plugin version)"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+    print_success "Docker Compose found (standalone version)"
+else
     print_error "Docker Compose is not installed or not in PATH"
+    print_info "Please install Docker Compose from: https://docs.docker.com/compose/install/"
     exit 1
 fi
-print_success "Docker Compose found"
 
 # Check Java
 if ! command -v java &> /dev/null; then
@@ -75,6 +82,30 @@ fi
 JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2)
 print_success "Java found: $JAVA_VERSION"
 
+# Check for javac (JDK, not just JRE)
+if ! command -v javac &> /dev/null; then
+    print_error "Java JDK is not installed (javac not found)"
+    print_info "You have Java JRE installed, but Maven requires JDK (Development Kit)"
+    print_info "Please install JDK: sudo apt install default-jdk"
+    print_info "Or for OpenJDK 17: sudo apt install openjdk-17-jdk"
+    exit 1
+fi
+
+# Set JAVA_HOME if not already set
+if [ -z "$JAVA_HOME" ]; then
+    # Try to find JAVA_HOME from java command
+    JAVA_PATH=$(readlink -f $(which java) 2>/dev/null || which java)
+    if [ -n "$JAVA_PATH" ]; then
+        # Remove /bin/java to get JAVA_HOME
+        JAVA_HOME_CANDIDATE=$(dirname $(dirname "$JAVA_PATH"))
+        if [ -f "$JAVA_HOME_CANDIDATE/bin/javac" ]; then
+            export JAVA_HOME="$JAVA_HOME_CANDIDATE"
+            print_info "Set JAVA_HOME to: $JAVA_HOME"
+        fi
+    fi
+fi
+print_success "Java JDK found: $JAVA_VERSION"
+
 # Check Maven
 if ! command -v mvn &> /dev/null; then
     print_error "Maven is not installed or not in PATH"
@@ -83,6 +114,12 @@ if ! command -v mvn &> /dev/null; then
 fi
 MAVEN_VERSION=$(mvn -version | head -n 1 | cut -d' ' -f3)
 print_success "Maven found: $MAVEN_VERSION"
+
+# Load nvm if available (for Node.js version management)
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+fi
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
@@ -128,7 +165,7 @@ fi
 print_header "STARTING INFRASTRUCTURE"
 
 print_step "Starting PostgreSQL, RabbitMQ, and Redis..."
-docker-compose up -d
+$DOCKER_COMPOSE_CMD up -d
 
 print_success "Infrastructure containers started"
 print_step "Waiting for services to be ready (30 seconds)..."

@@ -40,15 +40,25 @@ stop_service "review-service"
 stop_service "location-service"
 stop_service "maintenance-service"
 
+# Detect Docker Compose command (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+fi
+
 echo ""
 echo "✅ All backend services stopped!"
 echo ""
-echo "💡 To stop infrastructure (PostgreSQL, RabbitMQ, Redis):"
-echo "   docker-compose down"
-echo ""
-echo "⚠️  To stop infrastructure and DELETE ALL DATA:"
-echo "   docker-compose down -v"
-echo ""
+if [ -n "$DOCKER_COMPOSE_CMD" ]; then
+    echo "💡 To stop infrastructure (PostgreSQL, RabbitMQ, Redis):"
+    echo "   $DOCKER_COMPOSE_CMD down"
+    echo ""
+    echo "⚠️  To stop infrastructure and DELETE ALL DATA:"
+    echo "   $DOCKER_COMPOSE_CMD down -v"
+    echo ""
+fi
 
 
 

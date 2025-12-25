@@ -15,6 +15,17 @@ if ! docker version > /dev/null 2>&1; then
 fi
 echo "✓ Docker is running"
 
+# Detect Docker Compose command (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo "✗ Docker Compose is not installed or not in PATH"
+    exit 1
+fi
+
 # Check if .env exists, if not create from env.example
 if [ ! -f .env ]; then
     if [ -f env.example ]; then
@@ -29,7 +40,7 @@ fi
 # Start services
 echo ""
 echo "Starting infrastructure services..."
-docker-compose up -d
+$DOCKER_COMPOSE_CMD up -d
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -57,9 +68,9 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "========================================"
     echo ""
-    echo "To view logs: docker-compose logs -f"
-    echo "To check status: docker-compose ps"
-    echo "To stop services: docker-compose down"
+    echo "To view logs: $DOCKER_COMPOSE_CMD logs -f"
+    echo "To check status: $DOCKER_COMPOSE_CMD ps"
+    echo "To stop services: $DOCKER_COMPOSE_CMD down"
     echo ""
 else
     echo ""

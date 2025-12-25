@@ -32,6 +32,17 @@ if ! docker version > /dev/null 2>&1; then
 fi
 echo "✓ Docker is running"
 
+# Detect Docker Compose command (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo "✗ Docker Compose is not installed or not in PATH"
+    exit 1
+fi
+
 # Stop services
 echo ""
 if [ "$REMOVE_VOLUMES" = true ]; then
@@ -42,7 +53,7 @@ if [ "$REMOVE_VOLUMES" = true ]; then
     if [ "$confirmation" = "yes" ]; then
         echo ""
         echo "Stopping services and removing volumes..."
-        docker-compose down -v
+        $DOCKER_COMPOSE_CMD down -v
         
         if [ $? -eq 0 ]; then
             echo ""
@@ -59,7 +70,7 @@ if [ "$REMOVE_VOLUMES" = true ]; then
     fi
 else
     echo "Stopping services..."
-    docker-compose down
+    $DOCKER_COMPOSE_CMD down
     
     if [ $? -eq 0 ]; then
         echo ""

@@ -29,6 +29,14 @@ print_success() {
 
 print_header "STOPPING MOBILITY RENTAL PLATFORM"
 
+# Detect Docker Compose command (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+fi
+
 # Stop backend services
 print_step "Stopping backend services..."
 if [ -d "logs" ]; then
@@ -59,9 +67,11 @@ pkill -f "npm start" 2>/dev/null || true
 print_success "Frontend stopped"
 
 # Stop Docker containers
-print_step "Stopping infrastructure containers..."
-docker-compose down
-print_success "Infrastructure stopped"
+if [ -n "$DOCKER_COMPOSE_CMD" ]; then
+    print_step "Stopping infrastructure containers..."
+    $DOCKER_COMPOSE_CMD down
+    print_success "Infrastructure stopped"
+fi
 
 echo ""
 echo -e "${GREEN}✓ All services have been stopped${NC}"

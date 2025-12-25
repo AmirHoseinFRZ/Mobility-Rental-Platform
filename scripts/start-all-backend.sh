@@ -10,11 +10,23 @@ if [ ! -d "backend" ]; then
     exit 1
 fi
 
+# Detect Docker Compose command (support both plugin and standalone versions)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+fi
+
 # Check if infrastructure is running
 echo "📦 Checking infrastructure services..."
 if ! docker ps | grep -q mobility-postgres; then
+    if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+        echo "❌ Error: Docker Compose is not installed or not in PATH"
+        exit 1
+    fi
     echo "⚠️  PostgreSQL is not running. Starting infrastructure..."
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD up -d
     echo "⏳ Waiting for infrastructure to be ready (30 seconds)..."
     sleep 30
 fi

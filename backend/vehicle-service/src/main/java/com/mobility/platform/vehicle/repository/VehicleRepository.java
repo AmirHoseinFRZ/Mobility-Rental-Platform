@@ -66,6 +66,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     
     @Query("SELECT v FROM Vehicle v WHERE v.requiresDriver = :requiresDriver AND v.status = 'AVAILABLE'")
     List<Vehicle> findVehiclesByDriverRequirement(@Param("requiresDriver") Boolean requiresDriver);
+    
+    List<Vehicle> findByOwnerId(Long ownerId);
 }
 
 

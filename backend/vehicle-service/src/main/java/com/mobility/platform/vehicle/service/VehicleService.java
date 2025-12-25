@@ -231,7 +231,17 @@ public class VehicleService {
         log.info("Vehicle deleted successfully: {}", id);
     }
     
+    public List<VehicleResponse> getVehiclesByOwner(Long ownerId) {
+        log.info("Fetching vehicles for owner ID: {}", ownerId);
+        return vehicleRepository.findByOwnerId(ownerId).stream()
+                .map(vehicle -> mapToResponse(vehicle, null))
+                .collect(Collectors.toList());
+    }
+    
     private void mapRequestToEntity(VehicleRequest request, Vehicle vehicle) {
+        if (request.getOwnerId() != null) {
+            vehicle.setOwnerId(request.getOwnerId());
+        }
         vehicle.setVehicleNumber(request.getVehicleNumber());
         vehicle.setBrand(request.getBrand());
         vehicle.setModel(request.getModel());
@@ -262,6 +272,7 @@ public class VehicleService {
     private VehicleResponse mapToResponse(Vehicle vehicle, Double distanceKm) {
         VehicleResponse response = new VehicleResponse();
         response.setId(vehicle.getId());
+        response.setOwnerId(vehicle.getOwnerId());
         response.setVehicleNumber(vehicle.getVehicleNumber());
         response.setBrand(vehicle.getBrand());
         response.setModel(vehicle.getModel());

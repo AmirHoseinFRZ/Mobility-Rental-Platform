@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class VehicleResponse {
     
     private Long id;
+    private Long ownerId;
     private String vehicleNumber;
     private String brand;
     private String model;

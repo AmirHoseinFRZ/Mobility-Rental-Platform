@@ -6,6 +6,7 @@ package com.mobility.platform.common.enums;
 public enum UserRole {
     CUSTOMER,
     DRIVER,
+    VEHICLE_OWNER,
     ADMIN,
     SUPER_ADMIN
 }

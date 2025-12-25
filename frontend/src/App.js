@@ -14,6 +14,8 @@ import BookingPage from './pages/BookingPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
+import AddVehiclePage from './pages/AddVehiclePage';
+import MyVehiclesPage from './pages/MyVehiclesPage';
 
 // Components
 import Navbar from './components/Navbar';
@@ -84,6 +86,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-vehicle"
+            element={
+              <ProtectedRoute>
+                <AddVehiclePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-vehicles"
+            element={
+              <ProtectedRoute>
+                <MyVehiclesPage />
               </ProtectedRoute>
             }
           />

@@ -22,9 +22,13 @@ import java.math.BigDecimal;
 @Table(name = "vehicles", indexes = {
         @Index(name = "idx_vehicle_number", columnList = "vehicleNumber"),
         @Index(name = "idx_vehicle_type", columnList = "vehicleType"),
-        @Index(name = "idx_status", columnList = "status")
+        @Index(name = "idx_status", columnList = "status"),
+        @Index(name = "idx_owner_id", columnList = "ownerId")
 })
 public class Vehicle extends BaseEntity {
+    
+    @Column(nullable = false)
+    private Long ownerId;
     
     @Column(unique = true, nullable = false)
     private String vehicleNumber;

@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 @Data
 public class VehicleRequest {
     
+    private Long ownerId; // Set by the service from authenticated user
+    
     @NotBlank(message = "Vehicle number is required")
     private String vehicleNumber;
     

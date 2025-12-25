@@ -24,6 +24,7 @@ import {
   DirectionsCar,
   BookOnline,
   Logout,
+  Garage,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 
@@ -57,6 +58,7 @@ function Navbar() {
 
   const authMenuItems = [
     { label: 'My Bookings', path: '/my-bookings', icon: <BookOnline /> },
+    { label: 'My Vehicles', path: '/my-vehicles', icon: <Garage /> },
     { label: 'Profile', path: '/profile', icon: <Person /> },
   ];
 
@@ -122,6 +124,9 @@ function Navbar() {
                   <Button color="inherit" onClick={() => navigate('/my-bookings')}>
                     My Bookings
                   </Button>
+                  <Button color="inherit" onClick={() => navigate('/my-vehicles')}>
+                    My Vehicles
+                  </Button>
                   <IconButton onClick={handleMenu} color="inherit">
                     <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
                       {user?.firstName?.charAt(0)}
@@ -137,6 +142,9 @@ function Navbar() {
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/my-bookings'); handleClose(); }}>
                       <BookOnline sx={{ mr: 1 }} /> My Bookings
+                    </MenuItem>
+                    <MenuItem onClick={() => { navigate('/my-vehicles'); handleClose(); }}>
+                      <Garage sx={{ mr: 1 }} /> My Vehicles
                     </MenuItem>
                     <MenuItem onClick={handleLogout}>
                       <Logout sx={{ mr: 1 }} /> Logout

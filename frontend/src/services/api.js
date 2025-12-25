@@ -54,6 +54,10 @@ export const vehicleService = {
   searchByLocation: (searchData) => api.post('/api/vehicles/search/location', searchData),
   getNearestVehicles: (lat, lon, limit) => 
     api.get(`/api/vehicles/nearest?latitude=${lat}&longitude=${lon}&limit=${limit}`),
+  createVehicle: (vehicleData) => api.post('/api/vehicles', vehicleData),
+  updateVehicle: (id, vehicleData) => api.put(`/api/vehicles/${id}`, vehicleData),
+  deleteVehicle: (id) => api.delete(`/api/vehicles/${id}`),
+  getVehiclesByOwner: (ownerId) => api.get(`/api/vehicles/owner/${ownerId}`),
 };
 
 // ==================== BOOKING SERVICES ====================

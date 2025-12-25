@@ -132,6 +132,14 @@ public class VehicleController {
         return ResponseEntity.ok(ApiResponse.success("Vehicle deleted successfully", null));
     }
     
+    @GetMapping("/owner/{ownerId}")
+    @Operation(summary = "Get vehicles by owner ID")
+    public ResponseEntity<ApiResponse<List<VehicleResponse>>> getVehiclesByOwner(
+            @PathVariable Long ownerId) {
+        List<VehicleResponse> response = vehicleService.getVehiclesByOwner(ownerId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+    
     @GetMapping("/health")
     @Operation(summary = "Health check")
     public ResponseEntity<ApiResponse<String>> health() {

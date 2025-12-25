@@ -219,6 +219,16 @@ print_info "Starting microservices in background..."
 # Create logs directory
 mkdir -p logs
 
+# Start Eureka Server first
+print_step "Starting Eureka Server on port 8761..."
+cd "backend/eureka-server"
+nohup mvn spring-boot:run > "../../logs/eureka-server.log" 2>&1 &
+echo $! > "../../logs/eureka-server.pid"
+cd ../..
+print_success "Eureka Server started (PID: $(cat logs/eureka-server.pid))"
+print_info "Waiting for Eureka Server to be ready (20 seconds)..."
+sleep 20
+
 # Define services
 declare -a SERVICES=(
     "api-gateway:8080"
@@ -296,6 +306,9 @@ print_info "📊 Service URLs:"
 echo ""
 echo -e "${CYAN}  Frontend Application:${NC}"
 print_info "    ➜ http://localhost:3000"
+echo ""
+echo -e "${CYAN}  Service Discovery:${NC}"
+print_info "    ➜ Eureka Server:   http://localhost:8761"
 echo ""
 echo -e "${CYAN}  API Gateway:${NC}"
 print_info "    ➜ http://localhost:8080"

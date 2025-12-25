@@ -51,7 +51,12 @@ echo ""
 echo "🎯 Starting microservices..."
 echo ""
 
-# Start API Gateway first (critical)
+# Start Eureka Server first (service discovery)
+echo "Starting Eureka Server on port 8761..."
+start_service "eureka-server" "8761"
+sleep 20
+
+# Start API Gateway (critical)
 start_service "api-gateway" "8080"
 sleep 10
 

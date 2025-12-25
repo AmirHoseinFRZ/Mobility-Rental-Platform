@@ -14,6 +14,7 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Chip,
 } from '@mui/material';
 import {
   CheckCircle,

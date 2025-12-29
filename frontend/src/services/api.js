@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 // API Base URL - uses API Gateway
+// IMPORTANT: Should point to API Gateway (port 8080), NOT directly to services (8082, 8083, etc.)
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+// Debug: Log the API URL being used (remove in production)
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔍 API Base URL:', API_BASE_URL);
+  console.log('⚠️  If this shows port 8082, check your REACT_APP_API_URL environment variable!');
+}
 
 // Create axios instance
 const api = axios.create({
@@ -17,6 +24,12 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Debug: Log the actual request URL
+    if (process.env.NODE_ENV === 'development') {
+      const fullUrl = config.baseURL + config.url;
+      console.log('🌐 Making request to:', fullUrl);
+      console.log('   Method:', config.method?.toUpperCase());
     }
     return config;
   },

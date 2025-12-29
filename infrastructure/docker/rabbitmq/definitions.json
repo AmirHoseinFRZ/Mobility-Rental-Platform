@@ -3,13 +3,28 @@
   "rabbitmq_version": "3.13.0",
   "product_name": "RabbitMQ",
   "product_version": "3.13.0",
-  "users": [],
+  "users": [
+    {
+      "name": "mobility_user",
+      "password_hash": "mobility_password",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ["administrator"]
+    }
+  ],
   "vhosts": [
     {
       "name": "mobility_vhost"
     }
   ],
-  "permissions": [],
+  "permissions": [
+    {
+      "user": "mobility_user",
+      "vhost": "mobility_vhost",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
   "topic_permissions": [],
   "parameters": [],
   "global_parameters": [

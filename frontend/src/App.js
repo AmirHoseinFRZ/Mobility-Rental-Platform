@@ -16,6 +16,13 @@ import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
+import EditVehiclePage from './pages/EditVehiclePage';
+import DriverRegisterPage from './pages/DriverRegisterPage';
+import DriverDashboardPage from './pages/DriverDashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminVehiclesPage from './pages/AdminVehiclesPage';
+import AdminBookingsPage from './pages/AdminBookingsPage';
 
 // Components
 import Navbar from './components/Navbar';
@@ -102,6 +109,62 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <MyVehiclesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-vehicle/:id"
+            element={
+              <ProtectedRoute>
+                <EditVehiclePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/driver-register"
+            element={
+              <ProtectedRoute>
+                <DriverRegisterPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/driver-dashboard"
+            element={
+              <ProtectedRoute>
+                <DriverDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/vehicles"
+            element={
+              <ProtectedRoute>
+                <AdminVehiclesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminBookingsPage />
               </ProtectedRoute>
             }
           />

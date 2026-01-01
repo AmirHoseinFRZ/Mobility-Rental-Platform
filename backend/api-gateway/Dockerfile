@@ -15,6 +15,9 @@ RUN mvn clean package -pl api-gateway -am -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 COPY --from=build /app/api-gateway/target/*.jar app.jar
 
 EXPOSE 8080

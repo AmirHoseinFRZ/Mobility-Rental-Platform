@@ -21,6 +21,9 @@ RUN mvn clean package -pl pricing-service -am -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Copy jar from build stage
 COPY --from=build /app/pricing-service/target/*.jar app.jar
 

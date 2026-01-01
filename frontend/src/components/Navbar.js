@@ -25,6 +25,8 @@ import {
   BookOnline,
   Logout,
   Garage,
+  Dashboard,
+  LocalTaxi,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 
@@ -56,10 +58,20 @@ function Navbar() {
     { label: 'Search Vehicles', path: '/search' },
   ];
 
+  const additionalAuthItems = [
+    { label: 'Become a Driver', path: '/driver-register', icon: <LocalTaxi /> },
+    { label: 'Add Vehicle', path: '/add-vehicle', icon: <DirectionsCar /> },
+  ];
+
   const authMenuItems = [
     { label: 'My Bookings', path: '/my-bookings', icon: <BookOnline /> },
     { label: 'My Vehicles', path: '/my-vehicles', icon: <Garage /> },
+    { label: 'Driver Dashboard', path: '/driver-dashboard', icon: <LocalTaxi /> },
     { label: 'Profile', path: '/profile', icon: <Person /> },
+  ];
+
+  const adminMenuItems = [
+    { label: 'Admin Dashboard', path: '/admin', icon: <Dashboard /> },
   ];
 
   return (
@@ -113,6 +125,15 @@ function Navbar() {
                   {item.label}
                 </Button>
               ))}
+              {isAuthenticated && (
+                <Button
+                  onClick={() => navigate('/driver-register')}
+                  sx={{ color: 'white' }}
+                  startIcon={<LocalTaxi />}
+                >
+                  Become a Driver
+                </Button>
+              )}
             </Box>
           )}
 
@@ -145,6 +166,12 @@ function Navbar() {
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/my-vehicles'); handleClose(); }}>
                       <Garage sx={{ mr: 1 }} /> My Vehicles
+                    </MenuItem>
+                    <MenuItem onClick={() => { navigate('/driver-dashboard'); handleClose(); }}>
+                      <LocalTaxi sx={{ mr: 1 }} /> Driver Dashboard
+                    </MenuItem>
+                    <MenuItem onClick={() => { navigate('/admin'); handleClose(); }}>
+                      <Dashboard sx={{ mr: 1 }} /> Admin Panel
                     </MenuItem>
                     <MenuItem onClick={handleLogout}>
                       <Logout sx={{ mr: 1 }} /> Logout
@@ -182,6 +209,18 @@ function Navbar() {
             {isAuthenticated ? (
               <>
                 {authMenuItems.map((item) => (
+                  <ListItem button key={item.path} onClick={() => navigate(item.path)}>
+                    {item.icon}
+                    <ListItemText primary={item.label} sx={{ ml: 2 }} />
+                  </ListItem>
+                ))}
+                {additionalAuthItems.map((item) => (
+                  <ListItem button key={item.path} onClick={() => navigate(item.path)}>
+                    {item.icon}
+                    <ListItemText primary={item.label} sx={{ ml: 2 }} />
+                  </ListItem>
+                ))}
+                {adminMenuItems.map((item) => (
                   <ListItem button key={item.path} onClick={() => navigate(item.path)}>
                     {item.icon}
                     <ListItemText primary={item.label} sx={{ ml: 2 }} />

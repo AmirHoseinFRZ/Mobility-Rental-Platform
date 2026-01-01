@@ -104,6 +104,457 @@ services:
     profiles:
       - admin-tools
 
+  # ============================================
+  # BACKEND SERVICES
+  # ============================================
+
+  # Eureka Server - Service Discovery (must start first)
+  eureka-server:
+    build:
+      context: ./backend
+      dockerfile: eureka-server/Dockerfile
+    container_name: mobility-eureka-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8761
+      - EUREKA_HOSTNAME=eureka-server
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
+    container_name: mobility-api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8080
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # User Service
+  user-service:
+    build:
+      context: ./backend
+      dockerfile: user-service/Dockerfile
+    container_name: mobility-user-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8081
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+      - JWT_SECRET=${JWT_SECRET:-mobility-platform-secret-key-minimum-256-bits-long-for-security}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/api/users/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Vehicle Service
+  vehicle-service:
+    build:
+      context: ./backend
+      dockerfile: vehicle-service/Dockerfile
+    container_name: mobility-vehicle-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8082
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Booking Service
+  booking-service:
+    build:
+      context: ./backend
+      dockerfile: booking-service/Dockerfile
+    container_name: mobility-booking-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8083
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/api/bookings/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Pricing Service
+  pricing-service:
+    build:
+      context: ./backend
+      dockerfile: pricing-service/Dockerfile
+    container_name: mobility-pricing-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8084
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Driver Service
+  driver-service:
+    build:
+      context: ./backend
+      dockerfile: driver-service/Dockerfile
+    container_name: mobility-driver-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8085
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Review Service
+  review-service:
+    build:
+      context: ./backend
+      dockerfile: review-service/Dockerfile
+    container_name: mobility-review-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8086
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Location Service
+  location-service:
+    build:
+      context: ./backend
+      dockerfile: location-service/Dockerfile
+    container_name: mobility-location-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8087
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8087/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # Maintenance Service
+  maintenance-service:
+    build:
+      context: ./backend
+      dockerfile: maintenance-service/Dockerfile
+    container_name: mobility-maintenance-service
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8088
+      - EUREKA_SERVER=http://eureka-server:8761/eureka/
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-mobility_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-mobility_password}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USER:-mobility_user}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-mobility_password}
+      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-mobility_vhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8088/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    profiles:
+      - backend
+
+  # ============================================
+  # FRONTEND SERVICE
+  # ============================================
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mobility-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - mobility-network
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - frontend
+
 networks:
   mobility-network:
     driver: bridge

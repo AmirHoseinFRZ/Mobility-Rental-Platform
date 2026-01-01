@@ -17,6 +17,9 @@ RUN mvn clean package -pl maintenance-service -am -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 COPY --from=build /app/maintenance-service/target/*.jar app.jar
 
 EXPOSE 8088

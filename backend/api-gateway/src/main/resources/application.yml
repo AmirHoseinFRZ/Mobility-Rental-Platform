@@ -10,13 +10,13 @@ spring:
       routes:
         # User Service Routes
         - id: user-service
-          uri: http://localhost:8081
+          uri: lb://user-service
           predicates:
             - Path=/api/users/**
         
         # Vehicle Service Routes  
         - id: vehicle-service
-          uri: http://localhost:8082
+          uri: lb://vehicle-service
           predicates:
             - Path=/api/vehicles/**
           filters:
@@ -24,7 +24,7 @@ spring:
         
         # Booking Service Routes
         - id: booking-service
-          uri: http://localhost:8083
+          uri: lb://booking-service
           predicates:
             - Path=/api/bookings/**
         

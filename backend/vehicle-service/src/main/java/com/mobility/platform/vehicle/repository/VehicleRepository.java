@@ -37,8 +37,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     @Query(value = "SELECT * FROM vehicles v " +
             "WHERE v.status = 'AVAILABLE' " +
             "AND v.available = true " +
-            "AND ST_DWithin(v.current_location, :location, :radiusMeters) " +
-            "ORDER BY ST_Distance(v.current_location, :location)", 
+            "AND ST_DWithin(CAST(v.current_location AS geography), CAST(:location AS geography), :radiusMeters) " +
+            "ORDER BY ST_Distance(CAST(v.current_location AS geography), CAST(:location AS geography))", 
             nativeQuery = true)
     List<Vehicle> findAvailableVehiclesWithinRadius(
             @Param("location") Point location, 
@@ -48,8 +48,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             "WHERE v.vehicle_type = :vehicleType " +
             "AND v.status = 'AVAILABLE' " +
             "AND v.available = true " +
-            "AND ST_DWithin(v.current_location, :location, :radiusMeters) " +
-            "ORDER BY ST_Distance(v.current_location, :location)", 
+            "AND ST_DWithin(CAST(v.current_location AS geography), CAST(:location AS geography), :radiusMeters) " +
+            "ORDER BY ST_Distance(CAST(v.current_location AS geography), CAST(:location AS geography))", 
             nativeQuery = true)
     List<Vehicle> findAvailableVehiclesByTypeWithinRadius(
             @Param("vehicleType") String vehicleType,
@@ -57,7 +57,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             @Param("radiusMeters") double radiusMeters);
     
     @Query(value = "SELECT * FROM vehicles v " +
-            "ORDER BY ST_Distance(v.current_location, :location) " +
+            "ORDER BY ST_Distance(CAST(v.current_location AS geography), CAST(:location AS geography)) " +
             "LIMIT :limit", 
             nativeQuery = true)
     List<Vehicle> findNearestVehicles(

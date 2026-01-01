@@ -128,7 +128,7 @@ function MyVehiclesPage() {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={vehicle.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image'}
+                  image={vehicle.imageUrl || 'https://placehold.co/400x300/e0e0e0/666?text=No+Image'}
                   alt={`${vehicle.brand} ${vehicle.model}`}
                   sx={{ objectFit: 'cover' }}
                 />

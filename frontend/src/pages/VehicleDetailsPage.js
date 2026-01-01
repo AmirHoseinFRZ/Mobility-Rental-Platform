@@ -84,7 +84,7 @@ function VehicleDetailsPage() {
         <Grid item xs={12} md={6}>
           <Box
             component="img"
-            src={vehicle.imageUrl || 'https://via.placeholder.com/600x400?text=Vehicle'}
+            src={vehicle.imageUrl || 'https://placehold.co/600x400/e0e0e0/666?text=Vehicle'}
             alt={`${vehicle.brand} ${vehicle.model}`}
             sx={{ width: '100%', borderRadius: 2 }}
           />

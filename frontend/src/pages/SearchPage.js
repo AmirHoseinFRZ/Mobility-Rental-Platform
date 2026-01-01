@@ -304,7 +304,7 @@ function SearchPage() {
                   <CardMedia
                     component="img"
                     height="200"
-                    image={vehicle.imageUrl || 'https://via.placeholder.com/300x200?text=Vehicle'}
+                    image={vehicle.imageUrl || 'https://placehold.co/300x200/e0e0e0/666?text=Vehicle'}
                     alt={`${vehicle.brand} ${vehicle.model}`}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>

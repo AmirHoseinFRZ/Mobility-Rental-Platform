@@ -19,6 +19,8 @@ import {
   MenuItem,
   CircularProgress,
   Alert,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   LocationOn,
@@ -26,8 +28,12 @@ import {
   LocalGasStation,
   People,
   Search,
+  Map as MapIcon,
+  ViewList,
 } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
+import LocationSelector from '../components/LocationSelector';
+import MultipleLocationsMap from '../components/MultipleLocationsMap';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -35,10 +41,10 @@ function SearchPage() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
   
   // Search filters
-  const [latitude, setLatitude] = useState('40.7128');
-  const [longitude, setLongitude] = useState('-74.0060');
+  const [searchLocation, setSearchLocation] = useState(null);
   const [radius, setRadius] = useState('5');
   const [vehicleType, setVehicleType] = useState('');
   const [requiresDriver, setRequiresDriver] = useState('');
@@ -52,28 +58,40 @@ function SearchPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLatitude(position.coords.latitude.toString());
-          setLongitude(position.coords.longitude.toString());
-          searchVehicles(position.coords.latitude, position.coords.longitude);
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setSearchLocation(location);
+          searchVehicles(location.lat, location.lng);
         },
         () => {
-          // If geolocation fails, search with default location
-          searchVehicles();
+          // If geolocation fails, use default location (Tehran)
+          const defaultLocation = { lat: 35.6892, lng: 51.3890 };
+          setSearchLocation(defaultLocation);
+          searchVehicles(defaultLocation.lat, defaultLocation.lng);
         }
       );
     } else {
-      searchVehicles();
+      const defaultLocation = { lat: 35.6892, lng: 51.3890 };
+      setSearchLocation(defaultLocation);
+      searchVehicles(defaultLocation.lat, defaultLocation.lng);
     }
   }, []);
 
   const searchVehicles = async (lat, lon) => {
+    if (!lat || !lon) {
+      setError('Please select a search location on the map');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     
     try {
       const searchData = {
-        latitude: parseFloat(lat || latitude),
-        longitude: parseFloat(lon || longitude),
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lon),
         radiusKm: parseFloat(radius),
         vehicleType: vehicleType || null,
         requiresDriver: requiresDriver === '' ? null : requiresDriver === 'true',
@@ -95,8 +113,42 @@ function SearchPage() {
   };
 
   const handleSearch = () => {
-    searchVehicles();
+    if (searchLocation) {
+      searchVehicles(searchLocation.lat, searchLocation.lng);
+    }
   };
+
+  const handleLocationSelect = (lat, lng) => {
+    setSearchLocation({ lat, lng });
+    searchVehicles(lat, lng);
+  };
+
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setSearchLocation(location);
+          searchVehicles(location.lat, location.lng);
+        },
+        () => {
+          setError('Failed to get your location. Please select on the map.');
+        }
+      );
+    } else {
+      setError('Geolocation is not supported by your browser.');
+    }
+  };
+
+  const vehicleLocations = vehicles.map((vehicle) => ({
+    id: vehicle.id,
+    lat: vehicle.latitude,
+    lng: vehicle.longitude,
+    label: `${vehicle.brand} ${vehicle.model} - $${vehicle.pricePerHour}/hr`,
+  }));
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -104,28 +156,45 @@ function SearchPage() {
         Find Your Perfect Ride
       </Typography>
 
+      {/* Search Location Map */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Select Search Location
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Click on the map to select a location, or use the button to get your current location
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={handleUseMyLocation}
+          sx={{ mb: 2 }}
+          startIcon={<LocationOn />}
+        >
+          Use My Current Location
+        </Button>
+        
+        <LocationSelector
+          position={searchLocation}
+          onLocationSelect={handleLocationSelect}
+          height={300}
+          label="Search Center"
+          zoom={12}
+        />
+        
+        {searchLocation && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Searching near: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
+          </Typography>
+        )}
+      </Paper>
+
       {/* Search Filters */}
       <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Filters
+        </Typography>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              fullWidth
-              label="Latitude"
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              size="small"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              fullWidth
-              label="Longitude"
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              size="small"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               label="Radius (km)"
@@ -135,7 +204,7 @@ function SearchPage() {
               type="number"
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Vehicle Type</InputLabel>
               <Select
@@ -151,7 +220,7 @@ function SearchPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>With Driver</InputLabel>
               <Select
@@ -165,13 +234,13 @@ function SearchPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <Button
               fullWidth
               variant="contained"
               onClick={handleSearch}
               startIcon={<Search />}
-              disabled={loading}
+              disabled={loading || !searchLocation}
             >
               Search
             </Button>
@@ -192,12 +261,44 @@ function SearchPage() {
         </Box>
       ) : (
         <>
-          <Typography variant="h6" gutterBottom>
-            {vehicles.length} vehicles found
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">
+              {vehicles.length} vehicles found
+            </Typography>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, newMode) => newMode && setViewMode(newMode)}
+              size="small"
+            >
+              <ToggleButton value="list">
+                <ViewList sx={{ mr: 1 }} />
+                List
+              </ToggleButton>
+              <ToggleButton value="map">
+                <MapIcon sx={{ mr: 1 }} />
+                Map
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-          <Grid container spacing={3}>
-            {vehicles.map((vehicle) => (
+          {viewMode === 'map' && vehicles.length > 0 && (
+            <Paper sx={{ p: 2, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Vehicles on Map
+              </Typography>
+              <MultipleLocationsMap
+                locations={vehicleLocations}
+                height={500}
+                zoom={13}
+                onMarkerClick={(location) => navigate(`/vehicle/${location.id}`)}
+              />
+            </Paper>
+          )}
+
+          {viewMode === 'list' && (
+            <Grid container spacing={3}>
+              {vehicles.map((vehicle) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={vehicle.id}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <CardMedia
@@ -298,8 +399,9 @@ function SearchPage() {
                   </CardActions>
                 </Card>
               </Grid>
-            ))}
-          </Grid>
+              ))}
+            </Grid>
+          )}
 
           {!loading && vehicles.length === 0 && (
             <Box sx={{ textAlign: 'center', py: 8 }}>

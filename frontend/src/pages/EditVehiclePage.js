@@ -18,6 +18,8 @@ import {
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { vehicleService } from '../services/api';
+import LocationSelector from '../components/LocationSelector';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 const validationSchema = yup.object({
   vehicleType: yup.string().required('Vehicle type is required'),
@@ -28,8 +30,6 @@ const validationSchema = yup.object({
   seatingCapacity: yup.number().required('Seating capacity is required').min(1),
   pricePerHour: yup.number().required('Price per hour is required').min(0),
   pricePerDay: yup.number().required('Price per day is required').min(0),
-  currentLatitude: yup.number().required('Latitude is required'),
-  currentLongitude: yup.number().required('Longitude is required'),
 });
 
 function EditVehiclePage() {
@@ -39,6 +39,7 @@ function EditVehiclePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const formik = useFormik({
     initialValues: {
@@ -52,10 +53,8 @@ function EditVehiclePage() {
       transmission: 'MANUAL',
       pricePerHour: '',
       pricePerDay: '',
-      currentLatitude: '',
-      currentLongitude: '',
-      currentCity: '',
-      currentAddress: '',
+      latitude: '',
+      longitude: '',
       description: '',
       features: '',
       imageUrl: '',
@@ -68,10 +67,19 @@ function EditVehiclePage() {
       setSubmitting(true);
       setError('');
 
+      // Validate location
+      if (!selectedLocation) {
+        setError('Please select a location on the map');
+        setSubmitting(false);
+        return;
+      }
+
       try {
         const vehicleData = {
           ...values,
           ownerId: user.id,
+          latitude: selectedLocation.lat,
+          longitude: selectedLocation.lng,
         };
 
         const response = await vehicleService.updateVehicle(id, vehicleData);
@@ -117,10 +125,8 @@ function EditVehiclePage() {
           transmission: vehicle.transmission || 'MANUAL',
           pricePerHour: vehicle.pricePerHour || '',
           pricePerDay: vehicle.pricePerDay || '',
-          currentLatitude: vehicle.currentLatitude || '',
-          currentLongitude: vehicle.currentLongitude || '',
-          currentCity: vehicle.currentCity || '',
-          currentAddress: vehicle.currentAddress || '',
+          latitude: vehicle.latitude || '',
+          longitude: vehicle.longitude || '',
           description: vehicle.description || '',
           features: vehicle.features || '',
           imageUrl: vehicle.imageUrl || '',
@@ -128,6 +134,14 @@ function EditVehiclePage() {
           driverPricePerHour: vehicle.driverPricePerHour || '',
           status: vehicle.status || 'AVAILABLE',
         });
+
+        // Set initial location if available
+        if (vehicle.latitude && vehicle.longitude) {
+          setSelectedLocation({
+            lat: vehicle.latitude,
+            lng: vehicle.longitude,
+          });
+        }
       }
     } catch (err) {
       setError('Failed to load vehicle details');
@@ -368,58 +382,49 @@ function EditVehiclePage() {
               </Grid>
             )}
 
-            {/* Location - Latitude */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="currentLatitude"
-                name="currentLatitude"
-                label="Latitude"
-                type="number"
-                value={formik.values.currentLatitude}
-                onChange={formik.handleChange}
-                error={formik.touched.currentLatitude && Boolean(formik.errors.currentLatitude)}
-                helperText={formik.touched.currentLatitude && formik.errors.currentLatitude}
+            {/* Vehicle Location */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Vehicle Location *
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Click on the map to set the vehicle's current location
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<MyLocationIcon />}
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                          setSelectedLocation({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                          });
+                        },
+                        (error) => {
+                          console.error('Error getting location:', error);
+                          setError('Unable to get your current location. Please select manually on the map.');
+                        }
+                      );
+                    } else {
+                      setError('Geolocation is not supported by your browser');
+                    }
+                  }}
+                >
+                  Use My Current Location
+                </Button>
+              </Box>
+              <LocationSelector
+                position={selectedLocation}
+                onLocationSelect={(lat, lng) => setSelectedLocation({ lat, lng })}
               />
-            </Grid>
-
-            {/* Location - Longitude */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="currentLongitude"
-                name="currentLongitude"
-                label="Longitude"
-                type="number"
-                value={formik.values.currentLongitude}
-                onChange={formik.handleChange}
-                error={formik.touched.currentLongitude && Boolean(formik.errors.currentLongitude)}
-                helperText={formik.touched.currentLongitude && formik.errors.currentLongitude}
-              />
-            </Grid>
-
-            {/* City */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="currentCity"
-                name="currentCity"
-                label="City"
-                value={formik.values.currentCity}
-                onChange={formik.handleChange}
-              />
-            </Grid>
-
-            {/* Address */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="currentAddress"
-                name="currentAddress"
-                label="Address"
-                value={formik.values.currentAddress}
-                onChange={formik.handleChange}
-              />
+              {selectedLocation && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+                </Typography>
+              )}
             </Grid>
 
             {/* Image URL */}

@@ -15,6 +15,7 @@ import {
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { driverService } from '../services/api';
+import LocationSelector from '../components/LocationSelector';
 
 const validationSchema = yup.object({
   licenseNumber: yup.string().required('License number is required'),
@@ -22,8 +23,6 @@ const validationSchema = yup.object({
   licenseType: yup.string().required('License type is required'),
   vehiclePreference: yup.string(),
   bio: yup.string(),
-  latitude: yup.number().required('Current latitude is required'),
-  longitude: yup.number().required('Current longitude is required'),
   currentAddress: yup.string(),
   currentCity: yup.string(),
 });
@@ -33,6 +32,7 @@ function DriverRegisterPage() {
   const { user } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const formik = useFormik({
     initialValues: {
@@ -41,8 +41,6 @@ function DriverRegisterPage() {
       licenseType: '',
       vehiclePreference: 'CAR',
       bio: '',
-      latitude: '',
-      longitude: '',
       currentAddress: '',
       currentCity: '',
     },
@@ -50,6 +48,12 @@ function DriverRegisterPage() {
     onSubmit: async (values) => {
       setLoading(true);
       setError('');
+
+      if (!selectedLocation) {
+        setError('Please select your current location on the map');
+        setLoading(false);
+        return;
+      }
 
       try {
         const driverData = {
@@ -59,8 +63,8 @@ function DriverRegisterPage() {
           licenseType: values.licenseType,
           vehiclePreference: values.vehiclePreference,
           bio: values.bio,
-          latitude: parseFloat(values.latitude),
-          longitude: parseFloat(values.longitude),
+          latitude: selectedLocation.lat,
+          longitude: selectedLocation.lng,
           currentAddress: values.currentAddress,
           currentCity: values.currentCity,
         };
@@ -86,16 +90,22 @@ function DriverRegisterPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          formik.setFieldValue('latitude', position.coords.latitude);
-          formik.setFieldValue('longitude', position.coords.longitude);
+          setSelectedLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         (error) => {
-          setError('Failed to get current location. Please enter manually.');
+          setError('Failed to get current location. Please select manually on the map.');
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser.');
+      setError('Geolocation is not supported by your browser. Please select manually on the map.');
     }
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setSelectedLocation({ lat, lng });
   };
 
   return (
@@ -206,16 +216,33 @@ function DriverRegisterPage() {
 
             {/* Current Location */}
             <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom>
-                Current Location
+              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                Current Location *
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Click on the map to select your location, or use the button to get your current location
               </Typography>
               <Button
                 variant="outlined"
                 onClick={getCurrentLocation}
                 sx={{ mb: 2 }}
+                fullWidth
               >
-                Get Current Location
+                Use My Current Location
               </Button>
+              
+              <LocationSelector
+                position={selectedLocation}
+                onLocationSelect={handleLocationSelect}
+                height={350}
+                label="Driver Location"
+              />
+              
+              {selectedLocation && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+                </Typography>
+              )}
             </Grid>
 
             {/* Current Address */}
@@ -243,36 +270,6 @@ function DriverRegisterPage() {
                 onChange={formik.handleChange}
                 error={formik.touched.currentCity && Boolean(formik.errors.currentCity)}
                 helperText={formik.touched.currentCity && formik.errors.currentCity}
-              />
-            </Grid>
-
-            {/* Latitude */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="latitude"
-                name="latitude"
-                label="Latitude"
-                type="number"
-                value={formik.values.latitude}
-                onChange={formik.handleChange}
-                error={formik.touched.latitude && Boolean(formik.errors.latitude)}
-                helperText={formik.touched.latitude && formik.errors.latitude}
-              />
-            </Grid>
-
-            {/* Longitude */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                id="longitude"
-                name="longitude"
-                label="Longitude"
-                type="number"
-                value={formik.values.longitude}
-                onChange={formik.handleChange}
-                error={formik.touched.longitude && Boolean(formik.errors.longitude)}
-                helperText={formik.touched.longitude && formik.errors.longitude}
               />
             </Grid>
 

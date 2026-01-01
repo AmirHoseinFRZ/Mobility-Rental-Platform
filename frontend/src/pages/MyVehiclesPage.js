@@ -21,7 +21,6 @@ import {
   Edit,
   Delete,
   DirectionsCar,
-  LocationOn,
 } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
 
@@ -153,13 +152,6 @@ function MyVehiclesPage() {
                       size="small" 
                       variant="outlined"
                     />
-                  </Box>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <LocationOn fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {vehicle.currentCity || 'No location'}
-                    </Typography>
                   </Box>
 
                   <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 2 }}>

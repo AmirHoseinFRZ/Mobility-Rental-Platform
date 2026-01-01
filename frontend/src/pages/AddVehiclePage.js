@@ -13,8 +13,9 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { DirectionsCar } from '@mui/icons-material';
+import { DirectionsCar, LocationOn } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
+import LocationSelector from '../components/LocationSelector';
 
 function AddVehiclePage() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ function AddVehiclePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [vehicleLocation, setVehicleLocation] = useState(null);
 
   const [formData, setFormData] = useState({
     vehicleNumber: '',
@@ -36,8 +38,6 @@ function AddVehiclePage() {
     transmission: 'MANUAL',
     pricePerHour: '',
     pricePerDay: '',
-    currentAddress: '',
-    currentCity: '',
     imageUrl: '',
     description: '',
     features: '',
@@ -58,6 +58,12 @@ function AddVehiclePage() {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!vehicleLocation) {
+      setError('Please select vehicle location on the map');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -70,6 +76,8 @@ function AddVehiclePage() {
         pricePerDay: parseFloat(formData.pricePerDay),
         driverPricePerHour: formData.driverPricePerHour ? parseFloat(formData.driverPricePerHour) : null,
         driverPricePerDay: formData.driverPricePerDay ? parseFloat(formData.driverPricePerDay) : null,
+        latitude: vehicleLocation.lat,
+        longitude: vehicleLocation.lng,
       };
 
       await vehicleService.createVehicle(payload);
@@ -81,6 +89,28 @@ function AddVehiclePage() {
       setError(err.response?.data?.message || 'Failed to add vehicle');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setVehicleLocation({ lat, lng });
+  };
+
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setVehicleLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => {
+          setError('Failed to get your location. Please select manually on the map.');
+        }
+      );
+    } else {
+      setError('Geolocation is not supported by your browser. Please select manually on the map.');
     }
   };
 
@@ -266,27 +296,35 @@ function AddVehiclePage() {
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             Location
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Current City"
-                name="currentCity"
-                value={formData.currentCity}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Current Address"
-                name="currentAddress"
-                value={formData.currentAddress}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Select where your vehicle is parked. Click on the map or use the button to get your current location.
+          </Typography>
+          
+          <Box sx={{ mb: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={handleUseMyLocation}
+              startIcon={<LocationOn />}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              Use My Current Location
+            </Button>
+            
+            <LocationSelector
+              position={vehicleLocation}
+              onLocationSelect={handleLocationSelect}
+              height={350}
+              label="Vehicle Parking Location"
+              zoom={15}
+            />
+            
+            {vehicleLocation && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Selected: {vehicleLocation.lat.toFixed(6)}, {vehicleLocation.lng.toFixed(6)}
+              </Typography>
+            )}
+          </Box>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             Additional Details

@@ -68,6 +68,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  // Helper functions for role checks
+  const isAdmin = () => {
+    return user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  };
+
+  const isDriver = () => {
+    return user?.role === 'DRIVER';
+  };
+
   const value = {
     user,
     token,
@@ -76,6 +85,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     isAuthenticated: !!token,
+    isAdmin,
+    isDriver,
     loading,
   };
 

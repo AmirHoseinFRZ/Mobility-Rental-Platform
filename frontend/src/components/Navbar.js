@@ -32,7 +32,7 @@ import { useTheme } from '@mui/material/styles';
 
 function Navbar() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
@@ -170,9 +170,11 @@ function Navbar() {
                     <MenuItem onClick={() => { navigate('/driver-dashboard'); handleClose(); }}>
                       <LocalTaxi sx={{ mr: 1 }} /> Driver Dashboard
                     </MenuItem>
-                    <MenuItem onClick={() => { navigate('/admin'); handleClose(); }}>
-                      <Dashboard sx={{ mr: 1 }} /> Admin Panel
-                    </MenuItem>
+                    {isAdmin() && (
+                      <MenuItem onClick={() => { navigate('/admin'); handleClose(); }}>
+                        <Dashboard sx={{ mr: 1 }} /> Admin Panel
+                      </MenuItem>
+                    )}
                     <MenuItem onClick={handleLogout}>
                       <Logout sx={{ mr: 1 }} /> Logout
                     </MenuItem>
@@ -220,7 +222,7 @@ function Navbar() {
                     <ListItemText primary={item.label} sx={{ ml: 2 }} />
                   </ListItem>
                 ))}
-                {adminMenuItems.map((item) => (
+                {isAdmin() && adminMenuItems.map((item) => (
                   <ListItem button key={item.path} onClick={() => navigate(item.path)}>
                     {item.icon}
                     <ListItemText primary={item.label} sx={{ ml: 2 }} />

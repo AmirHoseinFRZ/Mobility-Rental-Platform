@@ -18,11 +18,14 @@ import { driverService } from '../services/api';
 
 const validationSchema = yup.object({
   licenseNumber: yup.string().required('License number is required'),
-  licenseExpiry: yup.date().required('License expiry date is required'),
-  vehicleType: yup.string().required('Vehicle type is required'),
-  experience: yup.number().required('Experience is required').min(0),
-  currentLatitude: yup.number().required('Current latitude is required'),
-  currentLongitude: yup.number().required('Current longitude is required'),
+  licenseExpiryDate: yup.date().required('License expiry date is required'),
+  licenseType: yup.string().required('License type is required'),
+  vehiclePreference: yup.string(),
+  bio: yup.string(),
+  latitude: yup.number().required('Current latitude is required'),
+  longitude: yup.number().required('Current longitude is required'),
+  currentAddress: yup.string(),
+  currentCity: yup.string(),
 });
 
 function DriverRegisterPage() {
@@ -34,11 +37,14 @@ function DriverRegisterPage() {
   const formik = useFormik({
     initialValues: {
       licenseNumber: '',
-      licenseExpiry: '',
-      vehicleType: 'CAR',
-      experience: '',
-      currentLatitude: '',
-      currentLongitude: '',
+      licenseExpiryDate: '',
+      licenseType: '',
+      vehiclePreference: 'CAR',
+      bio: '',
+      latitude: '',
+      longitude: '',
+      currentAddress: '',
+      currentCity: '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -49,12 +55,14 @@ function DriverRegisterPage() {
         const driverData = {
           userId: user.id,
           licenseNumber: values.licenseNumber,
-          licenseExpiry: values.licenseExpiry,
-          vehicleType: values.vehicleType,
-          experience: parseInt(values.experience),
-          currentLatitude: parseFloat(values.currentLatitude),
-          currentLongitude: parseFloat(values.currentLongitude),
-          status: 'AVAILABLE',
+          licenseExpiryDate: values.licenseExpiryDate,
+          licenseType: values.licenseType,
+          vehiclePreference: values.vehiclePreference,
+          bio: values.bio,
+          latitude: parseFloat(values.latitude),
+          longitude: parseFloat(values.longitude),
+          currentAddress: values.currentAddress,
+          currentCity: values.currentCity,
         };
 
         const response = await driverService.registerDriver(driverData);
@@ -78,8 +86,8 @@ function DriverRegisterPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          formik.setFieldValue('currentLatitude', position.coords.latitude);
-          formik.setFieldValue('currentLongitude', position.coords.longitude);
+          formik.setFieldValue('latitude', position.coords.latitude);
+          formik.setFieldValue('longitude', position.coords.longitude);
         },
         (error) => {
           setError('Failed to get current location. Please enter manually.');
@@ -126,49 +134,73 @@ function DriverRegisterPage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                id="licenseExpiry"
-                name="licenseExpiry"
+                id="licenseExpiryDate"
+                name="licenseExpiryDate"
                 label="License Expiry Date"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={formik.values.licenseExpiry}
+                value={formik.values.licenseExpiryDate}
                 onChange={formik.handleChange}
-                error={formik.touched.licenseExpiry && Boolean(formik.errors.licenseExpiry)}
-                helperText={formik.touched.licenseExpiry && formik.errors.licenseExpiry}
+                error={formik.touched.licenseExpiryDate && Boolean(formik.errors.licenseExpiryDate)}
+                helperText={formik.touched.licenseExpiryDate && formik.errors.licenseExpiryDate}
               />
             </Grid>
 
-            {/* Vehicle Type */}
+            {/* License Type */}
             <Grid item xs={12} sm={6}>
               <TextField
                 select
                 fullWidth
-                id="vehicleType"
-                name="vehicleType"
-                label="Preferred Vehicle Type"
-                value={formik.values.vehicleType}
+                id="licenseType"
+                name="licenseType"
+                label="License Type"
+                value={formik.values.licenseType}
                 onChange={formik.handleChange}
-                error={formik.touched.vehicleType && Boolean(formik.errors.vehicleType)}
-                helperText={formik.touched.vehicleType && formik.errors.vehicleType}
+                error={formik.touched.licenseType && Boolean(formik.errors.licenseType)}
+                helperText={formik.touched.licenseType && formik.errors.licenseType}
+              >
+                <MenuItem value="">Select License Type</MenuItem>
+                <MenuItem value="A">Class A - Motorcycle</MenuItem>
+                <MenuItem value="B">Class B - Car</MenuItem>
+                <MenuItem value="C">Class C - Truck</MenuItem>
+                <MenuItem value="D">Class D - Bus</MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Vehicle Preference */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                select
+                fullWidth
+                id="vehiclePreference"
+                name="vehiclePreference"
+                label="Preferred Vehicle Type"
+                value={formik.values.vehiclePreference}
+                onChange={formik.handleChange}
+                error={formik.touched.vehiclePreference && Boolean(formik.errors.vehiclePreference)}
+                helperText={formik.touched.vehiclePreference && formik.errors.vehiclePreference}
               >
                 <MenuItem value="CAR">Car</MenuItem>
                 <MenuItem value="BIKE">Motorcycle</MenuItem>
                 <MenuItem value="SCOOTER">Scooter</MenuItem>
+                <MenuItem value="TRUCK">Truck</MenuItem>
               </TextField>
             </Grid>
 
-            {/* Experience */}
-            <Grid item xs={12} sm={6}>
+            {/* Bio */}
+            <Grid item xs={12}>
               <TextField
                 fullWidth
-                id="experience"
-                name="experience"
-                label="Years of Experience"
-                type="number"
-                value={formik.values.experience}
+                multiline
+                rows={3}
+                id="bio"
+                name="bio"
+                label="Bio (Optional)"
+                placeholder="Tell us about yourself and your driving experience..."
+                value={formik.values.bio}
                 onChange={formik.handleChange}
-                error={formik.touched.experience && Boolean(formik.errors.experience)}
-                helperText={formik.touched.experience && formik.errors.experience}
+                error={formik.touched.bio && Boolean(formik.errors.bio)}
+                helperText={formik.touched.bio && formik.errors.bio}
               />
             </Grid>
 
@@ -186,18 +218,46 @@ function DriverRegisterPage() {
               </Button>
             </Grid>
 
+            {/* Current Address */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                id="currentAddress"
+                name="currentAddress"
+                label="Current Address (Optional)"
+                value={formik.values.currentAddress}
+                onChange={formik.handleChange}
+                error={formik.touched.currentAddress && Boolean(formik.errors.currentAddress)}
+                helperText={formik.touched.currentAddress && formik.errors.currentAddress}
+              />
+            </Grid>
+
+            {/* Current City */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                id="currentCity"
+                name="currentCity"
+                label="Current City (Optional)"
+                value={formik.values.currentCity}
+                onChange={formik.handleChange}
+                error={formik.touched.currentCity && Boolean(formik.errors.currentCity)}
+                helperText={formik.touched.currentCity && formik.errors.currentCity}
+              />
+            </Grid>
+
             {/* Latitude */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                id="currentLatitude"
-                name="currentLatitude"
+                id="latitude"
+                name="latitude"
                 label="Latitude"
                 type="number"
-                value={formik.values.currentLatitude}
+                value={formik.values.latitude}
                 onChange={formik.handleChange}
-                error={formik.touched.currentLatitude && Boolean(formik.errors.currentLatitude)}
-                helperText={formik.touched.currentLatitude && formik.errors.currentLatitude}
+                error={formik.touched.latitude && Boolean(formik.errors.latitude)}
+                helperText={formik.touched.latitude && formik.errors.latitude}
               />
             </Grid>
 
@@ -205,14 +265,14 @@ function DriverRegisterPage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                id="currentLongitude"
-                name="currentLongitude"
+                id="longitude"
+                name="longitude"
                 label="Longitude"
                 type="number"
-                value={formik.values.currentLongitude}
+                value={formik.values.longitude}
                 onChange={formik.handleChange}
-                error={formik.touched.currentLongitude && Boolean(formik.errors.currentLongitude)}
-                helperText={formik.touched.currentLongitude && formik.errors.currentLongitude}
+                error={formik.touched.longitude && Boolean(formik.errors.longitude)}
+                helperText={formik.touched.longitude && formik.errors.longitude}
               />
             </Grid>
 

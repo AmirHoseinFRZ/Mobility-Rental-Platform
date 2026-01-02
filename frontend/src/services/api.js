@@ -61,13 +61,13 @@ export const authService = {
 
 // ==================== VEHICLE SERVICES ====================
 export const vehicleService = {
-  getAllVehicles: (params) => api.get('/api/vehicles', { params }),
+  getAllVehicles: (params) => api.get('/api/vehicles/', { params }),
   getVehicleById: (id) => api.get(`/api/vehicles/${id}`),
   getAvailableVehicles: () => api.get('/api/vehicles/available'),
   searchByLocation: (searchData) => api.post('/api/vehicles/search/location', searchData),
   getNearestVehicles: (lat, lon, limit) => 
     api.get(`/api/vehicles/nearest?latitude=${lat}&longitude=${lon}&limit=${limit}`),
-  createVehicle: (vehicleData) => api.post('/api/vehicles', vehicleData),
+  createVehicle: (vehicleData) => api.post('/api/vehicles/', vehicleData),
   updateVehicle: (id, vehicleData) => api.put(`/api/vehicles/${id}`, vehicleData),
   deleteVehicle: (id) => api.delete(`/api/vehicles/${id}`),
   getVehiclesByOwner: (ownerId) => api.get(`/api/vehicles/owner/${ownerId}`),
@@ -75,7 +75,7 @@ export const vehicleService = {
 
 // ==================== BOOKING SERVICES ====================
 export const bookingService = {
-  createBooking: (bookingData) => api.post('/api/bookings', bookingData),
+  createBooking: (bookingData) => api.post('/api/bookings/', bookingData),
   getBookingById: (id) => api.get(`/api/bookings/${id}`),
   getUserBookings: (userId) => api.get(`/api/bookings/user/${userId}`),
   confirmBooking: (id) => api.patch(`/api/bookings/${id}/confirm`),
@@ -100,7 +100,7 @@ export const paymentService = {
 
 // ==================== DRIVER SERVICES ====================
 export const driverService = {
-  registerDriver: (driverData) => api.post('/api/drivers', driverData),
+  registerDriver: (driverData) => api.post('/api/drivers/', driverData),
   getDriverById: (id) => api.get(`/api/drivers/${id}`),
   getAvailableDrivers: () => api.get('/api/drivers/available'),
   findNearestDrivers: (lat, lon, limit) => 
@@ -113,7 +113,7 @@ export const driverService = {
 
 // ==================== REVIEW SERVICES ====================
 export const reviewService = {
-  createReview: (reviewData) => api.post('/api/reviews', reviewData),
+  createReview: (reviewData) => api.post('/api/reviews/', reviewData),
   getVehicleReviews: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}`),
   getDriverReviews: (driverId) => api.get(`/api/reviews/driver/${driverId}`),
   getVehicleRating: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}/rating`),

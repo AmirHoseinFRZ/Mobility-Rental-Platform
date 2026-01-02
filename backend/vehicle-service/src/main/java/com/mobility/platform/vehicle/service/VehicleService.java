@@ -53,11 +53,17 @@ public class VehicleService {
         vehicle = vehicleRepository.save(vehicle);
         
         // Publish vehicle created event
-        Map<String, Object> eventData = new HashMap<>();
-        eventData.put("vehicleId", vehicle.getId());
-        eventData.put("vehicleNumber", vehicle.getVehicleNumber());
-        eventData.put("vehicleType", vehicle.getVehicleType());
-        eventPublisher.publishVehicleEvent("status.created", eventData);
+        try {
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("vehicleId", vehicle.getId());
+            eventData.put("vehicleNumber", vehicle.getVehicleNumber());
+            eventData.put("vehicleType", vehicle.getVehicleType());
+            eventPublisher.publishVehicleEvent("vehicle.created", eventData);
+        } catch (Exception e) {
+            log.warn("Failed to publish vehicle created event for vehicle ID: {}. Error: {}", 
+                    vehicle.getId(), e.getMessage());
+            // Don't fail the transaction if event publishing fails
+        }
         
         log.info("Vehicle created successfully with ID: {}", vehicle.getId());
         
@@ -177,11 +183,16 @@ public class VehicleService {
         vehicle = vehicleRepository.save(vehicle);
         
         // Publish status update event
-        Map<String, Object> eventData = new HashMap<>();
-        eventData.put("vehicleId", vehicle.getId());
-        eventData.put("oldStatus", oldStatus);
-        eventData.put("newStatus", status);
-        eventPublisher.publishVehicleEvent("status.updated", eventData);
+        try {
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("vehicleId", vehicle.getId());
+            eventData.put("oldStatus", oldStatus);
+            eventData.put("newStatus", status);
+            eventPublisher.publishVehicleEvent("vehicle.status.updated", eventData);
+        } catch (Exception e) {
+            log.warn("Failed to publish vehicle status updated event for vehicle ID: {}. Error: {}", 
+                    vehicle.getId(), e.getMessage());
+        }
         
         log.info("Vehicle status updated successfully: {}", id);
         
@@ -205,11 +216,16 @@ public class VehicleService {
         vehicle = vehicleRepository.save(vehicle);
         
         // Publish location update event
-        Map<String, Object> eventData = new HashMap<>();
-        eventData.put("vehicleId", vehicle.getId());
-        eventData.put("latitude", latitude);
-        eventData.put("longitude", longitude);
-        eventPublisher.publishVehicleEvent("location.updated", eventData);
+        try {
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("vehicleId", vehicle.getId());
+            eventData.put("latitude", latitude);
+            eventData.put("longitude", longitude);
+            eventPublisher.publishVehicleEvent("vehicle.location.updated", eventData);
+        } catch (Exception e) {
+            log.warn("Failed to publish vehicle location updated event for vehicle ID: {}. Error: {}", 
+                    vehicle.getId(), e.getMessage());
+        }
         
         log.info("Vehicle location updated successfully: {}", id);
         

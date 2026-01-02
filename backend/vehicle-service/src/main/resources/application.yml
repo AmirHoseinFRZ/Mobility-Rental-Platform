@@ -1,6 +1,8 @@
 server:
   port: 8082
-  # context-path removed - API Gateway handles routing with /api/vehicles prefix
+  servlet:
+    context-path: /api/vehicles
+  forward-headers-strategy: framework
 
 spring:
   application:

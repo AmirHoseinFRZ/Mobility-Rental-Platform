@@ -19,8 +19,6 @@ spring:
           uri: lb://vehicle-service
           predicates:
             - Path=/api/vehicles/**
-          filters:
-            - StripPrefix=2  # Remove /api/vehicles from the path
         
         # Booking Service Routes
         - id: booking-service
@@ -66,6 +64,7 @@ spring:
       
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - PreserveHostHeader
       
       globalcors:
         corsConfigurations:

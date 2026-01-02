@@ -52,11 +52,14 @@ function MyVehiclesPage() {
     
     try {
       setLoading(true);
+      console.log('Loading vehicles for user:', user.id);
       const response = await vehicleService.getVehiclesByOwner(user.id);
+      console.log('Vehicles response:', response);
+      console.log('Vehicles data:', response.data);
       setVehicles(response.data || []);
     } catch (err) {
       setError('بارگذاری وسایل نقلیه شما ناموفق بود');
-      console.error(err);
+      console.error('Error loading vehicles:', err);
     } finally {
       setLoading(false);
     }

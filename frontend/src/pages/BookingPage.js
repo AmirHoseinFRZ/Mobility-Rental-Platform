@@ -300,7 +300,9 @@ function BookingPage() {
         specialRequests: specialRequests || null,
       };
       
+      console.log('Creating booking with request:', bookingRequest);
       const response = await bookingService.createBooking(bookingRequest);
+      console.log('Booking response:', response);
       
       if (response.success) {
         // Navigate to payment page
@@ -309,7 +311,9 @@ function BookingPage() {
         setError(response.message || 'رزرو ناموفق بود');
       }
     } catch (err) {
-      setError(err.message || 'رزرو ناموفق بود. لطفاً دوباره تلاش کنید.');
+      console.error('Booking error:', err);
+      console.error('Error details:', err.response?.data);
+      setError(err.response?.data?.message || err.message || 'رزرو ناموفق بود. لطفاً دوباره تلاش کنید.');
     } finally {
       setBookingLoading(false);
     }

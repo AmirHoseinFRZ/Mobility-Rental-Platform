@@ -81,7 +81,7 @@ function SearchPage() {
 
   const searchVehicles = async (lat, lon) => {
     if (!lat || !lon) {
-      setError('Please select a search location on the map');
+      setError('لطفاً یک موقعیت برای جستجو روی نقشه انتخاب کنید');
       return;
     }
     
@@ -102,10 +102,10 @@ function SearchPage() {
       if (response.success) {
         setVehicles(response.data || []);
       } else {
-        setError('Failed to load vehicles');
+        setError('بارگذاری وسایل نقلیه ناموفق بود');
       }
     } catch (err) {
-      setError('Failed to load vehicles. Please try again.');
+      setError('بارگذاری وسایل نقلیه ناموفق بود. لطفاً دوباره تلاش کنید.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -135,11 +135,11 @@ function SearchPage() {
           searchVehicles(location.lat, location.lng);
         },
         () => {
-          setError('Failed to get your location. Please select on the map.');
+          setError('دریافت موقعیت شما ناموفق بود. لطفاً روی نقشه انتخاب کنید.');
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser.');
+      setError('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند.');
     }
   };
 
@@ -147,22 +147,22 @@ function SearchPage() {
     id: vehicle.id,
     lat: vehicle.latitude,
     lng: vehicle.longitude,
-    label: `${vehicle.brand} ${vehicle.model} - $${vehicle.pricePerHour}/hr`,
+    label: `${vehicle.brand} ${vehicle.model} - $${vehicle.pricePerHour}/ساعت`,
   }));
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Find Your Perfect Ride
+        وسیله نقلیه مناسب خود را پیدا کنید
       </Typography>
 
       {/* Search Location Map */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Select Search Location
+          انتخاب موقعیت جستجو
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Click on the map to select a location, or use the button to get your current location
+          روی نقشه کلیک کنید تا موقعیت را انتخاب کنید، یا از دکمه برای دریافت موقعیت فعلی خود استفاده کنید
         </Typography>
         <Button
           variant="outlined"
@@ -170,20 +170,20 @@ function SearchPage() {
           sx={{ mb: 2 }}
           startIcon={<LocationOn />}
         >
-          Use My Current Location
+          استفاده از موقعیت فعلی من
         </Button>
         
         <LocationSelector
           position={searchLocation}
           onLocationSelect={handleLocationSelect}
           height={300}
-          label="Search Center"
+          label="مرکز جستجو"
           zoom={12}
         />
         
         {searchLocation && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Searching near: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
+            جستجو در نزدیکی: {searchLocation.lat.toFixed(4)}, {searchLocation.lng.toFixed(4)}
           </Typography>
         )}
       </Paper>
@@ -191,13 +191,13 @@ function SearchPage() {
       {/* Search Filters */}
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
-          Filters
+          فیلترها
         </Typography>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
-              label="Radius (km)"
+              label="شعاع (کیلومتر)"
               value={radius}
               onChange={(e) => setRadius(e.target.value)}
               size="small"
@@ -206,31 +206,31 @@ function SearchPage() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Vehicle Type</InputLabel>
+              <InputLabel>نوع وسیله نقلیه</InputLabel>
               <Select
                 value={vehicleType}
-                label="Vehicle Type"
+                label="نوع وسیله نقلیه"
                 onChange={(e) => setVehicleType(e.target.value)}
               >
-                <MenuItem value="">All Types</MenuItem>
-                <MenuItem value="CAR">Car</MenuItem>
-                <MenuItem value="BIKE">Motorcycle</MenuItem>
-                <MenuItem value="SCOOTER">Scooter</MenuItem>
-                <MenuItem value="BICYCLE">Bicycle</MenuItem>
+                <MenuItem value="">همه انواع</MenuItem>
+                <MenuItem value="CAR">خودرو</MenuItem>
+                <MenuItem value="BIKE">موتورسیکلت</MenuItem>
+                <MenuItem value="SCOOTER">اسکوتر</MenuItem>
+                <MenuItem value="BICYCLE">دوچرخه</MenuItem>
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>With Driver</InputLabel>
+              <InputLabel>با راننده</InputLabel>
               <Select
                 value={requiresDriver}
-                label="With Driver"
+                label="با راننده"
                 onChange={(e) => setRequiresDriver(e.target.value)}
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="false">Without Driver</MenuItem>
-                <MenuItem value="true">With Driver</MenuItem>
+                <MenuItem value="">همه</MenuItem>
+                <MenuItem value="false">بدون راننده</MenuItem>
+                <MenuItem value="true">با راننده</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -242,7 +242,7 @@ function SearchPage() {
               startIcon={<Search />}
               disabled={loading || !searchLocation}
             >
-              Search
+              جستجو
             </Button>
           </Grid>
         </Grid>
@@ -263,7 +263,7 @@ function SearchPage() {
         <>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">
-              {vehicles.length} vehicles found
+              {vehicles.length} وسیله نقلیه یافت شد
             </Typography>
             <ToggleButtonGroup
               value={viewMode}
@@ -273,11 +273,11 @@ function SearchPage() {
             >
               <ToggleButton value="list">
                 <ViewList sx={{ mr: 1 }} />
-                List
+                لیست
               </ToggleButton>
               <ToggleButton value="map">
                 <MapIcon sx={{ mr: 1 }} />
-                Map
+                نقشه
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
@@ -285,7 +285,7 @@ function SearchPage() {
           {viewMode === 'map' && vehicles.length > 0 && (
             <Paper sx={{ p: 2, mb: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Vehicles on Map
+                وسایل نقلیه روی نقشه
               </Typography>
               <MultipleLocationsMap
                 locations={vehicleLocations}
@@ -318,14 +318,14 @@ function SearchPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Star sx={{ color: 'gold', fontSize: 18, mr: 0.5 }} />
                       <Typography variant="body2">
-                        {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} reviews)
+                        {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
                       </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                       <Chip
                         icon={<People />}
-                        label={`${vehicle.seatingCapacity} seats`}
+                        label={`${vehicle.seatingCapacity} صندلی`}
                         size="small"
                       />
                       {vehicle.fuelType && (
@@ -338,7 +338,7 @@ function SearchPage() {
                       {vehicle.distanceKm && (
                         <Chip
                           icon={<LocationOn />}
-                          label={`${vehicle.distanceKm.toFixed(1)} km away`}
+                          label={`${vehicle.distanceKm.toFixed(1)} کیلومتر فاصله`}
                           size="small"
                           color="primary"
                         />
@@ -347,7 +347,7 @@ function SearchPage() {
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
-                        Per Hour:
+                        هر ساعت:
                       </Typography>
                       <Typography variant="h6" color="primary">
                         ${vehicle.pricePerHour}
@@ -356,7 +356,7 @@ function SearchPage() {
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" color="text.secondary">
-                        Per Day:
+                        هر روز:
                       </Typography>
                       <Typography variant="h6" color="primary">
                         ${vehicle.pricePerDay}
@@ -365,7 +365,7 @@ function SearchPage() {
 
                     {vehicle.requiresDriver && (
                       <Chip
-                        label="Driver Available"
+                        label="راننده موجود"
                         color="secondary"
                         size="small"
                         sx={{ mt: 1 }}
@@ -386,7 +386,7 @@ function SearchPage() {
                       variant="outlined"
                       onClick={() => navigate(`/vehicle/${vehicle.id}`)}
                     >
-                      View Details
+                      مشاهده جزئیات
                     </Button>
                     <Button
                       fullWidth
@@ -394,7 +394,7 @@ function SearchPage() {
                       onClick={() => navigate(`/booking/${vehicle.id}`)}
                       disabled={!vehicle.available}
                     >
-                      Book Now
+                      رزرو کنید
                     </Button>
                   </CardActions>
                 </Card>
@@ -406,7 +406,7 @@ function SearchPage() {
           {!loading && vehicles.length === 0 && (
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <Typography variant="h6" color="text.secondary">
-                No vehicles found in this area. Try expanding your search radius.
+                هیچ وسیله نقلیه‌ای در این منطقه یافت نشد. شعاع جستجوی خود را گسترش دهید.
               </Typography>
             </Box>
           )}
@@ -417,9 +417,3 @@ function SearchPage() {
 }
 
 export default SearchPage;
-
-
-
-
-
-

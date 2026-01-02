@@ -15,11 +15,11 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 const validationSchema = yup.object({
-  email: yup.string().email('Invalid email format').required('Email is required'),
-  password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-  firstName: yup.string().required('First name is required'),
-  lastName: yup.string().required('Last name is required'),
-  phoneNumber: yup.string().required('Phone number is required'),
+  email: yup.string().email('فرمت ایمیل نامعتبر است').required('ایمیل الزامی است'),
+  password: yup.string().min(8, 'رمز عبور باید حداقل ۸ کاراکتر باشد').required('رمز عبور الزامی است'),
+  firstName: yup.string().required('نام الزامی است'),
+  lastName: yup.string().required('نام خانوادگی الزامی است'),
+  phoneNumber: yup.string().required('شماره تلفن الزامی است'),
 });
 
 function RegisterPage() {
@@ -51,7 +51,7 @@ function RegisterPage() {
       if (result.success) {
         navigate('/search');
       } else {
-        setError(result.message || 'Registration failed. Please try again.');
+        setError(result.message || 'ثبت‌نام ناموفق بود. لطفاً دوباره تلاش کنید.');
       }
       
       setLoading(false);
@@ -62,10 +62,10 @@ function RegisterPage() {
     <Container maxWidth="md" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Create Account
+          ایجاد حساب کاربری
         </Typography>
         <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-          Join us and start renting today!
+          به ما بپیوندید و همین امروز شروع به اجاره کنید!
         </Typography>
 
         {error && (
@@ -81,7 +81,7 @@ function RegisterPage() {
                 fullWidth
                 id="firstName"
                 name="firstName"
-                label="First Name"
+                label="نام"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
                 error={formik.touched.firstName && Boolean(formik.errors.firstName)}
@@ -94,7 +94,7 @@ function RegisterPage() {
                 fullWidth
                 id="lastName"
                 name="lastName"
-                label="Last Name"
+                label="نام خانوادگی"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
                 error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -107,7 +107,7 @@ function RegisterPage() {
                 fullWidth
                 id="email"
                 name="email"
-                label="Email"
+                label="ایمیل"
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 error={formik.touched.email && Boolean(formik.errors.email)}
@@ -120,7 +120,7 @@ function RegisterPage() {
                 fullWidth
                 id="phoneNumber"
                 name="phoneNumber"
-                label="Phone Number"
+                label="شماره تلفن"
                 placeholder="+1234567890"
                 value={formik.values.phoneNumber}
                 onChange={formik.handleChange}
@@ -134,7 +134,7 @@ function RegisterPage() {
                 fullWidth
                 id="password"
                 name="password"
-                label="Password"
+                label="رمز عبور"
                 type="password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
@@ -148,7 +148,7 @@ function RegisterPage() {
                 fullWidth
                 id="address"
                 name="address"
-                label="Address (Optional)"
+                label="آدرس (اختیاری)"
                 value={formik.values.address}
                 onChange={formik.handleChange}
               />
@@ -159,7 +159,7 @@ function RegisterPage() {
                 fullWidth
                 id="city"
                 name="city"
-                label="City (Optional)"
+                label="شهر (اختیاری)"
                 value={formik.values.city}
                 onChange={formik.handleChange}
               />
@@ -170,7 +170,7 @@ function RegisterPage() {
                 fullWidth
                 id="country"
                 name="country"
-                label="Country (Optional)"
+                label="کشور (اختیاری)"
                 value={formik.values.country}
                 onChange={formik.handleChange}
               />
@@ -181,7 +181,7 @@ function RegisterPage() {
                 fullWidth
                 id="driverLicenseNumber"
                 name="driverLicenseNumber"
-                label="Driver License Number (Optional)"
+                label="شماره گواهینامه (اختیاری)"
                 value={formik.values.driverLicenseNumber}
                 onChange={formik.handleChange}
               />
@@ -196,14 +196,14 @@ function RegisterPage() {
             disabled={loading}
             sx={{ mt: 3, mb: 2 }}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? 'در حال ایجاد حساب...' : 'ثبت‌نام'}
           </Button>
 
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Typography variant="body2">
-              Already have an account?{' '}
+              قبلاً حساب کاربری دارید؟{' '}
               <Link to="/login" style={{ textDecoration: 'none', color: '#1976d2' }}>
-                Login
+                ورود
               </Link>
             </Typography>
           </Box>

@@ -60,7 +60,7 @@ function AddVehiclePage() {
     setSuccess('');
 
     if (!vehicleLocation) {
-      setError('Please select vehicle location on the map');
+      setError('لطفاً موقعیت وسیله نقلیه را روی نقشه انتخاب کنید');
       return;
     }
 
@@ -81,12 +81,12 @@ function AddVehiclePage() {
       };
 
       await vehicleService.createVehicle(payload);
-      setSuccess('Vehicle added successfully!');
+      setSuccess('وسیله نقلیه با موفقیت اضافه شد!');
       setTimeout(() => {
         navigate('/my-vehicles');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add vehicle');
+      setError(err.response?.data?.message || 'افزودن وسیله نقلیه ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -106,11 +106,11 @@ function AddVehiclePage() {
           });
         },
         () => {
-          setError('Failed to get your location. Please select manually on the map.');
+          setError('دریافت موقعیت شما ناموفق بود. لطفاً به صورت دستی روی نقشه انتخاب کنید.');
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser. Please select manually on the map.');
+      setError('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند. لطفاً به صورت دستی روی نقشه انتخاب کنید.');
     }
   };
 
@@ -124,7 +124,7 @@ function AddVehiclePage() {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <DirectionsCar sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
           <Typography variant="h4" component="h1">
-            List Your Vehicle for Rent
+            ثبت وسیله نقلیه برای اجاره
           </Typography>
         </Box>
 
@@ -133,24 +133,24 @@ function AddVehiclePage() {
 
         <Box component="form" onSubmit={handleSubmit}>
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            Basic Information
+            اطلاعات پایه
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Vehicle Number"
+                label="شماره وسیله نقلیه"
                 name="vehicleNumber"
                 value={formData.vehicleNumber}
                 onChange={handleChange}
                 required
-                helperText="Unique identifier for your vehicle"
+                helperText="شناسه منحصر به فرد برای وسیله نقلیه شما"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="License Plate"
+                label="پلاک"
                 name="licensePlate"
                 value={formData.licensePlate}
                 onChange={handleChange}
@@ -160,29 +160,29 @@ function AddVehiclePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Brand"
+                label="برند"
                 name="brand"
                 value={formData.brand}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Toyota, Honda, BMW"
+                placeholder="مثلاً: تویوتا، هوندا، بی‌ام‌و"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Model"
+                label="مدل"
                 name="model"
                 value={formData.model}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Camry, Civic, X5"
+                placeholder="مثلاً: کمری، سیویک، X5"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
-                label="Year"
+                label="سال"
                 name="year"
                 type="number"
                 value={formData.year}
@@ -195,7 +195,7 @@ function AddVehiclePage() {
               <TextField
                 fullWidth
                 select
-                label="Vehicle Type"
+                label="نوع وسیله نقلیه"
                 name="vehicleType"
                 value={formData.vehicleType}
                 onChange={handleChange}
@@ -209,7 +209,7 @@ function AddVehiclePage() {
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
-                label="Color"
+                label="رنگ"
                 name="color"
                 value={formData.color}
                 onChange={handleChange}
@@ -218,13 +218,13 @@ function AddVehiclePage() {
           </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            Specifications
+            مشخصات
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
-                label="Seating Capacity"
+                label="ظرفیت صندلی"
                 name="seatingCapacity"
                 type="number"
                 value={formData.seatingCapacity}
@@ -237,7 +237,7 @@ function AddVehiclePage() {
               <TextField
                 fullWidth
                 select
-                label="Fuel Type"
+                label="نوع سوخت"
                 name="fuelType"
                 value={formData.fuelType}
                 onChange={handleChange}
@@ -251,7 +251,7 @@ function AddVehiclePage() {
               <TextField
                 fullWidth
                 select
-                label="Transmission"
+                label="گیربکس"
                 name="transmission"
                 value={formData.transmission}
                 onChange={handleChange}
@@ -264,13 +264,13 @@ function AddVehiclePage() {
           </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            Pricing
+            قیمت‌گذاری
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Price Per Hour ($)"
+                label="قیمت هر ساعت (دلار)"
                 name="pricePerHour"
                 type="number"
                 value={formData.pricePerHour}
@@ -282,7 +282,7 @@ function AddVehiclePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Price Per Day ($)"
+                label="قیمت هر روز (دلار)"
                 name="pricePerDay"
                 type="number"
                 value={formData.pricePerDay}
@@ -294,10 +294,10 @@ function AddVehiclePage() {
           </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            Location
+            موقعیت
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Select where your vehicle is parked. Click on the map or use the button to get your current location.
+            محل پارک وسیله نقلیه خود را انتخاب کنید. روی نقشه کلیک کنید یا از دکمه برای دریافت موقعیت فعلی خود استفاده کنید.
           </Typography>
           
           <Box sx={{ mb: 2 }}>
@@ -308,32 +308,32 @@ function AddVehiclePage() {
               fullWidth
               sx={{ mb: 2 }}
             >
-              Use My Current Location
+              استفاده از موقعیت فعلی من
             </Button>
             
             <LocationSelector
               position={vehicleLocation}
               onLocationSelect={handleLocationSelect}
               height={350}
-              label="Vehicle Parking Location"
+              label="محل پارک وسیله نقلیه"
               zoom={15}
             />
             
             {vehicleLocation && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Selected: {vehicleLocation.lat.toFixed(6)}, {vehicleLocation.lng.toFixed(6)}
+                انتخاب شده: {vehicleLocation.lat.toFixed(6)}, {vehicleLocation.lng.toFixed(6)}
               </Typography>
             )}
           </Box>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            Additional Details
+            جزئیات بیشتر
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Image URL"
+                label="آدرس تصویر"
                 name="imageUrl"
                 value={formData.imageUrl}
                 onChange={handleChange}
@@ -345,21 +345,21 @@ function AddVehiclePage() {
                 fullWidth
                 multiline
                 rows={3}
-                label="Description"
+                label="توضیحات"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Describe your vehicle..."
+                placeholder="وسیله نقلیه خود را توصیف کنید..."
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Features"
+                label="امکانات"
                 name="features"
                 value={formData.features}
                 onChange={handleChange}
-                placeholder="AC, GPS, Bluetooth, etc. (comma separated)"
+                placeholder="تهویه، GPS، بلوتوث و غیره (جدا شده با کاما)"
               />
             </Grid>
           </Grid>
@@ -372,7 +372,7 @@ function AddVehiclePage() {
               disabled={loading}
               fullWidth
             >
-              {loading ? <CircularProgress size={24} /> : 'Add Vehicle'}
+              {loading ? <CircularProgress size={24} /> : 'افزودن وسیله نقلیه'}
             </Button>
             <Button
               variant="outlined"
@@ -380,7 +380,7 @@ function AddVehiclePage() {
               onClick={() => navigate('/my-vehicles')}
               disabled={loading}
             >
-              Cancel
+              لغو
             </Button>
           </Box>
         </Box>

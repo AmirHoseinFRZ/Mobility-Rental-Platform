@@ -54,24 +54,24 @@ function Navbar() {
   };
 
   const menuItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Search Vehicles', path: '/search' },
+    { label: 'خانه', path: '/' },
+    { label: 'جستجوی وسایل نقلیه', path: '/search' },
   ];
 
   const additionalAuthItems = [
-    { label: 'Become a Driver', path: '/driver-register', icon: <LocalTaxi /> },
-    { label: 'Add Vehicle', path: '/add-vehicle', icon: <DirectionsCar /> },
+    { label: 'راننده شوید', path: '/driver-register', icon: <LocalTaxi /> },
+    { label: 'افزودن وسیله نقلیه', path: '/add-vehicle', icon: <DirectionsCar /> },
   ];
 
   const authMenuItems = [
-    { label: 'My Bookings', path: '/my-bookings', icon: <BookOnline /> },
-    { label: 'My Vehicles', path: '/my-vehicles', icon: <Garage /> },
-    { label: 'Driver Dashboard', path: '/driver-dashboard', icon: <LocalTaxi /> },
-    { label: 'Profile', path: '/profile', icon: <Person /> },
+    { label: 'رزروهای من', path: '/my-bookings', icon: <BookOnline /> },
+    { label: 'وسایل نقلیه من', path: '/my-vehicles', icon: <Garage /> },
+    { label: 'پنل راننده', path: '/driver-dashboard', icon: <LocalTaxi /> },
+    { label: 'پروفایل', path: '/profile', icon: <Person /> },
   ];
 
   const adminMenuItems = [
-    { label: 'Admin Dashboard', path: '/admin', icon: <Dashboard /> },
+    { label: 'پنل مدیریت', path: '/admin', icon: <Dashboard /> },
   ];
 
   return (
@@ -92,7 +92,7 @@ function Navbar() {
             }}
             onClick={() => navigate('/')}
           >
-            MOBILITY RENTAL
+            اجاره وسایل نقلیه
           </Typography>
 
           {/* Mobile Menu */}
@@ -107,9 +107,9 @@ function Navbar() {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Mobility
-              </Typography>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              اجاره
+            </Typography>
             </>
           )}
 
@@ -131,7 +131,7 @@ function Navbar() {
                   sx={{ color: 'white' }}
                   startIcon={<LocalTaxi />}
                 >
-                  Become a Driver
+                  راننده شوید
                 </Button>
               )}
             </Box>
@@ -143,10 +143,10 @@ function Navbar() {
               {isAuthenticated ? (
                 <>
                   <Button color="inherit" onClick={() => navigate('/my-bookings')}>
-                    My Bookings
+                    رزروهای من
                   </Button>
                   <Button color="inherit" onClick={() => navigate('/my-vehicles')}>
-                    My Vehicles
+                    وسایل نقلیه من
                   </Button>
                   <IconButton onClick={handleMenu} color="inherit">
                     <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
@@ -159,34 +159,34 @@ function Navbar() {
                     onClose={handleClose}
                   >
                     <MenuItem onClick={() => { navigate('/profile'); handleClose(); }}>
-                      <Person sx={{ mr: 1 }} /> Profile
+                      <Person sx={{ mr: 1 }} /> پروفایل
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/my-bookings'); handleClose(); }}>
-                      <BookOnline sx={{ mr: 1 }} /> My Bookings
+                      <BookOnline sx={{ mr: 1 }} /> رزروهای من
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/my-vehicles'); handleClose(); }}>
-                      <Garage sx={{ mr: 1 }} /> My Vehicles
+                      <Garage sx={{ mr: 1 }} /> وسایل نقلیه من
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/driver-dashboard'); handleClose(); }}>
-                      <LocalTaxi sx={{ mr: 1 }} /> Driver Dashboard
+                      <LocalTaxi sx={{ mr: 1 }} /> پنل راننده
                     </MenuItem>
                     {isAdmin() && (
                       <MenuItem onClick={() => { navigate('/admin'); handleClose(); }}>
-                        <Dashboard sx={{ mr: 1 }} /> Admin Panel
+                        <Dashboard sx={{ mr: 1 }} /> پنل مدیریت
                       </MenuItem>
                     )}
                     <MenuItem onClick={handleLogout}>
-                      <Logout sx={{ mr: 1 }} /> Logout
+                      <Logout sx={{ mr: 1 }} /> خروج
                     </MenuItem>
                   </Menu>
                 </>
               ) : (
                 <>
                   <Button color="inherit" onClick={() => navigate('/login')}>
-                    Login
+                    ورود
                   </Button>
                   <Button variant="outlined" color="inherit" onClick={() => navigate('/register')}>
-                    Sign Up
+                    ثبت‌نام
                   </Button>
                 </>
               )}
@@ -230,16 +230,16 @@ function Navbar() {
                 ))}
                 <ListItem button onClick={handleLogout}>
                   <Logout />
-                  <ListItemText primary="Logout" sx={{ ml: 2 }} />
+                  <ListItemText primary="خروج" sx={{ ml: 2 }} />
                 </ListItem>
               </>
             ) : (
               <>
                 <ListItem button onClick={() => navigate('/login')}>
-                  <ListItemText primary="Login" />
+                  <ListItemText primary="ورود" />
                 </ListItem>
                 <ListItem button onClick={() => navigate('/register')}>
-                  <ListItemText primary="Sign Up" />
+                  <ListItemText primary="ثبت‌نام" />
                 </ListItem>
               </>
             )}

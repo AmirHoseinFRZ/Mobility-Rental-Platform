@@ -44,7 +44,7 @@ function VehicleDetailsPage() {
         setVehicle(response.data);
       }
     } catch (err) {
-      setError('Failed to load vehicle details');
+      setError('بارگذاری جزئیات وسیله نقلیه ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ function VehicleDetailsPage() {
   if (error || !vehicle) {
     return (
       <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error || 'Vehicle not found'}</Alert>
+        <Alert severity="error">{error || 'وسیله نقلیه یافت نشد'}</Alert>
       </Container>
     );
   }
@@ -99,7 +99,7 @@ function VehicleDetailsPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Rating value={vehicle.rating} readOnly precision={0.1} />
             <Typography variant="body2" sx={{ ml: 1 }}>
-              {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} reviews)
+              {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
             </Typography>
           </Box>
 
@@ -111,7 +111,7 @@ function VehicleDetailsPage() {
             />
             <Chip label={vehicle.vehicleType} variant="outlined" sx={{ mr: 1 }} />
             {vehicle.requiresDriver && (
-              <Chip label="Driver Available" color="secondary" />
+              <Chip label="راننده موجود" color="secondary" />
             )}
           </Box>
 
@@ -122,25 +122,25 @@ function VehicleDetailsPage() {
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <CalendarMonth sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>Year: {vehicle.year}</Typography>
+                <Typography>سال: {vehicle.year}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <People sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>Seats: {vehicle.seatingCapacity}</Typography>
+                <Typography>صندلی: {vehicle.seatingCapacity}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <LocalGasStation sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>{vehicle.fuelType || 'N/A'}</Typography>
+                <Typography>{vehicle.fuelType || 'نامشخص'}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Speed sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>{vehicle.transmission || 'N/A'}</Typography>
+                <Typography>{vehicle.transmission || 'نامشخص'}</Typography>
               </Box>
             </Grid>
             {vehicle.currentCity && (
@@ -158,16 +158,16 @@ function VehicleDetailsPage() {
           {/* Pricing */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="h5" gutterBottom>
-              Pricing
+              قیمت
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body1">Per Hour:</Typography>
+              <Typography variant="body1">هر ساعت:</Typography>
               <Typography variant="h6" color="primary">
                 ${vehicle.pricePerHour}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body1">Per Day:</Typography>
+              <Typography variant="body1">هر روز:</Typography>
               <Typography variant="h6" color="primary">
                 ${vehicle.pricePerDay}
               </Typography>
@@ -176,7 +176,7 @@ function VehicleDetailsPage() {
               <>
                 <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body1">Driver Per Hour:</Typography>
+                  <Typography variant="body1">راننده هر ساعت:</Typography>
                   <Typography variant="h6" color="secondary">
                     +${vehicle.driverPricePerHour}
                   </Typography>
@@ -191,7 +191,7 @@ function VehicleDetailsPage() {
           {vehicle.description && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Description
+                توضیحات
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {vehicle.description}
@@ -203,7 +203,7 @@ function VehicleDetailsPage() {
           {vehicle.features && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Features
+                امکانات
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {vehicle.features}
@@ -220,17 +220,17 @@ function VehicleDetailsPage() {
             disabled={!vehicle.available}
             sx={{ py: 1.5 }}
           >
-            {vehicle.available ? 'Book This Vehicle' : 'Not Available'}
+            {vehicle.available ? 'رزرو این وسیله نقلیه' : 'موجود نیست'}
           </Button>
         </Grid>
 
         {/* Reviews Section */}
         <Grid item xs={12}>
           <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-            Customer Reviews
+            نظرات مشتریان
           </Typography>
           {reviews.length === 0 ? (
-            <Typography color="text.secondary">No reviews yet</Typography>
+            <Typography color="text.secondary">هنوز نظری ثبت نشده</Typography>
           ) : (
             reviews.map((review) => (
               <Card key={review.id} sx={{ mb: 2 }}>

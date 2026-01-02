@@ -35,7 +35,7 @@ function PaymentPage() {
   const [transactionId, setTransactionId] = useState('');
   const [paymentStatus, setPaymentStatus] = useState(''); // PENDING, COMPLETED, FAILED
 
-  const steps = ['Booking Created', 'Payment Processing', 'Confirmation'];
+  const steps = ['رزرو ایجاد شد', 'پردازش پرداخت', 'تایید'];
   const [activeStep, setActiveStep] = useState(1);
 
   useEffect(() => {
@@ -54,10 +54,10 @@ function PaymentPage() {
           setPaymentStatus('COMPLETED');
         }
       } else {
-        setError('Booking not found');
+        setError('رزرو یافت نشد');
       }
     } catch (err) {
-      setError('Failed to load booking details');
+      setError('بارگذاری جزئیات رزرو ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -94,11 +94,11 @@ function PaymentPage() {
           }, 2000);
         }
       } else {
-        setError('Failed to create payment transaction');
+        setError('ایجاد تراکنش پرداخت ناموفق بود');
         setProcessing(false);
       }
     } catch (err) {
-      setError(err.message || 'Payment failed. Please try again.');
+      setError(err.message || 'پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.');
       setProcessing(false);
     }
   };
@@ -119,16 +119,16 @@ function PaymentPage() {
           await bookingService.confirmBooking(bookingId);
         } else if (transaction.status === 'FAILED') {
           setPaymentStatus('FAILED');
-          setError('Payment verification failed');
+          setError('تایید پرداخت ناموفق بود');
         } else {
           setPaymentStatus('PENDING');
         }
       } else {
-        setError('Failed to verify payment');
+        setError('تایید پرداخت ناموفق بود');
         setPaymentStatus('FAILED');
       }
     } catch (err) {
-      setError(err.message || 'Verification failed');
+      setError(err.message || 'تایید ناموفق بود');
       setPaymentStatus('FAILED');
     } finally {
       setProcessing(false);
@@ -146,7 +146,7 @@ function PaymentPage() {
   if (!booking) {
     return (
       <Container sx={{ py: 4 }}>
-        <Alert severity="error">Booking not found</Alert>
+        <Alert severity="error">رزرو یافت نشد</Alert>
       </Container>
     );
   }
@@ -154,7 +154,7 @@ function PaymentPage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom align="center">
-        Payment
+        پرداخت
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -174,43 +174,43 @@ function PaymentPage() {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Booking Summary
+            خلاصه رزرو
           </Typography>
           
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Booking Number:
+              شماره رزرو:
             </Typography>
             <Typography variant="body1">{booking.bookingNumber}</Typography>
           </Box>
 
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Pickup:
+              محل تحویل:
             </Typography>
             <Typography variant="body1">{booking.pickupLocation}</Typography>
           </Box>
 
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Duration:
+              مدت زمان:
             </Typography>
             <Typography variant="body1">
-              {new Date(booking.startDateTime).toLocaleString()} - 
-              {new Date(booking.endDateTime).toLocaleString()}
+              {new Date(booking.startDateTime).toLocaleString('fa-IR')} - 
+              {new Date(booking.endDateTime).toLocaleString('fa-IR')}
             </Typography>
           </Box>
 
           {booking.withDriver && (
             <Box sx={{ mb: 2 }}>
-              <Chip label="With Driver" color="secondary" size="small" />
+              <Chip label="با راننده" color="secondary" size="small" />
             </Box>
           )}
 
           <Divider sx={{ my: 2 }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-            <Typography variant="h5">Total Amount:</Typography>
+            <Typography variant="h5">مبلغ کل:</Typography>
             <Typography variant="h5" color="primary">
               ${booking.finalPrice}
             </Typography>
@@ -221,49 +221,49 @@ function PaymentPage() {
             <Box sx={{ textAlign: 'center', py: 3 }}>
               <CheckCircle sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
               <Typography variant="h5" gutterBottom>
-                Payment Successful!
+                پرداخت موفق!
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                Your booking has been confirmed. Transaction ID: {transactionId}
+                رزرو شما تایید شد. شناسه تراکنش: {transactionId}
               </Typography>
               <Button
                 variant="contained"
                 onClick={() => navigate('/my-bookings')}
               >
-                View My Bookings
+                مشاهده رزروهای من
               </Button>
             </Box>
           ) : paymentStatus === 'FAILED' ? (
             <Box sx={{ textAlign: 'center', py: 3 }}>
               <Error sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
               <Typography variant="h5" gutterBottom>
-                Payment Failed
+                پرداخت ناموفق
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                {error || 'Please try again or use a different payment method.'}
+                {error || 'لطفاً دوباره تلاش کنید یا از روش پرداخت دیگری استفاده کنید.'}
               </Typography>
               <Button
                 variant="contained"
                 onClick={handleCreateTransaction}
               >
-                Try Again
+                تلاش دوباره
               </Button>
             </Box>
           ) : processing ? (
             <Box sx={{ textAlign: 'center', py: 3 }}>
               <CircularProgress sx={{ mb: 2 }} />
               <Typography variant="body1">
-                Processing your payment...
+                در حال پردازش پرداخت شما...
               </Typography>
             </Box>
           ) : (
             <Box sx={{ textAlign: 'center', py: 3 }}>
               <Payment sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Ready to Pay
+                آماده پرداخت
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Click below to proceed with secure payment
+                برای ادامه پرداخت امن روی دکمه زیر کلیک کنید
               </Typography>
               <Button
                 fullWidth
@@ -272,7 +272,7 @@ function PaymentPage() {
                 onClick={handleCreateTransaction}
                 disabled={processing}
               >
-                Pay ${booking.finalPrice}
+                پرداخت ${booking.finalPrice}
               </Button>
             </Box>
           )}

@@ -43,7 +43,7 @@ function MyVehiclesPage() {
       const response = await vehicleService.getVehiclesByOwner(user.id);
       setVehicles(response.data || []);
     } catch (err) {
-      setError('Failed to load your vehicles');
+      setError('بارگذاری وسایل نقلیه شما ناموفق بود');
       console.error(err);
     } finally {
       setLoading(false);
@@ -51,7 +51,7 @@ function MyVehiclesPage() {
   };
 
   const handleDelete = async (vehicleId) => {
-    if (!window.confirm('Are you sure you want to delete this vehicle?')) {
+    if (!window.confirm('آیا مطمئن هستید که می‌خواهید این وسیله نقلیه را حذف کنید؟')) {
       return;
     }
 
@@ -59,7 +59,7 @@ function MyVehiclesPage() {
       await vehicleService.deleteVehicle(vehicleId);
       setVehicles(vehicles.filter(v => v.id !== vehicleId));
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete vehicle');
+      setError(err.response?.data?.message || 'حذف وسیله نقلیه ناموفق بود');
     }
   };
 
@@ -87,7 +87,7 @@ function MyVehiclesPage() {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <DirectionsCar sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
           <Typography variant="h4" component="h1">
-            My Vehicles
+            وسایل نقلیه من
           </Typography>
         </Box>
         <Button
@@ -96,7 +96,7 @@ function MyVehiclesPage() {
           onClick={() => navigate('/add-vehicle')}
           size="large"
         >
-          Add Vehicle
+          افزودن وسیله نقلیه
         </Button>
       </Box>
 
@@ -106,10 +106,10 @@ function MyVehiclesPage() {
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <DirectionsCar sx={{ fontSize: 100, color: 'text.disabled', mb: 2 }} />
           <Typography variant="h5" color="text.secondary" gutterBottom>
-            No vehicles listed yet
+            هنوز وسیله نقلیه‌ای ثبت نشده
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Start earning by listing your vehicle for rent
+            با ثبت وسیله نقلیه خود شروع به کسب درآمد کنید
           </Typography>
           <Button
             variant="contained"
@@ -117,7 +117,7 @@ function MyVehiclesPage() {
             onClick={() => navigate('/add-vehicle')}
             size="large"
           >
-            Add Your First Vehicle
+            اولین وسیله نقلیه خود را اضافه کنید
           </Button>
         </Box>
       ) : (
@@ -155,12 +155,12 @@ function MyVehiclesPage() {
                   </Box>
 
                   <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 2 }}>
-                    ${vehicle.pricePerHour}/hr • ${vehicle.pricePerDay}/day
+                    ${vehicle.pricePerHour}/ساعت • ${vehicle.pricePerDay}/روز
                   </Typography>
 
                   {vehicle.rating > 0 && (
                     <Typography variant="body2" color="text.secondary">
-                      ⭐ {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} reviews)
+                      ⭐ {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
                     </Typography>
                   )}
                 </CardContent>
@@ -170,7 +170,7 @@ function MyVehiclesPage() {
                     startIcon={<Edit />}
                     onClick={() => navigate(`/edit-vehicle/${vehicle.id}`)}
                   >
-                    Edit
+                    ویرایش
                   </Button>
                   <IconButton 
                     size="small" 

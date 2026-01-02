@@ -18,9 +18,9 @@ import { driverService } from '../services/api';
 import LocationSelector from '../components/LocationSelector';
 
 const validationSchema = yup.object({
-  licenseNumber: yup.string().required('License number is required'),
-  licenseExpiryDate: yup.date().required('License expiry date is required'),
-  licenseType: yup.string().required('License type is required'),
+  licenseNumber: yup.string().required('شماره گواهینامه الزامی است'),
+  licenseExpiryDate: yup.date().required('تاریخ انقضای گواهینامه الزامی است'),
+  licenseType: yup.string().required('نوع گواهینامه الزامی است'),
   vehiclePreference: yup.string(),
   bio: yup.string(),
   currentAddress: yup.string(),
@@ -50,7 +50,7 @@ function DriverRegisterPage() {
       setError('');
 
       if (!selectedLocation) {
-        setError('Please select your current location on the map');
+        setError('لطفاً موقعیت فعلی خود را روی نقشه انتخاب کنید');
         setLoading(false);
         return;
       }
@@ -72,13 +72,13 @@ function DriverRegisterPage() {
         const response = await driverService.registerDriver(driverData);
 
         if (response.success) {
-          alert('Driver registration successful!');
+          alert('ثبت‌نام راننده با موفقیت انجام شد!');
           navigate('/driver-dashboard');
         } else {
-          setError(response.message || 'Driver registration failed');
+          setError(response.message || 'ثبت‌نام راننده ناموفق بود');
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'Driver registration failed. Please try again.');
+        setError(err.response?.data?.message || 'ثبت‌نام راننده ناموفق بود. لطفاً دوباره تلاش کنید.');
       } finally {
         setLoading(false);
       }
@@ -96,11 +96,11 @@ function DriverRegisterPage() {
           });
         },
         (error) => {
-          setError('Failed to get current location. Please select manually on the map.');
+          setError('دریافت موقعیت فعلی ناموفق بود. لطفاً به صورت دستی روی نقشه انتخاب کنید.');
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser. Please select manually on the map.');
+      setError('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند. لطفاً به صورت دستی روی نقشه انتخاب کنید.');
     }
   };
 
@@ -112,10 +112,10 @@ function DriverRegisterPage() {
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Register as a Driver
+          ثبت‌نام به عنوان راننده
         </Typography>
         <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-          Join our platform as a professional driver
+          به عنوان یک راننده حرفه‌ای به پلتفرم ما بپیوندید
         </Typography>
 
         {error && (
@@ -132,7 +132,7 @@ function DriverRegisterPage() {
                 fullWidth
                 id="licenseNumber"
                 name="licenseNumber"
-                label="License Number"
+                label="شماره گواهینامه"
                 value={formik.values.licenseNumber}
                 onChange={formik.handleChange}
                 error={formik.touched.licenseNumber && Boolean(formik.errors.licenseNumber)}
@@ -146,7 +146,7 @@ function DriverRegisterPage() {
                 fullWidth
                 id="licenseExpiryDate"
                 name="licenseExpiryDate"
-                label="License Expiry Date"
+                label="تاریخ انقضای گواهینامه"
                 type="date"
                 InputLabelProps={{ shrink: true }}
                 value={formik.values.licenseExpiryDate}
@@ -163,17 +163,17 @@ function DriverRegisterPage() {
                 fullWidth
                 id="licenseType"
                 name="licenseType"
-                label="License Type"
+                label="نوع گواهینامه"
                 value={formik.values.licenseType}
                 onChange={formik.handleChange}
                 error={formik.touched.licenseType && Boolean(formik.errors.licenseType)}
                 helperText={formik.touched.licenseType && formik.errors.licenseType}
               >
-                <MenuItem value="">Select License Type</MenuItem>
-                <MenuItem value="A">Class A - Motorcycle</MenuItem>
-                <MenuItem value="B">Class B - Car</MenuItem>
-                <MenuItem value="C">Class C - Truck</MenuItem>
-                <MenuItem value="D">Class D - Bus</MenuItem>
+                <MenuItem value="">انتخاب نوع گواهینامه</MenuItem>
+                <MenuItem value="A">کلاس A - موتورسیکلت</MenuItem>
+                <MenuItem value="B">کلاس B - خودرو</MenuItem>
+                <MenuItem value="C">کلاس C - کامیون</MenuItem>
+                <MenuItem value="D">کلاس D - اتوبوس</MenuItem>
               </TextField>
             </Grid>
 
@@ -184,16 +184,16 @@ function DriverRegisterPage() {
                 fullWidth
                 id="vehiclePreference"
                 name="vehiclePreference"
-                label="Preferred Vehicle Type"
+                label="نوع وسیله نقلیه مورد علاقه"
                 value={formik.values.vehiclePreference}
                 onChange={formik.handleChange}
                 error={formik.touched.vehiclePreference && Boolean(formik.errors.vehiclePreference)}
                 helperText={formik.touched.vehiclePreference && formik.errors.vehiclePreference}
               >
-                <MenuItem value="CAR">Car</MenuItem>
-                <MenuItem value="BIKE">Motorcycle</MenuItem>
-                <MenuItem value="SCOOTER">Scooter</MenuItem>
-                <MenuItem value="TRUCK">Truck</MenuItem>
+                <MenuItem value="CAR">خودرو</MenuItem>
+                <MenuItem value="BIKE">موتورسیکلت</MenuItem>
+                <MenuItem value="SCOOTER">اسکوتر</MenuItem>
+                <MenuItem value="TRUCK">کامیون</MenuItem>
               </TextField>
             </Grid>
 
@@ -205,8 +205,8 @@ function DriverRegisterPage() {
                 rows={3}
                 id="bio"
                 name="bio"
-                label="Bio (Optional)"
-                placeholder="Tell us about yourself and your driving experience..."
+                label="معرفی (اختیاری)"
+                placeholder="درباره خود و تجربه رانندگی‌تان بگویید..."
                 value={formik.values.bio}
                 onChange={formik.handleChange}
                 error={formik.touched.bio && Boolean(formik.errors.bio)}
@@ -217,10 +217,10 @@ function DriverRegisterPage() {
             {/* Current Location */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                Current Location *
+                موقعیت فعلی *
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Click on the map to select your location, or use the button to get your current location
+                روی نقشه کلیک کنید تا موقعیت خود را انتخاب کنید، یا از دکمه برای دریافت موقعیت فعلی خود استفاده کنید
               </Typography>
               <Button
                 variant="outlined"
@@ -228,19 +228,19 @@ function DriverRegisterPage() {
                 sx={{ mb: 2 }}
                 fullWidth
               >
-                Use My Current Location
+                استفاده از موقعیت فعلی من
               </Button>
               
               <LocationSelector
                 position={selectedLocation}
                 onLocationSelect={handleLocationSelect}
                 height={350}
-                label="Driver Location"
+                label="موقعیت راننده"
               />
               
               {selectedLocation && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+                  انتخاب شده: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
                 </Typography>
               )}
             </Grid>
@@ -251,7 +251,7 @@ function DriverRegisterPage() {
                 fullWidth
                 id="currentAddress"
                 name="currentAddress"
-                label="Current Address (Optional)"
+                label="آدرس فعلی (اختیاری)"
                 value={formik.values.currentAddress}
                 onChange={formik.handleChange}
                 error={formik.touched.currentAddress && Boolean(formik.errors.currentAddress)}
@@ -265,7 +265,7 @@ function DriverRegisterPage() {
                 fullWidth
                 id="currentCity"
                 name="currentCity"
-                label="Current City (Optional)"
+                label="شهر فعلی (اختیاری)"
                 value={formik.values.currentCity}
                 onChange={formik.handleChange}
                 error={formik.touched.currentCity && Boolean(formik.errors.currentCity)}
@@ -282,7 +282,7 @@ function DriverRegisterPage() {
                 size="large"
                 disabled={loading}
               >
-                {loading ? 'Registering...' : 'Register as Driver'}
+                {loading ? 'در حال ثبت‌نام...' : 'ثبت‌نام به عنوان راننده'}
               </Button>
             </Grid>
           </Grid>

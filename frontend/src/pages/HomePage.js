@@ -30,9 +30,9 @@ function HomePage() {
   };
 
   const vehicleTypes = [
-    { name: 'Cars', icon: <DirectionsCar fontSize="large" />, type: 'CAR' },
-    { name: 'Motorcycles', icon: <TwoWheeler fontSize="large" />, type: 'BIKE' },
-    { name: 'Scooters', icon: <ElectricScooter fontSize="large" />, type: 'SCOOTER' },
+    { name: 'خودروها', icon: <DirectionsCar fontSize="large" />, type: 'CAR' },
+    { name: 'موتورسیکلت‌ها', icon: <TwoWheeler fontSize="large" />, type: 'BIKE' },
+    { name: 'اسکوترها', icon: <ElectricScooter fontSize="large" />, type: 'SCOOTER' },
   ];
 
   return (
@@ -49,16 +49,16 @@ function HomePage() {
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
               <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-                Rent Mobility Made Easy
+                اجاره وسایل نقلیه به آسانی
               </Typography>
               <Typography variant="h5" gutterBottom>
-                Choose from cars, bikes, and scooters. With or without a driver.
+                از بین خودروها، موتورسیکلت‌ها و اسکوترها انتخاب کنید. با یا بدون راننده.
               </Typography>
               <Box sx={{ mt: 4 }}>
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Enter your location..."
+                  placeholder="موقعیت خود را وارد کنید..."
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -75,7 +75,7 @@ function HomePage() {
                         onClick={handleSearch}
                         startIcon={<Search />}
                       >
-                        Search
+                        جستجو
                       </Button>
                     ),
                   }}
@@ -89,10 +89,10 @@ function HomePage() {
       {/* Vehicle Types Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Choose Your Ride
+          وسیله نقلیه خود را انتخاب کنید
         </Typography>
         <Typography variant="h6" align="center" color="text.secondary" sx={{ mb: 6 }}>
-          Select from our wide range of vehicles
+          از میان طیف گسترده‌ای از وسایل نقلیه ما انتخاب کنید
         </Typography>
 
         <Grid container spacing={4}>
@@ -125,36 +125,36 @@ function HomePage() {
       <Box sx={{ bgcolor: 'grey.100', py: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="h3" align="center" gutterBottom>
-            Why Choose Us?
+            چرا ما را انتخاب کنید؟
           </Typography>
           <Grid container spacing={4} sx={{ mt: 2 }}>
             <Grid item xs={12} md={4}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" gutterBottom>
-                  🚗 Wide Selection
+                  🚗 انتخاب گسترده
                 </Typography>
                 <Typography color="text.secondary">
-                  Choose from hundreds of vehicles in your area
+                  از بین صدها وسیله نقلیه در منطقه خود انتخاب کنید
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" gutterBottom>
-                  💰 Best Prices
+                  💰 بهترین قیمت‌ها
                 </Typography>
                 <Typography color="text.secondary">
-                  Dynamic pricing with discounts and promotions
+                  قیمت‌گذاری پویا با تخفیف‌ها و پیشنهادات ویژه
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" gutterBottom>
-                  ⭐ Trusted Service
+                  ⭐ خدمات قابل اعتماد
                 </Typography>
                 <Typography color="text.secondary">
-                  Verified vehicles and professional drivers
+                  وسایل نقلیه تایید شده و رانندگان حرفه‌ای
                 </Typography>
               </Box>
             </Grid>
@@ -165,10 +165,10 @@ function HomePage() {
       {/* CTA Section */}
       <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
         <Typography variant="h3" gutterBottom>
-          Ready to Get Started?
+          آماده شروع هستید؟
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-          Sign up today and get your first rental discount
+          همین امروز ثبت‌نام کنید و تخفیف اولین اجاره خود را دریافت کنید
         </Typography>
         <Button
           variant="contained"
@@ -176,7 +176,7 @@ function HomePage() {
           onClick={() => navigate('/register')}
           sx={{ px: 6, py: 2 }}
         >
-          Sign Up Now
+          همین الان ثبت‌نام کنید
         </Button>
       </Container>
     </Box>

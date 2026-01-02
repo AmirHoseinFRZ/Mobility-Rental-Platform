@@ -17,46 +17,46 @@ function Footer() {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" gutterBottom>
-              Mobility Rental
+              اجاره وسایل نقلیه
             </Typography>
             <Typography variant="body2" color="grey.400">
-              Your trusted partner for vehicle rentals. Rent cars, bikes, and scooters with or without a driver.
+              شریک مورد اعتماد شما برای اجاره وسایل نقلیه. خودرو، موتورسیکلت و اسکوتر را با یا بدون راننده اجاره کنید.
             </Typography>
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" gutterBottom>
-              Quick Links
+              لینک‌های سریع
             </Typography>
             <Link href="/" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              Home
+              خانه
             </Link>
             <Link href="/search" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              Search Vehicles
+              جستجوی وسایل نقلیه
             </Link>
             <Link href="/my-bookings" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              My Bookings
+              رزروهای من
             </Link>
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" gutterBottom>
-              Support
+              پشتیبانی
             </Typography>
             <Link href="#" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              Help Center
+              مرکز پشتیبانی
             </Link>
             <Link href="#" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              Terms of Service
+              شرایط استفاده
             </Link>
             <Link href="#" color="grey.400" display="block" sx={{ mb: 1, textDecoration: 'none' }}>
-              Privacy Policy
+              حریم خصوصی
             </Link>
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="h6" gutterBottom>
-              Follow Us
+              ما را دنبال کنید
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <IconButton sx={{ color: 'grey.400' }}>
@@ -77,7 +77,7 @@ function Footer() {
 
         <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <Typography variant="body2" color="grey.400" align="center">
-            © {new Date().getFullYear()} Mobility Rental Platform. All rights reserved.
+            © {new Date().getFullYear()} پلتفرم اجاره وسایل نقلیه. تمامی حقوق محفوظ است.
           </Typography>
         </Box>
       </Container>

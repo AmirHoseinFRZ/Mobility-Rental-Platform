@@ -117,7 +117,7 @@ function BookingPage() {
 
   const handleBooking = async () => {
     if (!pickupLocation) {
-      setError('Please enter pickup location');
+      setError('لطفاً محل تحویل را وارد کنید');
       return;
     }
     
@@ -145,10 +145,10 @@ function BookingPage() {
         // Navigate to payment page
         navigate(`/payment/${response.data.id}`);
       } else {
-        setError(response.message || 'Booking failed');
+        setError(response.message || 'رزرو ناموفق بود');
       }
     } catch (err) {
-      setError(err.message || 'Booking failed. Please try again.');
+      setError(err.message || 'رزرو ناموفق بود. لطفاً دوباره تلاش کنید.');
     } finally {
       setBookingLoading(false);
     }
@@ -166,7 +166,7 @@ function BookingPage() {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Book Your Vehicle
+          رزرو وسیله نقلیه خود
         </Typography>
 
         {error && (
@@ -181,13 +181,13 @@ function BookingPage() {
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Booking Details
+                  جزئیات رزرو
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>
                   <TextField
                     fullWidth
-                    label="Start Date & Time"
+                    label="تاریخ و زمان شروع"
                     type="datetime-local"
                     value={startDateTime.toISOString().slice(0, 16)}
                     onChange={(e) => setStartDateTime(new Date(e.target.value))}
@@ -197,7 +197,7 @@ function BookingPage() {
 
                   <TextField
                     fullWidth
-                    label="End Date & Time"
+                    label="تاریخ و زمان پایان"
                     type="datetime-local"
                     value={endDateTime.toISOString().slice(0, 16)}
                     onChange={(e) => setEndDateTime(new Date(e.target.value))}
@@ -207,7 +207,7 @@ function BookingPage() {
 
                 <TextField
                   fullWidth
-                  label="Pickup Location"
+                  label="محل تحویل"
                   value={pickupLocation}
                   onChange={(e) => setPickupLocation(e.target.value)}
                   required
@@ -216,7 +216,7 @@ function BookingPage() {
 
                 <TextField
                   fullWidth
-                  label="Dropoff Location (Optional)"
+                  label="محل بازگشت (اختیاری)"
                   value={dropoffLocation}
                   onChange={(e) => setDropoffLocation(e.target.value)}
                   sx={{ mb: 2 }}
@@ -230,7 +230,7 @@ function BookingPage() {
                         onChange={(e) => setWithDriver(e.target.checked)}
                       />
                     }
-                    label="Book with Driver"
+                    label="رزرو با راننده"
                     sx={{ mb: 2 }}
                   />
                 )}
@@ -238,7 +238,7 @@ function BookingPage() {
                 {withDriver && nearestDrivers.length > 0 && (
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      Available Drivers Nearby:
+                      رانندگان موجود در نزدیکی:
                     </Typography>
                     {nearestDrivers.map((driver) => (
                       <Card
@@ -252,8 +252,8 @@ function BookingPage() {
                       >
                         <CardContent>
                           <Typography variant="body2">
-                            ⭐ {driver.rating.toFixed(1)} • {driver.totalTrips} trips
-                            {driver.distanceKm && ` • ${driver.distanceKm.toFixed(1)} km away`}
+                            ⭐ {driver.rating.toFixed(1)} • {driver.totalTrips} سفر
+                            {driver.distanceKm && ` • ${driver.distanceKm.toFixed(1)} کیلومتر فاصله`}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -263,7 +263,7 @@ function BookingPage() {
 
                 <TextField
                   fullWidth
-                  label="Special Requests (Optional)"
+                  label="درخواست‌های ویژه (اختیاری)"
                   multiline
                   rows={3}
                   value={specialRequests}
@@ -273,7 +273,7 @@ function BookingPage() {
 
                 <TextField
                   fullWidth
-                  label="Discount Code (Optional)"
+                  label="کد تخفیف (اختیاری)"
                   value={discountCode}
                   onChange={(e) => setDiscountCode(e.target.value)}
                 />
@@ -286,7 +286,7 @@ function BookingPage() {
             <Card sx={{ position: 'sticky', top: 80 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Vehicle Summary
+                  خلاصه وسیله نقلیه
                 </Typography>
                 <Typography variant="body1">
                   {vehicle.brand} {vehicle.model}
@@ -298,33 +298,33 @@ function BookingPage() {
                 <Divider sx={{ my: 2 }} />
 
                 <Typography variant="h6" gutterBottom>
-                  Price Breakdown
+                  جزئیات قیمت
                 </Typography>
 
                 {priceData ? (
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2">Base Price:</Typography>
+                      <Typography variant="body2">قیمت پایه:</Typography>
                       <Typography variant="body2">${priceData.basePrice}</Typography>
                     </Box>
                     
                     {priceData.driverPrice > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">Driver Fee:</Typography>
+                        <Typography variant="body2">هزینه راننده:</Typography>
                         <Typography variant="body2">${priceData.driverPrice}</Typography>
                       </Box>
                     )}
                     
                     {priceData.surgeCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">Surge Charge:</Typography>
+                        <Typography variant="body2">هزینه اضافی:</Typography>
                         <Typography variant="body2">${priceData.surgeCharge}</Typography>
                       </Box>
                     )}
                     
                     {priceData.weekendCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">Weekend Charge:</Typography>
+                        <Typography variant="body2">هزینه آخر هفته:</Typography>
                         <Typography variant="body2">${priceData.weekendCharge}</Typography>
                       </Box>
                     )}
@@ -332,7 +332,7 @@ function BookingPage() {
                     {priceData.discountAmount > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" color="success.main">
-                          Discount ({priceData.discountCode}):
+                          تخفیف ({priceData.discountCode}):
                         </Typography>
                         <Typography variant="body2" color="success.main">
                           -${priceData.discountAmount}
@@ -344,12 +344,12 @@ function BookingPage() {
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2">
-                        Duration: {priceData.rentalHours}h ({priceData.rentalDays}d)
+                        مدت زمان: {priceData.rentalHours}ساعت ({priceData.rentalDays}روز)
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="h6">Total:</Typography>
+                      <Typography variant="h6">مجموع:</Typography>
                       <Typography variant="h6" color="primary">
                         ${priceData.totalPrice}
                       </Typography>
@@ -357,7 +357,7 @@ function BookingPage() {
                   </Box>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    Calculating price...
+                    در حال محاسبه قیمت...
                   </Typography>
                 )}
 
@@ -369,7 +369,7 @@ function BookingPage() {
                   disabled={bookingLoading || !priceData}
                   sx={{ mt: 3 }}
                 >
-                  {bookingLoading ? 'Processing...' : 'Proceed to Payment'}
+                  {bookingLoading ? 'در حال پردازش...' : 'ادامه به پرداخت'}
                 </Button>
               </CardContent>
             </Card>

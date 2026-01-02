@@ -14,8 +14,8 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 const validationSchema = yup.object({
-  emailOrPhone: yup.string().required('Email or phone is required'),
-  password: yup.string().required('Password is required'),
+  emailOrPhone: yup.string().required('ایمیل یا شماره تلفن الزامی است'),
+  password: yup.string().required('رمز عبور الزامی است'),
 });
 
 function LoginPage() {
@@ -39,7 +39,7 @@ function LoginPage() {
       if (result.success) {
         navigate('/search');
       } else {
-        setError(result.message || 'Login failed. Please try again.');
+        setError(result.message || 'ورود ناموفق بود. لطفاً دوباره تلاش کنید.');
       }
       
       setLoading(false);
@@ -50,10 +50,10 @@ function LoginPage() {
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Login
+          ورود
         </Typography>
         <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-          Welcome back! Please login to your account.
+          خوش آمدید! لطفاً وارد حساب خود شوید.
         </Typography>
 
         {error && (
@@ -67,7 +67,7 @@ function LoginPage() {
             fullWidth
             id="emailOrPhone"
             name="emailOrPhone"
-            label="Email or Phone Number"
+            label="ایمیل یا شماره تلفن"
             margin="normal"
             value={formik.values.emailOrPhone}
             onChange={formik.handleChange}
@@ -79,7 +79,7 @@ function LoginPage() {
             fullWidth
             id="password"
             name="password"
-            label="Password"
+            label="رمز عبور"
             type="password"
             margin="normal"
             value={formik.values.password}
@@ -96,14 +96,14 @@ function LoginPage() {
             disabled={loading}
             sx={{ mt: 3, mb: 2 }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'در حال ورود...' : 'ورود'}
           </Button>
 
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Typography variant="body2">
-              Don't have an account?{' '}
+              حساب کاربری ندارید؟{' '}
               <Link to="/register" style={{ textDecoration: 'none', color: '#1976d2' }}>
-                Sign Up
+                ثبت‌نام کنید
               </Link>
             </Typography>
           </Box>

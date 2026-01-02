@@ -53,10 +53,10 @@ function ProfilePage() {
       // }
       
       // For now, just update local state
-      setSuccess('Profile updated successfully');
+      setSuccess('پروفایل با موفقیت به‌روزرسانی شد');
       setEditing(false);
     } catch (err) {
-      setError('Failed to update profile');
+      setError('به‌روزرسانی پروفایل ناموفق بود');
     }
   };
 
@@ -93,14 +93,14 @@ function ProfilePage() {
         <Divider sx={{ mb: 3 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h6">Profile Information</Typography>
+          <Typography variant="h6">اطلاعات پروفایل</Typography>
           {!editing && (
             <Button
               variant="outlined"
               startIcon={<Edit />}
               onClick={() => setEditing(true)}
             >
-              Edit
+              ویرایش
             </Button>
           )}
         </Box>
@@ -110,7 +110,7 @@ function ProfilePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="First Name"
+                label="نام"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -121,7 +121,7 @@ function ProfilePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Last Name"
+                label="نام خانوادگی"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -132,7 +132,7 @@ function ProfilePage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Email"
+                label="ایمیل"
                 value={user?.email}
                 disabled
               />
@@ -141,7 +141,7 @@ function ProfilePage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Phone Number"
+                label="شماره تلفن"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
@@ -152,7 +152,7 @@ function ProfilePage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Address"
+                label="آدرس"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
@@ -163,7 +163,7 @@ function ProfilePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="City"
+                label="شهر"
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
@@ -174,7 +174,7 @@ function ProfilePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Country"
+                label="کشور"
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
@@ -186,7 +186,7 @@ function ProfilePage() {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Driver License"
+                  label="گواهینامه رانندگی"
                   value={user.driverLicenseNumber}
                   disabled
                 />
@@ -210,10 +210,10 @@ function ProfilePage() {
                   });
                 }}
               >
-                Cancel
+                لغو
               </Button>
               <Button type="submit" variant="contained">
-                Save Changes
+                ذخیره تغییرات
               </Button>
             </Box>
           )}
@@ -223,25 +223,25 @@ function ProfilePage() {
 
         <Box>
           <Typography variant="h6" gutterBottom>
-            Account Status
+            وضعیت حساب کاربری
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Typography variant="body2" color="text.secondary">
-                Email Verified:
+                ایمیل تایید شده:
               </Typography>
               <Chip
-                label={user?.emailVerified ? 'Yes' : 'No'}
+                label={user?.emailVerified ? 'بله' : 'خیر'}
                 color={user?.emailVerified ? 'success' : 'default'}
                 size="small"
               />
             </Grid>
             <Grid item xs={6}>
               <Typography variant="body2" color="text.secondary">
-                KYC Verified:
+                احراز هویت:
               </Typography>
               <Chip
-                label={user?.kycVerified ? 'Yes' : 'No'}
+                label={user?.kycVerified ? 'بله' : 'خیر'}
                 color={user?.kycVerified ? 'success' : 'default'}
                 size="small"
               />

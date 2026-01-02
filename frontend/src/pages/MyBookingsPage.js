@@ -48,7 +48,7 @@ function MyBookingsPage() {
         setBookings(response.data || []);
       }
     } catch (err) {
-      setError('Failed to load bookings');
+      setError('بارگذاری رزروها ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ function MyBookingsPage() {
         setCancelReason('');
       }
     } catch (err) {
-      setError('Failed to cancel booking');
+      setError('لغو رزرو ناموفق بود');
     }
   };
 
@@ -83,10 +83,10 @@ function MyBookingsPage() {
         setReviewDialog(false);
         setComment('');
         setRating(5);
-        alert('Review submitted successfully!');
+        alert('نظر شما با موفقیت ثبت شد!');
       }
     } catch (err) {
-      setError('Failed to submit review');
+      setError('ثبت نظر ناموفق بود');
     }
   };
 
@@ -111,7 +111,7 @@ function MyBookingsPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        My Bookings
+        رزروهای من
       </Typography>
 
       {error && (
@@ -123,10 +123,10 @@ function MyBookingsPage() {
       {bookings.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            No bookings yet
+            هنوز رزروی ندارید
           </Typography>
           <Button variant="contained" onClick={() => navigate('/search')}>
-            Start Searching
+            شروع جستجو
           </Button>
         </Box>
       ) : (
@@ -138,10 +138,10 @@ function MyBookingsPage() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
                     <Box>
                       <Typography variant="h6">
-                        Booking #{booking.bookingNumber}
+                        رزرو #{booking.bookingNumber}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Created: {new Date(booking.createdAt).toLocaleDateString()}
+                        ایجاد شده: {new Date(booking.createdAt).toLocaleDateString('fa-IR')}
                       </Typography>
                     </Box>
                     <Chip
@@ -153,45 +153,45 @@ function MyBookingsPage() {
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <Typography variant="body2" color="text.secondary">
-                        Pickup Location:
+                        محل تحویل:
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {booking.pickupLocation}
                       </Typography>
 
                       <Typography variant="body2" color="text.secondary">
-                        Start Time:
+                        زمان شروع:
                       </Typography>
                       <Typography variant="body1" gutterBottom>
-                        {new Date(booking.startDateTime).toLocaleString()}
+                        {new Date(booking.startDateTime).toLocaleString('fa-IR')}
                       </Typography>
 
                       <Typography variant="body2" color="text.secondary">
-                        End Time:
+                        زمان پایان:
                       </Typography>
                       <Typography variant="body1">
-                        {new Date(booking.endDateTime).toLocaleString()}
+                        {new Date(booking.endDateTime).toLocaleString('fa-IR')}
                       </Typography>
                     </Grid>
 
                     <Grid item xs={12} md={6}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">Total Price:</Typography>
+                        <Typography variant="body2">قیمت کل:</Typography>
                         <Typography variant="h6" color="primary">
                           ${booking.finalPrice}
                         </Typography>
                       </Box>
 
                       {booking.withDriver && (
-                        <Chip label="With Driver" color="secondary" size="small" sx={{ mb: 1 }} />
+                        <Chip label="با راننده" color="secondary" size="small" sx={{ mb: 1 }} />
                       )}
 
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="body2" color="text.secondary">
-                          Payment Status:
+                          وضعیت پرداخت:
                         </Typography>
                         <Chip
-                          label={booking.paymentCompleted ? 'Paid' : 'Pending'}
+                          label={booking.paymentCompleted ? 'پرداخت شده' : 'در انتظار'}
                           color={booking.paymentCompleted ? 'success' : 'warning'}
                           size="small"
                         />
@@ -209,7 +209,7 @@ function MyBookingsPage() {
                           setCancelDialog(true);
                         }}
                       >
-                        Cancel Booking
+                        لغو رزرو
                       </Button>
                     )}
 
@@ -221,7 +221,7 @@ function MyBookingsPage() {
                           setReviewDialog(true);
                         }}
                       >
-                        Leave Review
+                        ثبت نظر
                       </Button>
                     )}
 
@@ -230,7 +230,7 @@ function MyBookingsPage() {
                         variant="contained"
                         onClick={() => navigate(`/payment/${booking.id}`)}
                       >
-                        Complete Payment
+                        تکمیل پرداخت
                       </Button>
                     )}
                   </Box>
@@ -243,11 +243,11 @@ function MyBookingsPage() {
 
       {/* Cancel Dialog */}
       <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)}>
-        <DialogTitle>Cancel Booking</DialogTitle>
+        <DialogTitle>لغو رزرو</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
-            label="Cancellation Reason (Optional)"
+            label="دلیل لغو (اختیاری)"
             multiline
             rows={3}
             value={cancelReason}
@@ -256,20 +256,20 @@ function MyBookingsPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCancelDialog(false)}>Close</Button>
+          <Button onClick={() => setCancelDialog(false)}>بستن</Button>
           <Button variant="contained" color="error" onClick={handleCancelBooking}>
-            Cancel Booking
+            لغو رزرو
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Review Dialog */}
       <Dialog open={reviewDialog} onClose={() => setReviewDialog(false)}>
-        <DialogTitle>Leave a Review</DialogTitle>
+        <DialogTitle>ثبت نظر</DialogTitle>
         <DialogContent>
           <Box sx={{ mb: 2, mt: 2 }}>
             <Typography variant="body2" gutterBottom>
-              Rating:
+              امتیاز:
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               {[1, 2, 3, 4, 5].map((star) => (
@@ -286,7 +286,7 @@ function MyBookingsPage() {
           
           <TextField
             fullWidth
-            label="Your Review"
+            label="نظر شما"
             multiline
             rows={4}
             value={comment}
@@ -294,9 +294,9 @@ function MyBookingsPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setReviewDialog(false)}>Close</Button>
+          <Button onClick={() => setReviewDialog(false)}>بستن</Button>
           <Button variant="contained" onClick={handleSubmitReview}>
-            Submit Review
+            ثبت نظر
           </Button>
         </DialogActions>
       </Dialog>

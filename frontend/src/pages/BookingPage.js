@@ -21,6 +21,103 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { vehicleService, pricingService, bookingService, driverService } from '../services/api';
 
+// Convert English numbers to Persian
+const toPersianNumber = (num) => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return String(num).replace(/\d/g, (digit) => persianDigits[digit]);
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  const formatted = Math.round(parseFloat(amount)).toLocaleString('en-US');
+  return toPersianNumber(formatted);
+};
+
+// Convert Gregorian date to Jalali (Persian/Shamsi)
+const toJalaliDate = (date) => {
+  const gDate = new Date(date);
+  const gYear = gDate.getFullYear();
+  const gMonth = gDate.getMonth() + 1;
+  const gDay = gDate.getDate();
+  
+  // Simple Jalali conversion algorithm
+  let jYear, jMonth, jDay;
+  
+  if (gYear <= 1600) {
+    jYear = 0;
+  } else {
+    jYear = 979;
+  }
+  
+  const gy = gYear - 1600;
+  const gm = gMonth - 1;
+  const gd = gDay - 1;
+  
+  let gdayNo = 365 * gy + Math.floor((gy + 3) / 4) - Math.floor((gy + 99) / 100) + Math.floor((gy + 399) / 400);
+  
+  for (let i = 0; i < gm; ++i) {
+    gdayNo += [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][i];
+  }
+  
+  if (gm > 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0))) {
+    ++gdayNo;
+  }
+  
+  gdayNo += gd;
+  
+  let jdayNo = gdayNo - 79;
+  const jNp = Math.floor(jdayNo / 12053);
+  jdayNo %= 12053;
+  
+  jYear += 33 * jNp + 4 * Math.floor(jdayNo / 1461);
+  jdayNo %= 1461;
+  
+  if (jdayNo >= 366) {
+    jYear += Math.floor((jdayNo - 1) / 365);
+    jdayNo = (jdayNo - 1) % 365;
+  }
+  
+  const monthDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  
+  for (let i = 0; i < 11 && jdayNo >= monthDays[i]; ++i) {
+    jdayNo -= monthDays[i];
+    jMonth = i + 2;
+  }
+  
+  if (jMonth === undefined) {
+    jMonth = 1;
+  }
+  
+  jDay = jdayNo + 1;
+  
+  return { year: jYear, month: jMonth, day: jDay };
+};
+
+// Format Jalali date and time in Persian
+const formatPersianDateTime = (date) => {
+  const persianMonths = [
+    'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+    'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+  ];
+  
+  const gDate = new Date(date);
+  const jalali = toJalaliDate(gDate);
+  const hours = gDate.getHours();
+  const minutes = gDate.getMinutes();
+  
+  return `${toPersianNumber(jalali.day)} ${persianMonths[jalali.month - 1]} ${toPersianNumber(jalali.year)} - ساعت ${toPersianNumber(hours)}:${toPersianNumber(String(minutes).padStart(2, '0'))}`;
+};
+
+// Format datetime for local input (without timezone offset)
+const formatDateTimeLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 function BookingPage() {
   const { vehicleId } = useParams();
   const navigate = useNavigate();
@@ -32,8 +129,10 @@ function BookingPage() {
   const [error, setError] = useState('');
   
   // Booking form data
-  const [startDateTime, setStartDateTime] = useState(new Date(Date.now() + 3600000));
-  const [endDateTime, setEndDateTime] = useState(new Date(Date.now() + 7200000));
+  // Set minimum start time to current time + 30 minutes
+  const getMinStartTime = () => new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+  const [startDateTime, setStartDateTime] = useState(getMinStartTime());
+  const [endDateTime, setEndDateTime] = useState(new Date(Date.now() + 90 * 60 * 1000)); // 1.5 hours from now
   const [withDriver, setWithDriver] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [pickupLocation, setPickupLocation] = useState('');
@@ -129,15 +228,25 @@ function BookingPage() {
   const calculatePriceLocally = () => {
     if (!vehicle || !startDateTime || !endDateTime) return;
     
-    const hours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
+    const totalHours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
+    const days = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
     
-    let basePrice = (days * vehicle.pricePerDay) + (remainingHours * vehicle.pricePerHour);
+    let basePrice = 0;
     let driverPrice = 0;
     
+    // محاسبه قیمت پایه
+    if (days >= 1) {
+      // اگر به روز رسید: تعداد روز * قیمت روزانه + ساعات باقیمانده * قیمت ساعتی
+      basePrice = (days * vehicle.pricePerDay) + (remainingHours * vehicle.pricePerHour);
+    } else {
+      // اگر کمتر از یک روز: تعداد ساعات * قیمت ساعتی
+      basePrice = totalHours * vehicle.pricePerHour;
+    }
+    
+    // محاسبه قیمت راننده (همیشه بر اساس ساعت)
     if (withDriver && vehicle.driverPricePerHour) {
-      driverPrice = hours * vehicle.driverPricePerHour;
+      driverPrice = totalHours * vehicle.driverPricePerHour;
     }
     
     const totalPrice = basePrice + driverPrice;
@@ -149,7 +258,7 @@ function BookingPage() {
       weekendCharge: 0,
       discountAmount: 0,
       discountCode: null,
-      rentalHours: hours,
+      rentalHours: totalHours,
       rentalDays: days,
       totalPrice: totalPrice.toFixed(2),
     });
@@ -158,8 +267,12 @@ function BookingPage() {
       basePrice,
       driverPrice,
       totalPrice,
-      hours,
+      totalHours,
       days,
+      remainingHours,
+      calculation: days >= 1 
+        ? `${days} روز * ${vehicle.pricePerDay} + ${remainingHours} ساعت * ${vehicle.pricePerHour}`
+        : `${totalHours} ساعت * ${vehicle.pricePerHour}`
     });
   };
 
@@ -237,9 +350,29 @@ function BookingPage() {
                     fullWidth
                     label="تاریخ و زمان شروع"
                     type="datetime-local"
-                    value={startDateTime.toISOString().slice(0, 16)}
-                    onChange={(e) => setStartDateTime(new Date(e.target.value))}
+                    value={formatDateTimeLocal(startDateTime)}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      const minTime = getMinStartTime();
+                      
+                      // Don't allow time before minimum allowed time
+                      if (selectedDate < minTime) {
+                        setError('زمان شروع نمی‌تواند کمتر از نیم ساعت آینده باشد');
+                        setStartDateTime(minTime);
+                      } else {
+                        setError('');
+                        setStartDateTime(selectedDate);
+                        // If end time is before new start time, adjust it
+                        if (endDateTime <= selectedDate) {
+                          setEndDateTime(new Date(selectedDate.getTime() + 60 * 60 * 1000));
+                        }
+                      }
+                    }}
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: formatDateTimeLocal(getMinStartTime())
+                    }}
+                    helperText={startDateTime ? formatPersianDateTime(startDateTime) : ''}
                     sx={{ mb: 2 }}
                   />
 
@@ -247,9 +380,23 @@ function BookingPage() {
                     fullWidth
                     label="تاریخ و زمان پایان"
                     type="datetime-local"
-                    value={endDateTime.toISOString().slice(0, 16)}
-                    onChange={(e) => setEndDateTime(new Date(e.target.value))}
+                    value={formatDateTimeLocal(endDateTime)}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      
+                      // Don't allow end time before start time
+                      if (selectedDate <= startDateTime) {
+                        setError('زمان پایان باید بعد از زمان شروع باشد');
+                      } else {
+                        setError('');
+                        setEndDateTime(selectedDate);
+                      }
+                    }}
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      min: formatDateTimeLocal(new Date(startDateTime.getTime() + 60 * 60 * 1000))
+                    }}
+                    helperText={endDateTime ? formatPersianDateTime(endDateTime) : ''}
                   />
                 </Box>
 
@@ -300,8 +447,8 @@ function BookingPage() {
                       >
                         <CardContent>
                           <Typography variant="body2">
-                            ⭐ {driver.rating.toFixed(1)} • {driver.totalTrips} سفر
-                            {driver.distanceKm && ` • ${driver.distanceKm.toFixed(1)} کیلومتر فاصله`}
+                            ⭐ {toPersianNumber(driver.rating.toFixed(1))} • {toPersianNumber(driver.totalTrips)} سفر
+                            {driver.distanceKm && ` • ${toPersianNumber(driver.distanceKm.toFixed(1))} کیلومتر فاصله`}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -340,7 +487,7 @@ function BookingPage() {
                   {vehicle.brand} {vehicle.model}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {vehicle.year} • {vehicle.vehicleType}
+                  {toPersianNumber(vehicle.year)} • {vehicle.vehicleType}
                 </Typography>
 
                 <Divider sx={{ my: 2 }} />
@@ -353,27 +500,27 @@ function BookingPage() {
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2">قیمت پایه:</Typography>
-                      <Typography variant="body2">${priceData.basePrice}</Typography>
+                      <Typography variant="body2">{formatPrice(priceData.basePrice)} تومان</Typography>
                     </Box>
                     
                     {priceData.driverPrice > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2">هزینه راننده:</Typography>
-                        <Typography variant="body2">${priceData.driverPrice}</Typography>
+                        <Typography variant="body2">{formatPrice(priceData.driverPrice)} تومان</Typography>
                       </Box>
                     )}
                     
                     {priceData.surgeCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2">هزینه اضافی:</Typography>
-                        <Typography variant="body2">${priceData.surgeCharge}</Typography>
+                        <Typography variant="body2">{formatPrice(priceData.surgeCharge)} تومان</Typography>
                       </Box>
                     )}
                     
                     {priceData.weekendCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2">هزینه آخر هفته:</Typography>
-                        <Typography variant="body2">${priceData.weekendCharge}</Typography>
+                        <Typography variant="body2">{formatPrice(priceData.weekendCharge)} تومان</Typography>
                       </Box>
                     )}
                     
@@ -383,7 +530,7 @@ function BookingPage() {
                           تخفیف ({priceData.discountCode}):
                         </Typography>
                         <Typography variant="body2" color="success.main">
-                          -${priceData.discountAmount}
+                          -{formatPrice(priceData.discountAmount)} تومان
                         </Typography>
                       </Box>
                     )}
@@ -392,14 +539,14 @@ function BookingPage() {
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2">
-                        مدت زمان: {priceData.rentalHours}ساعت ({priceData.rentalDays}روز)
+                        مدت زمان: {toPersianNumber(priceData.rentalHours)} ساعت ({toPersianNumber(priceData.rentalDays)} روز)
                       </Typography>
                     </Box>
                     
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="h6">مجموع:</Typography>
                       <Typography variant="h6" color="primary">
-                        ${priceData.totalPrice}
+                        {formatPrice(priceData.totalPrice)} تومان
                       </Typography>
                     </Box>
                   </Box>

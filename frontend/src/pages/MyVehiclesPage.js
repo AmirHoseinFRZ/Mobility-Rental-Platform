@@ -24,6 +24,18 @@ import {
 } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
 
+// Convert English numbers to Persian
+const toPersianNumber = (num) => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return String(num).replace(/\d/g, (digit) => persianDigits[digit]);
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  const formatted = Math.round(parseFloat(amount)).toLocaleString('en-US');
+  return toPersianNumber(formatted);
+};
+
 function MyVehiclesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -137,7 +149,7 @@ function MyVehiclesPage() {
                     {vehicle.brand} {vehicle.model}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {vehicle.year} • {vehicle.vehicleType}
+                    {toPersianNumber(vehicle.year)} • {vehicle.vehicleType}
                   </Typography>
                   
                   <Box sx={{ mt: 1, mb: 2 }}>
@@ -155,12 +167,12 @@ function MyVehiclesPage() {
                   </Box>
 
                   <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 2 }}>
-                    ${vehicle.pricePerHour}/ساعت • ${vehicle.pricePerDay}/روز
+                    {formatPrice(vehicle.pricePerHour)} تومان/ساعت • {formatPrice(vehicle.pricePerDay)} تومان/روز
                   </Typography>
 
                   {vehicle.rating > 0 && (
                     <Typography variant="body2" color="text.secondary">
-                      ⭐ {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
+                      ⭐ {toPersianNumber(vehicle.rating.toFixed(1))} ({toPersianNumber(vehicle.totalReviews)} نظر)
                     </Typography>
                   )}
                 </CardContent>

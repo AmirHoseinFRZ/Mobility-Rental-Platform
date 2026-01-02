@@ -270,7 +270,7 @@ function AddVehiclePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="قیمت هر ساعت (دلار)"
+                label="قیمت هر ساعت (تومان)"
                 name="pricePerHour"
                 type="number"
                 value={formData.pricePerHour}
@@ -282,7 +282,7 @@ function AddVehiclePage() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="قیمت هر روز (دلار)"
+                label="قیمت هر روز (تومان)"
                 name="pricePerDay"
                 type="number"
                 value={formData.pricePerDay}

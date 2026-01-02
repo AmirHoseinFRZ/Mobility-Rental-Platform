@@ -22,14 +22,14 @@ import LocationSelector from '../components/LocationSelector';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 const validationSchema = yup.object({
-  vehicleType: yup.string().required('Vehicle type is required'),
-  brand: yup.string().required('Brand is required'),
-  model: yup.string().required('Model is required'),
-  year: yup.number().required('Year is required').min(1900).max(new Date().getFullYear() + 1),
-  vehicleNumber: yup.string().required('Vehicle number is required'),
-  seatingCapacity: yup.number().required('Seating capacity is required').min(1),
-  pricePerHour: yup.number().required('Price per hour is required').min(0),
-  pricePerDay: yup.number().required('Price per day is required').min(0),
+  vehicleType: yup.string().required('نوع وسیله نقلیه الزامی است'),
+  brand: yup.string().required('برند الزامی است'),
+  model: yup.string().required('مدل الزامی است'),
+  year: yup.number().required('سال الزامی است').min(1900).max(new Date().getFullYear() + 1),
+  vehicleNumber: yup.string().required('شماره وسیله نقلیه الزامی است'),
+  seatingCapacity: yup.number().required('ظرفیت صندلی الزامی است').min(1),
+  pricePerHour: yup.number().required('قیمت ساعتی الزامی است').min(0),
+  pricePerDay: yup.number().required('قیمت روزانه الزامی است').min(0),
 });
 
 function EditVehiclePage() {
@@ -69,7 +69,7 @@ function EditVehiclePage() {
 
       // Validate location
       if (!selectedLocation) {
-        setError('Please select a location on the map');
+        setError('لطفاً موقعیت را روی نقشه انتخاب کنید');
         setSubmitting(false);
         return;
       }
@@ -87,10 +87,10 @@ function EditVehiclePage() {
         if (response.success) {
           navigate('/my-vehicles');
         } else {
-          setError(response.message || 'Failed to update vehicle');
+          setError(response.message || 'به‌روزرسانی وسیله نقلیه ناموفق بود');
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to update vehicle. Please try again.');
+        setError(err.response?.data?.message || 'به‌روزرسانی وسیله نقلیه ناموفق بود. لطفاً دوباره تلاش کنید.');
       } finally {
         setSubmitting(false);
       }
@@ -109,7 +109,7 @@ function EditVehiclePage() {
         
         // Check if user is the owner
         if (vehicle.ownerId !== user.id) {
-          setError('You are not authorized to edit this vehicle');
+          setError('شما مجاز به ویرایش این وسیله نقلیه نیستید');
           return;
         }
 
@@ -144,7 +144,7 @@ function EditVehiclePage() {
         }
       }
     } catch (err) {
-      setError('Failed to load vehicle details');
+      setError('بارگذاری جزئیات وسیله نقلیه ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -162,10 +162,10 @@ function EditVehiclePage() {
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Edit Vehicle
+          ویرایش وسیله نقلیه
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Update your vehicle information
+          اطلاعات وسیله نقلیه خود را به‌روزرسانی کنید
         </Typography>
 
         {error && (
@@ -183,16 +183,16 @@ function EditVehiclePage() {
                 fullWidth
                 id="vehicleType"
                 name="vehicleType"
-                label="Vehicle Type"
+                label="نوع وسیله نقلیه"
                 value={formik.values.vehicleType}
                 onChange={formik.handleChange}
                 error={formik.touched.vehicleType && Boolean(formik.errors.vehicleType)}
                 helperText={formik.touched.vehicleType && formik.errors.vehicleType}
               >
-                <MenuItem value="CAR">Car</MenuItem>
-                <MenuItem value="BIKE">Motorcycle</MenuItem>
-                <MenuItem value="SCOOTER">Scooter</MenuItem>
-                <MenuItem value="BICYCLE">Bicycle</MenuItem>
+                <MenuItem value="CAR">خودرو</MenuItem>
+                <MenuItem value="BIKE">موتورسیکلت</MenuItem>
+                <MenuItem value="SCOOTER">اسکوتر</MenuItem>
+                <MenuItem value="BICYCLE">دوچرخه</MenuItem>
               </TextField>
             </Grid>
 
@@ -203,15 +203,15 @@ function EditVehiclePage() {
                 fullWidth
                 id="status"
                 name="status"
-                label="Status"
+                label="وضعیت"
                 value={formik.values.status}
                 onChange={formik.handleChange}
               >
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="BOOKED">Booked</MenuItem>
-                <MenuItem value="IN_USE">In Use</MenuItem>
-                <MenuItem value="MAINTENANCE">Maintenance</MenuItem>
-                <MenuItem value="INACTIVE">Inactive</MenuItem>
+                <MenuItem value="AVAILABLE">در دسترس</MenuItem>
+                <MenuItem value="BOOKED">رزرو شده</MenuItem>
+                <MenuItem value="IN_USE">در حال استفاده</MenuItem>
+                <MenuItem value="MAINTENANCE">در تعمیر</MenuItem>
+                <MenuItem value="INACTIVE">غیرفعال</MenuItem>
               </TextField>
             </Grid>
 
@@ -221,7 +221,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="brand"
                 name="brand"
-                label="Brand"
+                label="برند"
                 value={formik.values.brand}
                 onChange={formik.handleChange}
                 error={formik.touched.brand && Boolean(formik.errors.brand)}
@@ -235,7 +235,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="model"
                 name="model"
-                label="Model"
+                label="مدل"
                 value={formik.values.model}
                 onChange={formik.handleChange}
                 error={formik.touched.model && Boolean(formik.errors.model)}
@@ -249,7 +249,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="year"
                 name="year"
-                label="Year"
+                label="سال"
                 type="number"
                 value={formik.values.year}
                 onChange={formik.handleChange}
@@ -264,7 +264,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="vehicleNumber"
                 name="vehicleNumber"
-                label="Vehicle Number"
+                label="شماره وسیله نقلیه"
                 value={formik.values.vehicleNumber}
                 onChange={formik.handleChange}
                 error={formik.touched.vehicleNumber && Boolean(formik.errors.vehicleNumber)}
@@ -278,7 +278,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="seatingCapacity"
                 name="seatingCapacity"
-                label="Seating Capacity"
+                label="ظرفیت صندلی"
                 type="number"
                 value={formik.values.seatingCapacity}
                 onChange={formik.handleChange}
@@ -294,14 +294,14 @@ function EditVehiclePage() {
                 fullWidth
                 id="fuelType"
                 name="fuelType"
-                label="Fuel Type"
+                label="نوع سوخت"
                 value={formik.values.fuelType}
                 onChange={formik.handleChange}
               >
-                <MenuItem value="PETROL">Petrol</MenuItem>
-                <MenuItem value="DIESEL">Diesel</MenuItem>
-                <MenuItem value="ELECTRIC">Electric</MenuItem>
-                <MenuItem value="HYBRID">Hybrid</MenuItem>
+                <MenuItem value="PETROL">بنزین</MenuItem>
+                <MenuItem value="DIESEL">دیزل</MenuItem>
+                <MenuItem value="ELECTRIC">برقی</MenuItem>
+                <MenuItem value="HYBRID">هیبریدی</MenuItem>
                 <MenuItem value="CNG">CNG</MenuItem>
               </TextField>
             </Grid>
@@ -313,12 +313,12 @@ function EditVehiclePage() {
                 fullWidth
                 id="transmission"
                 name="transmission"
-                label="Transmission"
+                label="گیربکس"
                 value={formik.values.transmission}
                 onChange={formik.handleChange}
               >
-                <MenuItem value="MANUAL">Manual</MenuItem>
-                <MenuItem value="AUTOMATIC">Automatic</MenuItem>
+                <MenuItem value="MANUAL">دستی</MenuItem>
+                <MenuItem value="AUTOMATIC">اتوماتیک</MenuItem>
               </TextField>
             </Grid>
 
@@ -328,7 +328,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="pricePerHour"
                 name="pricePerHour"
-                label="Price Per Hour ($)"
+                label="قیمت ساعتی (تومان)"
                 type="number"
                 value={formik.values.pricePerHour}
                 onChange={formik.handleChange}
@@ -343,7 +343,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="pricePerDay"
                 name="pricePerDay"
-                label="Price Per Day ($)"
+                label="قیمت روزانه (تومان)"
                 type="number"
                 value={formik.values.pricePerDay}
                 onChange={formik.handleChange}
@@ -363,7 +363,7 @@ function EditVehiclePage() {
                     onChange={formik.handleChange}
                   />
                 }
-                label="Requires Driver"
+                label="نیاز به راننده دارد"
               />
             </Grid>
 
@@ -374,7 +374,7 @@ function EditVehiclePage() {
                   fullWidth
                   id="driverPricePerHour"
                   name="driverPricePerHour"
-                  label="Driver Price Per Hour ($)"
+                  label="قیمت ساعتی راننده (تومان)"
                   type="number"
                   value={formik.values.driverPricePerHour}
                   onChange={formik.handleChange}
@@ -385,10 +385,10 @@ function EditVehiclePage() {
             {/* Vehicle Location */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom>
-                Vehicle Location *
+                موقعیت وسیله نقلیه *
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Click on the map to set the vehicle's current location
+                روی نقشه کلیک کنید تا موقعیت فعلی وسیله نقلیه را تنظیم کنید
               </Typography>
               <Box sx={{ mb: 2 }}>
                 <Button
@@ -405,15 +405,15 @@ function EditVehiclePage() {
                         },
                         (error) => {
                           console.error('Error getting location:', error);
-                          setError('Unable to get your current location. Please select manually on the map.');
+                          setError('دریافت موقعیت فعلی شما ممکن نیست. لطفاً به صورت دستی روی نقشه انتخاب کنید.');
                         }
                       );
                     } else {
-                      setError('Geolocation is not supported by your browser');
+                      setError('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند');
                     }
                   }}
                 >
-                  Use My Current Location
+                  استفاده از موقعیت فعلی من
                 </Button>
               </Box>
               <LocationSelector
@@ -422,7 +422,7 @@ function EditVehiclePage() {
               />
               {selectedLocation && (
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  Selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+                  انتخاب شده: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
                 </Typography>
               )}
             </Grid>
@@ -433,7 +433,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="imageUrl"
                 name="imageUrl"
-                label="Image URL"
+                label="آدرس تصویر (URL)"
                 value={formik.values.imageUrl}
                 onChange={formik.handleChange}
               />
@@ -445,7 +445,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="description"
                 name="description"
-                label="Description"
+                label="توضیحات"
                 multiline
                 rows={3}
                 value={formik.values.description}
@@ -459,7 +459,7 @@ function EditVehiclePage() {
                 fullWidth
                 id="features"
                 name="features"
-                label="Features (comma separated)"
+                label="امکانات (جدا شده با کاما)"
                 multiline
                 rows={2}
                 value={formik.values.features}
@@ -475,14 +475,14 @@ function EditVehiclePage() {
                   onClick={() => navigate('/my-vehicles')}
                   disabled={submitting}
                 >
-                  Cancel
+                  انصراف
                 </Button>
                 <Button
                   type="submit"
                   variant="contained"
                   disabled={submitting}
                 >
-                  {submitting ? 'Updating...' : 'Update Vehicle'}
+                  {submitting ? 'در حال به‌روزرسانی...' : 'به‌روزرسانی وسیله نقلیه'}
                 </Button>
               </Box>
             </Grid>

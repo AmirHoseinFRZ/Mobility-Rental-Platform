@@ -35,6 +35,18 @@ import { vehicleService } from '../services/api';
 import LocationSelector from '../components/LocationSelector';
 import MultipleLocationsMap from '../components/MultipleLocationsMap';
 
+// Convert English numbers to Persian
+const toPersianNumber = (num) => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return String(num).replace(/\d/g, (digit) => persianDigits[digit]);
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  const formatted = Math.round(parseFloat(amount)).toLocaleString('en-US');
+  return toPersianNumber(formatted);
+};
+
 function SearchPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -147,7 +159,7 @@ function SearchPage() {
     id: vehicle.id,
     lat: vehicle.latitude,
     lng: vehicle.longitude,
-    label: `${vehicle.brand} ${vehicle.model} - $${vehicle.pricePerHour}/ساعت`,
+    label: `${vehicle.brand} ${vehicle.model} - ${formatPrice(vehicle.pricePerHour)} تومان/ساعت`,
   }));
 
   return (
@@ -312,20 +324,20 @@ function SearchPage() {
                       {vehicle.brand} {vehicle.model}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {vehicle.year} • {vehicle.vehicleType}
+                      {toPersianNumber(vehicle.year)} • {vehicle.vehicleType}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Star sx={{ color: 'gold', fontSize: 18, mr: 0.5 }} />
                       <Typography variant="body2">
-                        {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
+                        {toPersianNumber(vehicle.rating.toFixed(1))} ({toPersianNumber(vehicle.totalReviews)} نظر)
                       </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                       <Chip
                         icon={<People />}
-                        label={`${vehicle.seatingCapacity} صندلی`}
+                        label={`${toPersianNumber(vehicle.seatingCapacity)} صندلی`}
                         size="small"
                       />
                       {vehicle.fuelType && (
@@ -338,7 +350,7 @@ function SearchPage() {
                       {vehicle.distanceKm && (
                         <Chip
                           icon={<LocationOn />}
-                          label={`${vehicle.distanceKm.toFixed(1)} کیلومتر فاصله`}
+                          label={`${toPersianNumber(vehicle.distanceKm.toFixed(1))} کیلومتر فاصله`}
                           size="small"
                           color="primary"
                         />
@@ -350,7 +362,7 @@ function SearchPage() {
                         هر ساعت:
                       </Typography>
                       <Typography variant="h6" color="primary">
-                        ${vehicle.pricePerHour}
+                        {formatPrice(vehicle.pricePerHour)} تومان
                       </Typography>
                     </Box>
 
@@ -359,7 +371,7 @@ function SearchPage() {
                         هر روز:
                       </Typography>
                       <Typography variant="h6" color="primary">
-                        ${vehicle.pricePerDay}
+                        {formatPrice(vehicle.pricePerDay)} تومان
                       </Typography>
                     </Box>
 

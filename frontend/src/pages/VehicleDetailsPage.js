@@ -24,6 +24,18 @@ import {
 } from '@mui/icons-material';
 import { vehicleService, reviewService } from '../services/api';
 
+// Convert English numbers to Persian
+const toPersianNumber = (num) => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return String(num).replace(/\d/g, (digit) => persianDigits[digit]);
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  const formatted = Math.round(parseFloat(amount)).toLocaleString('en-US');
+  return toPersianNumber(formatted);
+};
+
 function VehicleDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -99,7 +111,7 @@ function VehicleDetailsPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Rating value={vehicle.rating} readOnly precision={0.1} />
             <Typography variant="body2" sx={{ ml: 1 }}>
-              {vehicle.rating.toFixed(1)} ({vehicle.totalReviews} نظر)
+              {toPersianNumber(vehicle.rating.toFixed(1))} ({toPersianNumber(vehicle.totalReviews)} نظر)
             </Typography>
           </Box>
 
@@ -122,13 +134,13 @@ function VehicleDetailsPage() {
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <CalendarMonth sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>سال: {vehicle.year}</Typography>
+                <Typography>سال: {toPersianNumber(vehicle.year)}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <People sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography>صندلی: {vehicle.seatingCapacity}</Typography>
+                <Typography>صندلی: {toPersianNumber(vehicle.seatingCapacity)}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -163,13 +175,13 @@ function VehicleDetailsPage() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body1">هر ساعت:</Typography>
               <Typography variant="h6" color="primary">
-                ${vehicle.pricePerHour}
+                {formatPrice(vehicle.pricePerHour)} تومان
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="body1">هر روز:</Typography>
               <Typography variant="h6" color="primary">
-                ${vehicle.pricePerDay}
+                {formatPrice(vehicle.pricePerDay)} تومان
               </Typography>
             </Box>
             {vehicle.requiresDriver && vehicle.driverPricePerHour && (
@@ -178,7 +190,7 @@ function VehicleDetailsPage() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body1">راننده هر ساعت:</Typography>
                   <Typography variant="h6" color="secondary">
-                    +${vehicle.driverPricePerHour}
+                    +{formatPrice(vehicle.driverPricePerHour)} تومان
                   </Typography>
                 </Box>
               </>

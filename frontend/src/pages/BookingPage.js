@@ -106,13 +106,61 @@ function BookingPage() {
         discountCode: discountCode || null,
       };
       
+      console.log('Calculating price with request:', priceRequest);
       const response = await pricingService.calculatePrice(priceRequest);
+      console.log('Price calculation response:', response);
+      
       if (response.success) {
         setPriceData(response.data);
+        console.log('Price data set:', response.data);
+      } else {
+        console.error('Price calculation failed:', response);
+        // Fallback: Calculate price locally
+        calculatePriceLocally();
       }
     } catch (err) {
       console.error('Failed to calculate price', err);
+      console.error('Error details:', err.response?.data);
+      // Fallback: Calculate price locally
+      calculatePriceLocally();
     }
+  };
+
+  const calculatePriceLocally = () => {
+    if (!vehicle || !startDateTime || !endDateTime) return;
+    
+    const hours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    
+    let basePrice = (days * vehicle.pricePerDay) + (remainingHours * vehicle.pricePerHour);
+    let driverPrice = 0;
+    
+    if (withDriver && vehicle.driverPricePerHour) {
+      driverPrice = hours * vehicle.driverPricePerHour;
+    }
+    
+    const totalPrice = basePrice + driverPrice;
+    
+    setPriceData({
+      basePrice: basePrice.toFixed(2),
+      driverPrice: driverPrice.toFixed(2),
+      surgeCharge: 0,
+      weekendCharge: 0,
+      discountAmount: 0,
+      discountCode: null,
+      rentalHours: hours,
+      rentalDays: days,
+      totalPrice: totalPrice.toFixed(2),
+    });
+    
+    console.log('Price calculated locally:', {
+      basePrice,
+      driverPrice,
+      totalPrice,
+      hours,
+      days,
+    });
   };
 
   const handleBooking = async () => {

@@ -108,6 +108,12 @@ management:
       prometheus:
         enabled: true
 
+# Payment Gateway Configuration
+payment:
+  gateway:
+    url: ${PAYMENT_GATEWAY_URL:http://localhost:8089/api}
+    token: ${PAYMENT_GATEWAY_TOKEN:mobility-platform-token-2024-secure-key}
+
 
 
 

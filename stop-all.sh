@@ -59,6 +59,7 @@ fi
 print_step "Cleaning up any remaining Java processes..."
 pkill -f "spring-boot:run" 2>/dev/null || true
 pkill -f "mvn spring-boot" 2>/dev/null || true
+pkill -f "internal-payment-gateway" 2>/dev/null || true
 
 # Stop any Node.js processes
 print_step "Stopping frontend..."

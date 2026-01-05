@@ -290,6 +290,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+      - PAYMENT_GATEWAY_URL=http://payment-gateway:8089/api
+      - PAYMENT_GATEWAY_TOKEN=mobility-platform-token-2024-secure-key
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -298,6 +300,8 @@ services:
       rabbitmq:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      payment-gateway:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/api/bookings/health"]
@@ -525,6 +529,40 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+    profiles:
+      - backend
+
+  # Payment Gateway (Internal)
+  payment-gateway:
+    build:
+      context: ./backend
+      dockerfile: internal-payment-gateway/Dockerfile
+    container_name: mobility-payment-gateway
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    networks:
+      - mobility-network
+    environment:
+      - SERVER_PORT=8089
+      - SPRING_PROFILES_ACTIVE=local
+      - DB_PAYMENT=jdbc:postgresql://postgres:5432/mobility_platform?currentSchema=ipg
+      - SECRETS_DBUSER=${POSTGRES_USER:-mobility_user}
+      - SECRETS_DBPASS=${POSTGRES_PASSWORD:-mobility_password}
+      - AMQ_HOST=rabbitmq
+      - SECRETS_AMQUSER=${RABBITMQ_USER:-mobility_user}
+      - SECRETS_AMQPASS=${RABBITMQ_PASSWORD:-mobility_password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8089/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     profiles:
       - backend
 

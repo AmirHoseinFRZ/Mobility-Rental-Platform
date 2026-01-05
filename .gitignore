@@ -94,6 +94,9 @@ junit/
 *.tfstate
 *.tfstate.backup
 
+# Payment Gateway (External App)
+backend/internal-payment-gateway/
+
 
 
 

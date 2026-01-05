@@ -95,6 +95,9 @@ public class Booking extends BaseEntity {
     @Column(length = 1000)
     private String specialRequests;
     
+    @Column(name = "payment_transaction_id")
+    private String paymentTransactionId;
+    
     @Column(length = 2000)
     private String notes;
 }

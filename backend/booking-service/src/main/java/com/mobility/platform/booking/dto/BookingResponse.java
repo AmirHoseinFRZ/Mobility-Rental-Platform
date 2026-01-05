@@ -40,6 +40,7 @@ public class BookingResponse {
     private LocalDateTime cancelledAt;
     private Integer distanceKm;
     private String specialRequests;
+    private String paymentTransactionId;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

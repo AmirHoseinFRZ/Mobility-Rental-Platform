@@ -122,7 +122,8 @@ $services = @(
     @{Name="Driver Service"; Port=8085; Path="backend\driver-service"},
     @{Name="Review Service"; Port=8086; Path="backend\review-service"},
     @{Name="Location Service"; Port=8087; Path="backend\location-service"},
-    @{Name="Maintenance Service"; Port=8088; Path="backend\maintenance-service"}
+    @{Name="Maintenance Service"; Port=8088; Path="backend\maintenance-service"},
+    @{Name="Payment Gateway"; Port=8089; Path="backend\internal-payment-gateway"}
 )
 
 foreach ($service in $services) {
@@ -202,6 +203,9 @@ Write-Host "  Infrastructure:" -ForegroundColor White
 Write-Host "    PostgreSQL:      localhost:5432" -ForegroundColor Green
 Write-Host "    RabbitMQ Admin:  http://localhost:15672" -ForegroundColor Green
 Write-Host "    Redis:           localhost:6379" -ForegroundColor Green
+Write-Host ""
+Write-Host "  Payment Gateway:" -ForegroundColor White
+Write-Host "    http://localhost:8089/api" -ForegroundColor Green
 Write-Host ""
 Write-Host "RabbitMQ Credentials: mobility_user / mobility_password" -ForegroundColor White
 Write-Host ""

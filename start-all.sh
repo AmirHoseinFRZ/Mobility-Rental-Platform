@@ -259,6 +259,44 @@ done
 print_info "Waiting for services to initialize (45 seconds)..."
 sleep 45
 
+# Start Payment Gateway
+print_step "Starting Payment Gateway on port 8089..."
+if [ -d "backend/internal-payment-gateway" ]; then
+    # Check if Java 21 is available
+    if [ -d "/usr/lib/jvm/java-21-openjdk-amd64" ]; then
+        JAVA21_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+        print_info "Using Java 21 for Payment Gateway"
+        
+        cd "backend/internal-payment-gateway"
+        
+        # Make mvnw executable if needed
+        chmod +x mvnw 2>/dev/null || true
+        
+        # Set environment variables for payment gateway
+        export SPRING_PROFILES_ACTIVE=local
+        export DB_PAYMENT="jdbc:postgresql://localhost:5432/mobility_platform?currentSchema=ipg"
+        export SECRETS_DBUSER="mobility_user"
+        export SECRETS_DBPASS="mobility_password"
+        export AMQ_HOST="localhost"
+        export SECRETS_AMQUSER="mobility_user"
+        export SECRETS_AMQPASS="mobility_password"
+        export RABBITMQ_VHOST="mobility_vhost"
+        
+        # Start with Maven wrapper and explicit Java 21
+        nohup env JAVA_HOME="$JAVA21_HOME" PATH="$JAVA21_HOME/bin:$PATH" ./mvnw spring-boot:run > "../../logs/payment-gateway.log" 2>&1 &
+        echo $! > "../../logs/payment-gateway.pid"
+        cd ../..
+        
+        print_success "Payment Gateway started (PID: $(cat logs/payment-gateway.pid))"
+        sleep 5
+    else
+        print_info "Java 21 not found at /usr/lib/jvm/java-21-openjdk-amd64"
+        print_info "Payment Gateway requires Java 21. Skipping..."
+    fi
+else
+    print_info "Payment Gateway directory not found, skipping..."
+fi
+
 # ============================================================================
 # STEP 6: Install Frontend Dependencies
 # ============================================================================
@@ -327,6 +365,7 @@ print_info "    ➜ Driver Service:      http://localhost:8085"
 print_info "    ➜ Review Service:      http://localhost:8086"
 print_info "    ➜ Location Service:    http://localhost:8087"
 print_info "    ➜ Maintenance Service: http://localhost:8088"
+print_info "    ➜ Payment Gateway:     http://localhost:8089/api"
 echo ""
 echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
 echo ""

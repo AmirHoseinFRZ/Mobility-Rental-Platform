@@ -23,6 +23,18 @@ import {
 } from '@mui/icons-material';
 import { bookingService, paymentService } from '../services/api';
 
+// Convert English numbers to Persian
+const toPersianNumber = (num) => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return String(num).replace(/\d/g, (digit) => persianDigits[digit]);
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  const formatted = Math.round(parseFloat(amount)).toLocaleString('en-US');
+  return toPersianNumber(formatted);
+};
+
 function PaymentPage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -212,7 +224,7 @@ function PaymentPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
             <Typography variant="h5">مبلغ کل:</Typography>
             <Typography variant="h5" color="primary">
-              ${booking.finalPrice}
+              {formatPrice(booking.finalPrice)} تومان
             </Typography>
           </Box>
 
@@ -272,7 +284,7 @@ function PaymentPage() {
                 onClick={handleCreateTransaction}
                 disabled={processing}
               >
-                پرداخت ${booking.finalPrice}
+                پرداخت {formatPrice(booking.finalPrice)} تومان
               </Button>
             </Box>
           )}

@@ -55,8 +55,25 @@ public class BookingService {
             throw new BusinessException("Vehicle is not available for the selected time period", "VEHICLE_NOT_AVAILABLE");
         }
         
-        // Calculate price (simplified - should call pricing service)
-        BigDecimal totalPrice = calculatePrice(request);
+        // Calculate price (use provided price from frontend if available, otherwise calculate)
+        BigDecimal vehiclePrice = request.getVehiclePrice();
+        BigDecimal driverPrice = request.getDriverPrice();
+        BigDecimal totalPrice = request.getTotalPrice();
+        
+        // If prices not provided, calculate them (fallback for backward compatibility)
+        if (totalPrice == null) {
+            totalPrice = calculatePrice(request);
+            vehiclePrice = totalPrice;
+            driverPrice = request.getWithDriver() ? BigDecimal.valueOf(50) : BigDecimal.ZERO;
+        } else {
+            // Use provided prices, but ensure vehiclePrice and driverPrice are set
+            if (vehiclePrice == null) {
+                vehiclePrice = totalPrice.subtract(driverPrice != null ? driverPrice : BigDecimal.ZERO);
+            }
+            if (driverPrice == null) {
+                driverPrice = request.getWithDriver() ? BigDecimal.valueOf(50) : BigDecimal.ZERO;
+            }
+        }
         
         // Create booking
         Booking booking = new Booking();
@@ -74,8 +91,8 @@ public class BookingService {
         booking.setDropoffLatitude(request.getDropoffLatitude());
         booking.setDropoffLongitude(request.getDropoffLongitude());
         booking.setWithDriver(request.getWithDriver());
-        booking.setVehiclePrice(totalPrice);
-        booking.setDriverPrice(request.getWithDriver() ? BigDecimal.valueOf(50) : BigDecimal.ZERO);
+        booking.setVehiclePrice(vehiclePrice);
+        booking.setDriverPrice(driverPrice);
         booking.setTotalPrice(totalPrice);
         booking.setFinalPrice(totalPrice);
         booking.setSpecialRequests(request.getSpecialRequests());

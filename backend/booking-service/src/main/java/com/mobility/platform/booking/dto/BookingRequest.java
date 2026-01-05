@@ -1,10 +1,11 @@
 package com.mobility.platform.booking.dto;
 
-import jakarta.validation.constraints.Future;
+import com.mobility.platform.common.validation.FutureUTC;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -22,11 +23,11 @@ public class BookingRequest {
     private Long driverId; // Optional, for with-driver bookings
     
     @NotNull(message = "Start date/time is required")
-    @Future(message = "Start date/time must be in the future")
+    @FutureUTC(message = "Start date/time must be in the future")
     private LocalDateTime startDateTime;
     
     @NotNull(message = "End date/time is required")
-    @Future(message = "End date/time must be in the future")
+    @FutureUTC(message = "End date/time must be in the future")
     private LocalDateTime endDateTime;
     
     @NotBlank(message = "Pickup location is required")
@@ -46,6 +47,11 @@ public class BookingRequest {
     private Boolean withDriver;
     
     private String specialRequests;
+    
+    // Price fields (optional - if provided, will be used; otherwise backend will calculate)
+    private BigDecimal vehiclePrice;
+    private BigDecimal driverPrice;
+    private BigDecimal totalPrice;
 }
 
 

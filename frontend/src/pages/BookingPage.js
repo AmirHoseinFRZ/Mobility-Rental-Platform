@@ -298,6 +298,9 @@ function BookingPage() {
         dropoffLocation: dropoffLocation || null,
         withDriver,
         specialRequests: specialRequests || null,
+        vehiclePrice: priceData ? parseFloat(priceData.basePrice) : null,
+        driverPrice: priceData ? parseFloat(priceData.driverPrice) : null,
+        totalPrice: priceData ? parseFloat(priceData.totalPrice) : null,
       };
       
       console.log('Creating booking with request:', bookingRequest);

@@ -21,7 +21,7 @@ import {
   Payment,
   Error,
 } from '@mui/icons-material';
-import { bookingService, paymentService } from '../services/api';
+import { bookingService, paymentService, paymentGatewayDirect } from '../services/api';
 
 // Convert English numbers to Persian
 const toPersianNumber = (num) => {
@@ -65,6 +65,11 @@ function PaymentPage() {
           setActiveStep(2);
           setPaymentStatus('COMPLETED');
         }
+        
+        // If booking has a transaction ID, set it
+        if (response.data.paymentTransactionId) {
+          setTransactionId(response.data.paymentTransactionId);
+        }
       } else {
         setError('رزرو یافت نشد');
       }
@@ -76,39 +81,118 @@ function PaymentPage() {
   };
 
   const handleCreateTransaction = async () => {
+    // Prevent creating transaction if payment is already completed
+    if (paymentStatus === 'COMPLETED' || booking?.paymentCompleted) {
+      console.warn('Payment already completed, cannot create new transaction');
+      return;
+    }
+    
+    // Prevent creating transaction if one already exists and is pending
+    if (transactionId && paymentStatus !== 'FAILED') {
+      console.warn('Transaction already exists, cannot create new transaction');
+      return;
+    }
+    
     setProcessing(true);
     setError('');
     
     try {
-      // Call Payment Gateway - Create Transaction
+      // Prepare transaction request according to PaymentTransactionRequest DTO
+      // Amount should be in smallest currency unit (rials)
+      // If booking.finalPrice is in tomans, multiply by 10 to get rials
+      // Minimum amount is 1000 rials (100 tomans)
+      const baseAmount = parseFloat(booking.finalPrice) || 0;
+      const amountInRials = Math.round(baseAmount * 10);
+      
+      if (amountInRials < 1000) {
+        throw new Error('مبلغ پرداخت باید حداقل ۱۰۰ تومان باشد');
+      }
+      
+      const invoiceId = `BOOKING-${booking.bookingNumber || bookingId}`;
+      
       const transactionRequest = {
-        userId: user.id,
-        bookingId: parseInt(bookingId),
-        amount: booking.finalPrice,
-        currency: 'USD',
-        description: `Booking #${booking.bookingNumber}`,
-        callbackUrl: `${window.location.origin}/payment/${bookingId}/callback`,
+        invoiceId: invoiceId, // Required: Invoice ID
+        amount: amountInRials, // Required: Amount in smallest currency unit (rials), minimum 1000
+        mobileNumber: user?.phoneNumber || user?.mobileNumber || null, // Optional
+        email: user?.email || null, // Optional
+        callbackUrl: `${window.location.origin}/payment/${bookingId}/callback`, // Required: Callback URL
+        description: `Payment for booking #${booking.bookingNumber || bookingId}`, // Optional: Description
       };
       
-      const response = await paymentService.createTransaction(transactionRequest);
+      // Step 1: Create transaction through booking service
+      // Response format: { transactionId, invoiceId, createdAt }
+      const transaction = await paymentService.createTransaction(transactionRequest);
+      const txnId = transaction.transactionId;
       
-      if (response.success) {
-        const transaction = response.data;
-        setTransactionId(transaction.transactionId);
-        
-        // If payment gateway provides a payment URL, redirect user
-        if (transaction.paymentUrl) {
-          window.location.href = transaction.paymentUrl;
-        } else {
-          // For testing, automatically verify after 2 seconds
-          setTimeout(() => {
-            handleVerifyTransaction(transaction.transactionId);
-          }, 2000);
-        }
-      } else {
-        setError('ایجاد تراکنش پرداخت ناموفق بود');
-        setProcessing(false);
+      if (!txnId) {
+        throw new Error('Transaction ID not received from server');
       }
+      
+      setTransactionId(txnId);
+      
+      // Store transactionId in localStorage for callback page
+      localStorage.setItem(`payment_transaction_${bookingId}`, txnId);
+      
+      // Step 2: Get payment details directly from payment gateway
+      let paymentDetails;
+      try {
+        paymentDetails = await paymentGatewayDirect.getPaymentDetailsV2(txnId, 'sandbox');
+      } catch (gatewayError) {
+        console.error('Error getting payment details:', gatewayError);
+        throw new Error('دریافت اطلاعات پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.');
+      }
+      
+      // paymentDetails contains: { payUrl, method, params, body }
+      if (!paymentDetails || !paymentDetails.payUrl) {
+        throw new Error('آدرس پرداخت دریافت نشد');
+      }
+      
+      // Step 3: Redirect to payment URL
+      const method = (paymentDetails.method || 'GET').toUpperCase();
+      
+      // For POST requests, create a form and submit it
+      if (method === 'POST' && (paymentDetails.params || paymentDetails.body)) {
+          const form = document.createElement('form');
+          form.method = paymentDetails.method;
+          form.action = paymentDetails.payUrl;
+          
+          // Add params as hidden inputs
+          if (paymentDetails.params) {
+            Object.entries(paymentDetails.params).forEach(([key, value]) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+          }
+          
+          // If body is provided and it's a form-encoded string, parse it
+          if (paymentDetails.body && !paymentDetails.params) {
+            const bodyParams = new URLSearchParams(paymentDetails.body);
+            bodyParams.forEach((value, key) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+          }
+          
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          // For GET requests, append params as query string parameters
+          let finalUrl = paymentDetails.payUrl;
+          if (paymentDetails.params && Object.keys(paymentDetails.params).length > 0) {
+            const url = new URL(paymentDetails.payUrl);
+            Object.entries(paymentDetails.params).forEach(([key, value]) => {
+              url.searchParams.append(key, value);
+            });
+            finalUrl = url.toString();
+          }
+          window.location.href = finalUrl;
+        }
     } catch (err) {
       setError(err.message || 'پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.');
       setProcessing(false);

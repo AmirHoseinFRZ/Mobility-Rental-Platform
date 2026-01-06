@@ -62,6 +62,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.status = 'ONGOING' " +
             "AND b.actualEndDateTime IS NULL")
     List<Booking> findBookingsToComplete(@Param("now") LocalDateTime now);
+    
+    Optional<Booking> findByPaymentTransactionId(String paymentTransactionId);
 }
 
 

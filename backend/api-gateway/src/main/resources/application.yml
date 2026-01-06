@@ -26,17 +26,19 @@ spring:
           predicates:
             - Path=/api/bookings/**
         
+        # Payment Routes (handled by Booking Service)
+        - id: payment-routes
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api/payments/(?<segment>.*), /api/bookings/payments/$\{segment}
+        
         # Pricing Service Routes
         - id: pricing-service
           uri: lb://pricing-service
           predicates:
             - Path=/api/pricing/**
-        
-        # Payment Service Routes
-        - id: payment-service
-          uri: lb://payment-service
-          predicates:
-            - Path=/api/payments/**
         
         # Driver Service Routes
         - id: driver-service

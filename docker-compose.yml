@@ -291,7 +291,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
       - PAYMENT_GATEWAY_URL=http://payment-gateway:8089/api
-      - PAYMENT_GATEWAY_TOKEN=mobility-platform-token-2024-secure-key
+      - PAYMENT_GATEWAY_TOKEN=8f3A9cKpQ2Lw7ZxR6M4HnB5JdE
     depends_on:
       eureka-server:
         condition: service_healthy

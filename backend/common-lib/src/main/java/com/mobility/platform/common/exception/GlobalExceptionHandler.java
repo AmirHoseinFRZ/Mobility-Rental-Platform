@@ -81,6 +81,36 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     
+    @ExceptionHandler(org.hibernate.StaleObjectStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStaleObjectStateException(
+            org.hibernate.StaleObjectStateException ex, WebRequest request) {
+        log.error("Concurrent modification detected: {}", ex.getMessage());
+        
+        ErrorDetails errorDetails = ErrorDetails.builder()
+                .code("CONCURRENT_MODIFICATION")
+                .build();
+        
+        ApiResponse<Void> response = ApiResponse.error(
+                "The resource was modified by another process. Please try again.", 
+                errorDetails);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+    
+    @ExceptionHandler(jakarta.persistence.OptimisticLockException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLockException(
+            jakarta.persistence.OptimisticLockException ex, WebRequest request) {
+        log.error("Optimistic locking failure: {}", ex.getMessage());
+        
+        ErrorDetails errorDetails = ErrorDetails.builder()
+                .code("CONCURRENT_MODIFICATION")
+                .build();
+        
+        ApiResponse<Void> response = ApiResponse.error(
+                "The resource was modified by another process. Please try again.", 
+                errorDetails);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(
             Exception ex, WebRequest request) {

@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS ipg.client_token (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     client_id UUID NOT NULL REFERENCES ipg.client(id) ON DELETE CASCADE,
     token VARCHAR(500) NOT NULL UNIQUE,
-    enabled BOOLEAN DEFAULT true,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    expires_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS ipg.transaction (
 -- Create transaction audit table
 CREATE TABLE IF NOT EXISTS ipg.transaction_audit (
     id UUID NOT NULL,
-    rev INTEGER NOT NULL,
+    rev BIGINT NOT NULL,
     revtype SMALLINT,
     client_id UUID,
     amount BIGINT,
@@ -78,11 +79,20 @@ CREATE TABLE IF NOT EXISTS ipg.transaction_audit (
     PRIMARY KEY (id, rev)
 );
 
+-- Create revision info sequence
+CREATE SEQUENCE IF NOT EXISTS ipg.revision_info_id_seq;
+
 -- Create revision info table
 CREATE TABLE IF NOT EXISTS ipg.revision_info (
-    rev SERIAL PRIMARY KEY,
-    revtstmp BIGINT
+    id BIGINT PRIMARY KEY DEFAULT nextval('ipg.revision_info_id_seq'),
+    timestamp TIMESTAMP NOT NULL,
+    client_id VARCHAR(255),
+    uri TEXT,
+    trace_id VARCHAR(255)
 );
+
+-- Set sequence ownership
+ALTER SEQUENCE ipg.revision_info_id_seq OWNED BY ipg.revision_info.id;
 
 -- Create UUID mapping table
 CREATE TABLE IF NOT EXISTS ipg.uuid_mapping (
@@ -118,10 +128,10 @@ VALUES ('550e8400-e29b-41d4-a716-446655440000', 'mobility-platform')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Insert default client token for the mobility platform
-INSERT INTO ipg.client_token (client_id, token, enabled) 
+INSERT INTO ipg.client_token (client_id, token, is_active) 
 VALUES (
     '550e8400-e29b-41d4-a716-446655440000', 
-    'mobility-platform-token-2024-secure-key',
+    '8f3A9cKpQ2Lw7ZxR6M4HnB5JdE',
     true
 )
 ON CONFLICT (token) DO NOTHING;

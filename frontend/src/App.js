@@ -14,6 +14,7 @@ import BookingPage from './pages/BookingPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
+import PaymentCallbackPage from './pages/PaymentCallbackPage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
 import EditVehiclePage from './pages/EditVehiclePage';
@@ -112,6 +113,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment/:bookingId/callback"
+            element={
+              <ProtectedRoute>
+                <PaymentCallbackPage />
               </ProtectedRoute>
             }
           />

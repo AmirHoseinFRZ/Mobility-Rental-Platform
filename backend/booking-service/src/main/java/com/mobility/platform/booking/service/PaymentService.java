@@ -6,10 +6,12 @@ import com.mobility.platform.booking.dto.PaymentTransactionRequest;
 import com.mobility.platform.booking.dto.PaymentTransactionResponse;
 import com.mobility.platform.booking.entity.Booking;
 import com.mobility.platform.booking.repository.BookingRepository;
+import com.mobility.platform.common.enums.BookingStatus;
 import com.mobility.platform.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for handling payment operations
@@ -25,9 +27,23 @@ public class PaymentService {
     /**
      * Create a payment transaction
      */
+    @Transactional
     public PaymentTransactionResponse createTransaction(PaymentTransactionRequest request) {
         log.info("Creating payment transaction: {}", request);
-        return paymentGatewayClient.createTransaction(request);
+        PaymentTransactionResponse response = paymentGatewayClient.createTransaction(request);
+        
+        // Store transactionId in booking if invoiceId is a booking reference
+        if (request.getInvoiceId() != null && request.getInvoiceId().startsWith("BOOKING-")) {
+            String bookingNumber = request.getInvoiceId().substring(8); // Remove "BOOKING-" prefix
+            bookingRepository.findByBookingNumber(bookingNumber)
+                    .ifPresent(booking -> {
+                        booking.setPaymentTransactionId(response.getTransactionId());
+                        bookingRepository.save(booking);
+                        log.info("Stored transactionId {} for booking {}", response.getTransactionId(), bookingNumber);
+                    });
+        }
+        
+        return response;
     }
     
     /**
@@ -65,6 +81,57 @@ public class PaymentService {
                 .amount(booking.getTotalPrice().multiply(new java.math.BigDecimal(100)).longValue())
                 .status("PENDING")
                 .build();
+    }
+    
+    /**
+     * Verify payment transaction and update booking status
+     * This method is idempotent - multiple calls with the same result won't cause errors
+     */
+    @Transactional
+    public PaymentTransactionResponse verifyTransaction(String transactionId) {
+        log.info("Verifying payment transaction: {}", transactionId);
+        
+        // Find booking by transaction ID
+        Booking booking = bookingRepository.findByPaymentTransactionId(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "paymentTransactionId", transactionId));
+        
+        // Inquire transaction status from payment gateway
+        PaymentTransactionResponse transactionResponse = paymentGatewayClient.inquireTransaction(transactionId);
+        
+        // Update booking based on payment status
+        String paymentStatus = transactionResponse.getStatus();
+        if ("SUCCESS".equalsIgnoreCase(paymentStatus) || "COMPLETED".equalsIgnoreCase(paymentStatus)) {
+            // Check if booking is already confirmed (idempotent operation)
+            if (booking.getStatus() == BookingStatus.CONFIRMED && booking.getPaymentCompleted()) {
+                log.info("Booking {} is already confirmed, skipping update", booking.getId());
+            } else if (booking.getStatus() == BookingStatus.PENDING) {
+                // Only update if still pending
+                booking.setStatus(BookingStatus.CONFIRMED);
+                booking.setPaymentCompleted(true);
+                try {
+                    bookingRepository.save(booking);
+                    log.info("Booking {} confirmed after successful payment verification", booking.getId());
+                } catch (org.hibernate.StaleObjectStateException e) {
+                    // Booking was updated by another transaction, refresh and check status
+                    log.warn("Concurrent update detected for booking {}, refreshing state", booking.getId());
+                    Booking refreshedBooking = bookingRepository.findById(booking.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", booking.getId()));
+                    
+                    // If already confirmed, that's fine (idempotent)
+                    if (refreshedBooking.getStatus() != BookingStatus.CONFIRMED) {
+                        throw e; // Re-throw if not confirmed yet
+                    }
+                    log.info("Booking {} was confirmed by another transaction", booking.getId());
+                }
+            } else {
+                log.info("Booking {} is in status {}, not updating", booking.getId(), booking.getStatus());
+            }
+        } else if ("FAILED".equalsIgnoreCase(paymentStatus) || "CANCELED".equalsIgnoreCase(paymentStatus)) {
+            // Keep booking as PENDING if payment failed
+            log.warn("Payment verification failed for booking {}: {}", booking.getId(), paymentStatus);
+        }
+        
+        return transactionResponse;
     }
 }
 

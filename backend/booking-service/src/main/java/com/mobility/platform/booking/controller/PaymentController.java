@@ -60,5 +60,14 @@ public class PaymentController {
         PaymentTransactionResponse response = paymentService.getPaymentByBookingId(bookingId);
         return ResponseEntity.ok(response);
     }
+    
+    @PostMapping("/transaction/verify")
+    @Operation(summary = "Verify payment transaction", description = "Verifies payment transaction and updates booking status")
+    public ResponseEntity<PaymentTransactionResponse> verifyTransaction(
+            @RequestParam String transactionId) {
+        log.info("Verifying payment transaction: {}", transactionId);
+        PaymentTransactionResponse response = paymentService.verifyTransaction(transactionId);
+        return ResponseEntity.ok(response);
+    }
 }
 

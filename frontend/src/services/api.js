@@ -4,6 +4,9 @@ import axios from 'axios';
 // IMPORTANT: Should point to API Gateway (port 8080), NOT directly to services (8082, 8083, etc.)
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
+// Payment Gateway Direct URL - bypasses API Gateway for certain payment operations
+const PAYMENT_GATEWAY_URL = process.env.REACT_APP_PAYMENT_GATEWAY_URL || 'http://localhost:8089/api';
+
 // Debug: Log the API URL being used (remove in production)
 if (process.env.NODE_ENV === 'development') {
   console.log('🔍 API Base URL:', API_BASE_URL);
@@ -91,11 +94,34 @@ export const pricingService = {
 };
 
 // ==================== PAYMENT SERVICES ====================
+// These go through API Gateway → Booking Service → Payment Gateway
 export const paymentService = {
+  // Create transaction (goes through API Gateway to Booking Service)
   createTransaction: (transactionData) => 
     api.post('/api/payments/transaction/create', transactionData),
+  
+  // Verify transaction status (goes through API Gateway to Booking Service)
   verifyTransaction: (transactionId) => 
     api.post(`/api/payments/transaction/verify?transactionId=${transactionId}`),
+  
+  // Get transaction status (goes through API Gateway to Booking Service)
+  getTransactionStatus: (transactionId) =>
+    api.get(`/api/payments/transaction/${transactionId}/status`),
+};
+
+// ==================== PAYMENT GATEWAY DIRECT SERVICES ====================
+// These bypass API Gateway and call Payment Gateway directly
+// No authentication required for these endpoints
+export const paymentGatewayDirect = {
+  // Get payment details with full response (recommended)
+  getPaymentDetailsV2: (transactionId, gateway = 'sandbox') =>
+    axios.post(`${PAYMENT_GATEWAY_URL}/pay/v2/${transactionId}?gateway=${gateway}`)
+      .then(response => response.data),
+  
+  // Get simple payment link (alternative)
+  getPaymentLink: (transactionId, gateway = 'sandbox') =>
+    axios.post(`${PAYMENT_GATEWAY_URL}/pay/${transactionId}?gateway=${gateway}`)
+      .then(response => response.data),
 };
 
 // ==================== DRIVER SERVICES ====================

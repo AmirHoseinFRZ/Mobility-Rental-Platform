@@ -112,7 +112,7 @@ management:
 payment:
   gateway:
     url: ${PAYMENT_GATEWAY_URL:http://localhost:8089/api}
-    token: ${PAYMENT_GATEWAY_TOKEN:mobility-platform-token-2024-secure-key}
+    token: ${PAYMENT_GATEWAY_TOKEN:8f3A9cKpQ2Lw7ZxR6M4HnB5JdE}
 
 
 

@@ -111,17 +111,19 @@ public class PaymentService {
                 try {
                     bookingRepository.save(booking);
                     log.info("Booking {} confirmed after successful payment verification", booking.getId());
-                } catch (org.hibernate.StaleObjectStateException e) {
+                } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
                     // Booking was updated by another transaction, refresh and check status
                     log.warn("Concurrent update detected for booking {}, refreshing state", booking.getId());
                     Booking refreshedBooking = bookingRepository.findById(booking.getId())
                             .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", booking.getId()));
                     
                     // If already confirmed, that's fine (idempotent)
-                    if (refreshedBooking.getStatus() != BookingStatus.CONFIRMED) {
-                        throw e; // Re-throw if not confirmed yet
+                    if (refreshedBooking.getStatus() == BookingStatus.CONFIRMED && refreshedBooking.getPaymentCompleted()) {
+                        log.info("Booking {} was confirmed by another transaction", booking.getId());
+                    } else {
+                        // Re-throw if not yet confirmed - something else is wrong
+                        throw e;
                     }
-                    log.info("Booking {} was confirmed by another transaction", booking.getId());
                 }
             } else {
                 log.info("Booking {} is in status {}, not updating", booking.getId(), booking.getStatus());

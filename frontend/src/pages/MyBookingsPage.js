@@ -20,6 +20,50 @@ import {
 } from '@mui/material';
 import { bookingService, reviewService } from '../services/api';
 
+// Convert English numbers to Persian
+const toPersianNumber = (str) => {
+  if (!str) return str;
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  const englishDigits = '0123456789';
+  
+  let result = String(str);
+  for (let i = 0; i < 10; i++) {
+    result = result.replace(new RegExp(englishDigits[i], 'g'), persianDigits[i]);
+  }
+  return result;
+};
+
+// Format price with Persian numbers and thousand separators
+const formatPrice = (amount) => {
+  if (!amount) return '۰.۰۰';
+  const formatted = amount.toLocaleString('en-US', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+  return toPersianNumber(formatted);
+};
+
+// Format date to Persian numbers
+const formatDatePersian = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  const options = { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return toPersianNumber(d.toLocaleString('fa-IR', options));
+};
+
+// Format date only (without time)
+const formatDateOnlyPersian = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return toPersianNumber(d.toLocaleDateString('fa-IR'));
+};
+
 function MyBookingsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -45,7 +89,11 @@ function MyBookingsPage() {
     try {
       const response = await bookingService.getUserBookings(user.id);
       if (response.success) {
-        setBookings(response.data || []);
+        // Sort bookings from newest to oldest
+        const sortedBookings = (response.data || []).sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setBookings(sortedBookings);
       }
     } catch (err) {
       setError('بارگذاری رزروها ناموفق بود');
@@ -138,10 +186,10 @@ function MyBookingsPage() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
                     <Box>
                       <Typography variant="h6">
-                        رزرو #{booking.bookingNumber}
+                        رزرو #{toPersianNumber(booking.bookingNumber)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        ایجاد شده: {new Date(booking.createdAt).toLocaleDateString('fa-IR')}
+                        ایجاد شده: {formatDateOnlyPersian(booking.createdAt)}
                       </Typography>
                     </Box>
                     <Chip
@@ -163,14 +211,14 @@ function MyBookingsPage() {
                         زمان شروع:
                       </Typography>
                       <Typography variant="body1" gutterBottom>
-                        {new Date(booking.startDateTime).toLocaleString('fa-IR')}
+                        {formatDatePersian(booking.startDateTime)}
                       </Typography>
 
                       <Typography variant="body2" color="text.secondary">
                         زمان پایان:
                       </Typography>
                       <Typography variant="body1">
-                        {new Date(booking.endDateTime).toLocaleString('fa-IR')}
+                        {formatDatePersian(booking.endDateTime)}
                       </Typography>
                     </Grid>
 
@@ -178,7 +226,7 @@ function MyBookingsPage() {
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2">قیمت کل:</Typography>
                         <Typography variant="h6" color="primary">
-                          ${booking.finalPrice}
+                          {formatPrice(booking.finalPrice)} تومان
                         </Typography>
                       </Box>
 

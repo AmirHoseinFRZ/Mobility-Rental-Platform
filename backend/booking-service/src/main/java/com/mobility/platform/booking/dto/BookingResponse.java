@@ -49,6 +49,12 @@ public class BookingResponse {
     private String ownerFirstName;
     private String ownerLastName;
     private String ownerPhoneNumber;
+    
+    // User (renter) information
+    private String userFirstName;
+    private String userLastName;
+    private String userPhoneNumber;
+    private String userEmail;
 }
 
 

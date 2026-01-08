@@ -81,6 +81,7 @@ export const bookingService = {
   createBooking: (bookingData) => api.post('/api/bookings/', bookingData),
   getBookingById: (id) => api.get(`/api/bookings/${id}`),
   getUserBookings: (userId) => api.get(`/api/bookings/user/${userId}`),
+  getVehicleBookings: (vehicleId) => api.get(`/api/bookings/vehicle/${vehicleId}`),
   confirmBooking: (id) => api.patch(`/api/bookings/${id}/confirm`),
   startBooking: (id) => api.patch(`/api/bookings/${id}/start`),
   completeBooking: (id) => api.patch(`/api/bookings/${id}/complete`),

@@ -344,6 +344,21 @@ public class BookingService {
         response.setCreatedAt(booking.getCreatedAt());
         response.setUpdatedAt(booking.getUpdatedAt());
         
+        // Fetch user (renter) information
+        try {
+            ApiResponse<Object> userResponse = userClient.getUserById(booking.getUserId());
+            if (userResponse != null && userResponse.getData() != null) {
+                Map<String, Object> userData = objectMapper.convertValue(userResponse.getData(), Map.class);
+                response.setUserFirstName((String) userData.get("firstName"));
+                response.setUserLastName((String) userData.get("lastName"));
+                response.setUserPhoneNumber((String) userData.get("phoneNumber"));
+                response.setUserEmail((String) userData.get("email"));
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch user information for booking {}: {}", booking.getId(), e.getMessage());
+            // Don't fail the request if user info can't be fetched
+        }
+        
         // Fetch owner information for confirmed bookings
         if (booking.getStatus() == BookingStatus.CONFIRMED || 
             booking.getStatus() == BookingStatus.ONGOING || 

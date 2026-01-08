@@ -21,8 +21,10 @@ import {
   Edit,
   Delete,
   DirectionsCar,
+  CalendarToday,
 } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
+import VehicleBookingsDialog from '../components/VehicleBookingsDialog';
 
 // Convert English numbers to Persian
 const toPersianNumber = (num) => {
@@ -42,6 +44,8 @@ function MyVehiclesPage() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadMyVehicles();
@@ -86,6 +90,16 @@ function MyVehiclesPage() {
       case 'MAINTENANCE': return 'error';
       default: return 'default';
     }
+  };
+
+  const handleViewBookings = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setBookingsDialogOpen(true);
+  };
+
+  const handleCloseBookingsDialog = () => {
+    setBookingsDialogOpen(false);
+    setSelectedVehicle(null);
   };
 
   if (loading) {
@@ -179,14 +193,24 @@ function MyVehiclesPage() {
                     </Typography>
                   )}
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                  <Button 
-                    size="small" 
-                    startIcon={<Edit />}
-                    onClick={() => navigate(`/edit-vehicle/${vehicle.id}`)}
-                  >
-                    ویرایش
-                  </Button>
+                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button 
+                      size="small" 
+                      startIcon={<Edit />}
+                      onClick={() => navigate(`/edit-vehicle/${vehicle.id}`)}
+                    >
+                      ویرایش
+                    </Button>
+                    <Button 
+                      size="small" 
+                      startIcon={<CalendarToday />}
+                      onClick={() => handleViewBookings(vehicle)}
+                      variant="outlined"
+                    >
+                      رزروها
+                    </Button>
+                  </Box>
                   <IconButton 
                     size="small" 
                     color="error"
@@ -200,6 +224,13 @@ function MyVehiclesPage() {
           ))}
         </Grid>
       )}
+
+      {/* Bookings Dialog */}
+      <VehicleBookingsDialog 
+        open={bookingsDialogOpen}
+        onClose={handleCloseBookingsDialog}
+        vehicle={selectedVehicle}
+      />
     </Container>
   );
 }

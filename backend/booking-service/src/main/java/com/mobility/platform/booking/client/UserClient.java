@@ -15,3 +15,4 @@ public interface UserClient {
     ApiResponse<Object> getUserById(@PathVariable("id") Long id);
 }
 
+

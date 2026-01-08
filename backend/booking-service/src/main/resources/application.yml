@@ -66,8 +66,17 @@ spring:
       client:
         config:
           default:
-            connectTimeout: 5000
-            readTimeout: 5000
+            connectTimeout: 3000
+            readTimeout: 10000
+      circuitbreaker:
+        enabled: true
+        alphanumeric-ids:
+          enabled: true
+    loadbalancer:
+      retry:
+        enabled: true
+      health-check:
+        initial-delay: 0
 
 eureka:
   client:
@@ -75,15 +84,23 @@ eureka:
       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
+    registry-fetch-interval-seconds: 5
+    disable-delta: false
+    eureka-service-url-poll-interval-seconds: 300
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 # Logging
 logging:
   level:
     root: INFO
     com.mobility.platform: DEBUG
+    com.mobility.platform.booking.client: DEBUG
+    feign: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
   pattern:

@@ -1,7 +1,9 @@
 package com.mobility.platform.booking.config;
 
 import feign.Client;
+import feign.Logger;
 import feign.Retryer;
+import feign.codec.ErrorDecoder;
 import okhttp3.OkHttpClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +23,10 @@ public class FeignConfig {
     @LoadBalanced
     public Client feignClient() {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(true)
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false) // Disable OkHttp retry, use Feign retry instead
                 .build();
         
         return new feign.okhttp.OkHttpClient(okHttpClient);
@@ -32,8 +34,21 @@ public class FeignConfig {
     
     @Bean
     public Retryer feignRetryer() {
-        // Retry up to 3 times with 1 second intervals
-        return new Retryer.Default(1000, 2000, 3);
+        // Retry up to 2 times with shorter intervals
+        // period = 100ms, maxPeriod = 1000ms, maxAttempts = 2
+        // This will retry quickly for transient failures but won't wait too long
+        return new Retryer.Default(100, 1000, 2);
+    }
+    
+    @Bean
+    public Logger.Level feignLoggerLevel() {
+        // Enable detailed logging for debugging
+        return Logger.Level.BASIC;
+    }
+    
+    @Bean
+    public ErrorDecoder errorDecoder() {
+        return new FeignErrorDecoder();
     }
 }
 

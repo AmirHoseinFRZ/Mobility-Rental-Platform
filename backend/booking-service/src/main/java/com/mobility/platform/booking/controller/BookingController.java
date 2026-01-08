@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -91,6 +92,17 @@ public class BookingController {
             @RequestParam(required = false) String reason) {
         BookingResponse response = bookingService.cancelBooking(id, reason);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", response));
+    }
+    
+    @GetMapping("/booked-vehicles")
+    @Operation(summary = "Get list of vehicle IDs that are booked in a time range")
+    public ResponseEntity<ApiResponse<List<Long>>> getBookedVehicleIds(
+            @RequestParam String startDateTime,
+            @RequestParam String endDateTime) {
+        LocalDateTime start = LocalDateTime.parse(startDateTime);
+        LocalDateTime end = LocalDateTime.parse(endDateTime);
+        List<Long> bookedVehicleIds = bookingService.getBookedVehicleIds(start, end);
+        return ResponseEntity.ok(ApiResponse.success(bookedVehicleIds));
     }
     
     @GetMapping("/health")

@@ -21,6 +21,8 @@ import {
   Alert,
   ToggleButton,
   ToggleButtonGroup,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import {
   LocationOn,
@@ -47,6 +49,101 @@ const formatPrice = (amount) => {
   return toPersianNumber(formatted);
 };
 
+// Format datetime for local input (without timezone offset)
+const formatDateTimeLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Format datetime for backend (assumes user is in Iran timezone)
+const formatDateTimeForBackend = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+};
+
+// Convert Gregorian date to Jalali (Persian/Shamsi)
+const toJalaliDate = (date) => {
+  const gDate = new Date(date);
+  const gYear = gDate.getFullYear();
+  const gMonth = gDate.getMonth() + 1;
+  const gDay = gDate.getDate();
+  
+  let jYear, jMonth, jDay;
+  
+  if (gYear <= 1600) {
+    jYear = 0;
+  } else {
+    jYear = 979;
+  }
+  
+  const gy = gYear - 1600;
+  const gm = gMonth - 1;
+  const gd = gDay - 1;
+  
+  let gdayNo = 365 * gy + Math.floor((gy + 3) / 4) - Math.floor((gy + 99) / 100) + Math.floor((gy + 399) / 400);
+  
+  for (let i = 0; i < gm; ++i) {
+    gdayNo += [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][i];
+  }
+  
+  if (gm > 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0))) {
+    ++gdayNo;
+  }
+  
+  gdayNo += gd;
+  
+  let jdayNo = gdayNo - 79;
+  const jNp = Math.floor(jdayNo / 12053);
+  jdayNo %= 12053;
+  
+  jYear += 33 * jNp + 4 * Math.floor(jdayNo / 1461);
+  jdayNo %= 1461;
+  
+  if (jdayNo >= 366) {
+    jYear += Math.floor((jdayNo - 1) / 365);
+    jdayNo = (jdayNo - 1) % 365;
+  }
+  
+  const monthDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  
+  for (let i = 0; i < 11 && jdayNo >= monthDays[i]; ++i) {
+    jdayNo -= monthDays[i];
+    jMonth = i + 2;
+  }
+  
+  if (jMonth === undefined) {
+    jMonth = 1;
+  }
+  
+  jDay = jdayNo + 1;
+  
+  return { year: jYear, month: jMonth, day: jDay };
+};
+
+// Format Jalali date and time in Persian
+const formatPersianDateTime = (date) => {
+  const persianMonths = [
+    'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+    'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+  ];
+  
+  const gDate = new Date(date);
+  const jalali = toJalaliDate(gDate);
+  const hours = gDate.getHours();
+  const minutes = gDate.getMinutes();
+  
+  return `${toPersianNumber(jalali.day)} ${persianMonths[jalali.month - 1]} ${toPersianNumber(jalali.year)} - ساعت ${toPersianNumber(hours)}:${toPersianNumber(String(minutes).padStart(2, '0'))}`;
+};
+
 function SearchPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -60,6 +157,12 @@ function SearchPage() {
   const [radius, setRadius] = useState('5');
   const [vehicleType, setVehicleType] = useState('');
   const [requiresDriver, setRequiresDriver] = useState('');
+  
+  // Time range filters
+  const [useTimeRange, setUseTimeRange] = useState(false);
+  const getMinStartTime = () => new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+  const [startDateTime, setStartDateTime] = useState(getMinStartTime());
+  const [endDateTime, setEndDateTime] = useState(new Date(Date.now() + 90 * 60 * 1000)); // 1.5 hours from now
 
   useEffect(() => {
     const type = searchParams.get('type');
@@ -97,6 +200,19 @@ function SearchPage() {
       return;
     }
     
+    // Validate time range if enabled
+    if (useTimeRange) {
+      if (endDateTime <= startDateTime) {
+        setError('زمان پایان باید بعد از زمان شروع باشد');
+        return;
+      }
+      const minTime = getMinStartTime();
+      if (startDateTime < minTime) {
+        setError('زمان شروع نمی‌تواند کمتر از نیم ساعت آینده باشد');
+        return;
+      }
+    }
+    
     setLoading(true);
     setError('');
     
@@ -108,6 +224,12 @@ function SearchPage() {
         vehicleType: vehicleType || null,
         requiresDriver: requiresDriver === '' ? null : requiresDriver === 'true',
       };
+      
+      // Add time range if enabled
+      if (useTimeRange) {
+        searchData.startDateTime = formatDateTimeForBackend(startDateTime);
+        searchData.endDateTime = formatDateTimeForBackend(endDateTime);
+      }
       
       const response = await vehicleService.searchByLocation(searchData);
       
@@ -258,6 +380,77 @@ function SearchPage() {
             </Button>
           </Grid>
         </Grid>
+        
+        {/* Time Range Filter */}
+        <Box sx={{ mt: 3 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={useTimeRange}
+                onChange={(e) => setUseTimeRange(e.target.checked)}
+              />
+            }
+            label="فیلتر بر اساس بازه زمانی (فقط وسایل نقلیه موجود در این بازه را نشان بده)"
+          />
+          
+          {useTimeRange && (
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="تاریخ و زمان شروع"
+                  type="datetime-local"
+                  value={formatDateTimeLocal(startDateTime)}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const minTime = getMinStartTime();
+                    
+                    if (selectedDate < minTime) {
+                      setError('زمان شروع نمی‌تواند کمتر از نیم ساعت آینده باشد');
+                      setStartDateTime(minTime);
+                    } else {
+                      setError('');
+                      setStartDateTime(selectedDate);
+                      if (endDateTime <= selectedDate) {
+                        setEndDateTime(new Date(selectedDate.getTime() + 60 * 60 * 1000));
+                      }
+                    }
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: formatDateTimeLocal(getMinStartTime())
+                  }}
+                  helperText={startDateTime ? formatPersianDateTime(startDateTime) : ''}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="تاریخ و زمان پایان"
+                  type="datetime-local"
+                  value={formatDateTimeLocal(endDateTime)}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    
+                    if (selectedDate <= startDateTime) {
+                      setError('زمان پایان باید بعد از زمان شروع باشد');
+                    } else {
+                      setError('');
+                      setEndDateTime(selectedDate);
+                    }
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: formatDateTimeLocal(new Date(startDateTime.getTime() + 60 * 60 * 1000))
+                  }}
+                  helperText={endDateTime ? formatPersianDateTime(endDateTime) : ''}
+                  size="small"
+                />
+              </Grid>
+            </Grid>
+          )}
+        </Box>
       </Paper>
 
       {error && (

@@ -242,13 +242,6 @@ function PaymentCallbackPage() {
               )}
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleViewBooking}
-                >
-                  بازگشت به صفحه پرداخت
-                </Button>
-                <Button
                   variant="outlined"
                   onClick={handleViewMyBookings}
                 >

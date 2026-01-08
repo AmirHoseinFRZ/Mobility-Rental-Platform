@@ -1,15 +1,18 @@
 package com.mobility.platform.booking.service;
 
+import com.mobility.platform.booking.client.UserClient;
 import com.mobility.platform.booking.client.VehicleClient;
 import com.mobility.platform.booking.dto.BookingRequest;
 import com.mobility.platform.booking.dto.BookingResponse;
 import com.mobility.platform.booking.entity.Booking;
 import com.mobility.platform.booking.repository.BookingRepository;
+import com.mobility.platform.common.dto.ApiResponse;
 import com.mobility.platform.common.enums.BookingStatus;
 import com.mobility.platform.common.enums.VehicleStatus;
 import com.mobility.platform.common.event.EventPublisher;
 import com.mobility.platform.common.exception.BusinessException;
 import com.mobility.platform.common.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,9 @@ public class BookingService {
     
     private final BookingRepository bookingRepository;
     private final VehicleClient vehicleClient;
+    private final UserClient userClient;
     private final EventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
     
     @Transactional
     public BookingResponse createBooking(BookingRequest request) {
@@ -147,6 +152,25 @@ public class BookingService {
         List<Booking> bookings = bookingRepository.findByVehicleId(vehicleId);
         return bookings.stream()
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+    
+    public List<Long> getBookedVehicleIds(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        log.info("Fetching booked vehicle IDs for time range: {} to {}", startDateTime, endDateTime);
+        
+        // Get all bookings that overlap with the requested time range
+        // We need to find bookings where:
+        // - Booking status is CONFIRMED or ONGOING
+        // - Booking time overlaps with requested range
+        List<Booking> bookings = bookingRepository.findAll().stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED || b.getStatus() == BookingStatus.ONGOING)
+                .filter(b -> b.getStartDateTime().isBefore(endDateTime) && b.getEndDateTime().isAfter(startDateTime))
+                .collect(Collectors.toList());
+        
+        // Extract unique vehicle IDs
+        return bookings.stream()
+                .map(Booking::getVehicleId)
+                .distinct()
                 .collect(Collectors.toList());
     }
     
@@ -319,6 +343,36 @@ public class BookingService {
         response.setNotes(booking.getNotes());
         response.setCreatedAt(booking.getCreatedAt());
         response.setUpdatedAt(booking.getUpdatedAt());
+        
+        // Fetch owner information for confirmed bookings
+        if (booking.getStatus() == BookingStatus.CONFIRMED || 
+            booking.getStatus() == BookingStatus.ONGOING || 
+            booking.getStatus() == BookingStatus.COMPLETED) {
+            try {
+                // Get vehicle to find owner ID
+                ApiResponse<Object> vehicleResponse = vehicleClient.getVehicleById(booking.getVehicleId());
+                if (vehicleResponse != null && vehicleResponse.getData() != null) {
+                    Map<String, Object> vehicleData = objectMapper.convertValue(vehicleResponse.getData(), Map.class);
+                    Long ownerId = vehicleData.get("ownerId") != null ? 
+                        Long.valueOf(vehicleData.get("ownerId").toString()) : null;
+                    
+                    if (ownerId != null) {
+                        // Get owner information
+                        ApiResponse<Object> userResponse = userClient.getUserById(ownerId);
+                        if (userResponse != null && userResponse.getData() != null) {
+                            Map<String, Object> userData = objectMapper.convertValue(userResponse.getData(), Map.class);
+                            response.setOwnerFirstName((String) userData.get("firstName"));
+                            response.setOwnerLastName((String) userData.get("lastName"));
+                            response.setOwnerPhoneNumber((String) userData.get("phoneNumber"));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch owner information for booking {}: {}", booking.getId(), e.getMessage());
+                // Don't fail the request if owner info can't be fetched
+            }
+        }
+        
         return response;
     }
 }

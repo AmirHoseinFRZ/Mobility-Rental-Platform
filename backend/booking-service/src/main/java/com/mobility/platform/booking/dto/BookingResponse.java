@@ -44,6 +44,11 @@ public class BookingResponse {
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // Owner information (only populated for confirmed bookings)
+    private String ownerFirstName;
+    private String ownerLastName;
+    private String ownerPhoneNumber;
 }
 
 

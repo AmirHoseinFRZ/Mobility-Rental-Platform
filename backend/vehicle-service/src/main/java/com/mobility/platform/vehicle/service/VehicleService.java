@@ -7,6 +7,7 @@ import com.mobility.platform.common.exception.BusinessException;
 import com.mobility.platform.common.exception.ResourceNotFoundException;
 import com.mobility.platform.vehicle.dto.LocationSearchRequest;
 import com.mobility.platform.vehicle.dto.VehicleRequest;
+import com.mobility.platform.vehicle.client.BookingClient;
 import com.mobility.platform.vehicle.dto.VehicleResponse;
 import com.mobility.platform.vehicle.entity.Vehicle;
 import com.mobility.platform.vehicle.repository.VehicleRepository;
@@ -36,6 +37,7 @@ public class VehicleService {
     
     private final VehicleRepository vehicleRepository;
     private final EventPublisher eventPublisher;
+    private final BookingClient bookingClient;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     
     @Transactional
@@ -125,6 +127,34 @@ public class VehicleService {
         } else {
             vehicles = vehicleRepository.findAvailableVehiclesWithinRadius(
                     searchLocation, radiusMeters);
+        }
+        
+        // Filter by time-based availability if time range is provided
+        if (request.getStartDateTime() != null && request.getEndDateTime() != null) {
+            log.info("Filtering vehicles by availability in time range: {} to {}", 
+                    request.getStartDateTime(), request.getEndDateTime());
+            
+            try {
+                // Get list of booked vehicle IDs in the time range
+                List<Long> bookedVehicleIds = bookingClient.getBookedVehicleIds(
+                        request.getStartDateTime().toString(),
+                        request.getEndDateTime().toString()
+                ).getData();
+                
+                if (bookedVehicleIds != null && !bookedVehicleIds.isEmpty()) {
+                    // Filter out vehicles that are booked
+                    vehicles = vehicles.stream()
+                            .filter(v -> !bookedVehicleIds.contains(v.getId()))
+                            .collect(Collectors.toList());
+                    
+                    log.info("Filtered out {} booked vehicles, {} vehicles remaining", 
+                            bookedVehicleIds.size(), vehicles.size());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to check booking availability, returning all vehicles. Error: {}", 
+                        e.getMessage());
+                // Continue with all vehicles if booking service is unavailable
+            }
         }
         
         return vehicles.stream()

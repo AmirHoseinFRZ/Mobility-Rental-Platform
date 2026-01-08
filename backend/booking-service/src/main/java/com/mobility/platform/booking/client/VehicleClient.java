@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Feign client for Vehicle Service
+ * Uses service discovery via Eureka when available, or direct URL if configured
  */
 @FeignClient(name = "vehicle-service", path = "/api/vehicles")
 public interface VehicleClient {

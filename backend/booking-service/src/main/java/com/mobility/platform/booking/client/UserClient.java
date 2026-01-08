@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * Feign client for User Service
+ * Uses service discovery via Eureka when available, or direct URL if configured
  */
 @FeignClient(name = "user-service", path = "/api/users")
 public interface UserClient {

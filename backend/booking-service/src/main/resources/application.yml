@@ -68,6 +68,18 @@ spring:
           default:
             connectTimeout: 3000
             readTimeout: 10000
+          # Service URLs - use direct URLs when service discovery is not available
+          # Default to localhost for local development without Eureka
+          # For Docker/production with Eureka: set USER_SERVICE_URL="" and VEHICLE_SERVICE_URL="" to use service discovery
+          # Or remove the url property entirely to use service discovery
+          user-service:
+            url: ${USER_SERVICE_URL:http://localhost:8081}
+            connectTimeout: 3000
+            readTimeout: 10000
+          vehicle-service:
+            url: ${VEHICLE_SERVICE_URL:http://localhost:8082}
+            connectTimeout: 3000
+            readTimeout: 10000
       circuitbreaker:
         enabled: true
         alphanumeric-ids:
@@ -135,6 +147,13 @@ payment:
   gateway:
     url: ${PAYMENT_GATEWAY_URL:http://localhost:8089/api}
     token: ${PAYMENT_GATEWAY_TOKEN:8f3A9cKpQ2Lw7ZxR6M4HnB5JdE}
+
+# Service URLs Configuration
+# By default, uses direct localhost URLs for local development without Eureka
+# To use service discovery in Docker/production:
+#   1. Ensure Eureka is running and services are registered
+#   2. Set environment variables: USER_SERVICE_URL="" VEHICLE_SERVICE_URL=""
+#   3. Or comment out the url properties in the openfeign.client.config section above
 
 
 

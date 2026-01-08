@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -28,23 +28,23 @@ function PaymentCallbackPage() {
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success', 'failed', 'pending'
   const [error, setError] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [hasVerified, setHasVerified] = useState(false);
+  const hasVerifiedRef = useRef(false);
 
   useEffect(() => {
-    // Only verify once, prevent duplicate calls
-    if (!hasVerified) {
+    // Only verify once, prevent duplicate calls (even in React Strict Mode)
+    if (!hasVerifiedRef.current) {
       verifyPayment();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId]); // Only depend on bookingId, searchParams is checked inside verifyPayment
 
   const verifyPayment = async () => {
-    // Prevent duplicate verification
-    if (hasVerified || verifying) {
+    // Prevent duplicate verification using ref (more reliable than state)
+    if (hasVerifiedRef.current || verifying) {
       return;
     }
     
-    setHasVerified(true);
+    hasVerifiedRef.current = true;
     setVerifying(true);
     setError('');
     

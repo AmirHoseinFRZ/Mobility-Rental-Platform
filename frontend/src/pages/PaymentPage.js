@@ -35,6 +35,103 @@ const formatPrice = (amount) => {
   return toPersianNumber(formatted);
 };
 
+// Convert Gregorian date to Jalali (Persian/Shamsi)
+const toJalaliDate = (date) => {
+  const gDate = new Date(date);
+  const gYear = gDate.getFullYear();
+  const gMonth = gDate.getMonth() + 1;
+  const gDay = gDate.getDate();
+  
+  // Simple Jalali conversion algorithm
+  let jYear, jMonth, jDay;
+  
+  if (gYear <= 1600) {
+    jYear = 0;
+  } else {
+    jYear = 979;
+  }
+  
+  const gy = gYear - 1600;
+  const gm = gMonth - 1;
+  const gd = gDay - 1;
+  
+  let gdayNo = 365 * gy + Math.floor((gy + 3) / 4) - Math.floor((gy + 99) / 100) + Math.floor((gy + 399) / 400);
+  
+  for (let i = 0; i < gm; ++i) {
+    gdayNo += [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][i];
+  }
+  
+  if (gm > 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0))) {
+    ++gdayNo;
+  }
+  
+  gdayNo += gd;
+  
+  let jdayNo = gdayNo - 79;
+  const jNp = Math.floor(jdayNo / 12053);
+  jdayNo %= 12053;
+  
+  jYear += 33 * jNp + 4 * Math.floor(jdayNo / 1461);
+  jdayNo %= 1461;
+  
+  if (jdayNo >= 366) {
+    jYear += Math.floor((jdayNo - 1) / 365);
+    jdayNo = (jdayNo - 1) % 365;
+  }
+  
+  const monthDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  
+  for (let i = 0; i < 11 && jdayNo >= monthDays[i]; ++i) {
+    jdayNo -= monthDays[i];
+    jMonth = i + 2;
+  }
+  
+  if (jMonth === undefined) {
+    jMonth = 1;
+  }
+  
+  jDay = jdayNo + 1;
+  
+  return { year: jYear, month: jMonth, day: jDay };
+};
+
+// Format Jalali date and time in Persian (handles timezone correctly)
+const formatPersianDateTime = (date) => {
+  if (!date) return '';
+  
+  const persianMonths = [
+    'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+    'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+  ];
+  
+  // Parse the date string - if it doesn't have timezone, treat it as local time
+  let dateObj;
+  if (typeof date === 'string') {
+    // Check if it's an ISO datetime string without timezone (e.g., "2024-01-15T14:30:00")
+    // These are typically sent from Java LocalDateTime and should be treated as local time
+    const isoLocalPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/;
+    if (isoLocalPattern.test(date)) {
+      // Parse as local time components
+      const [datePart, timePart] = date.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const timeOnly = timePart.split('.')[0]; // Remove milliseconds if present
+      const [hours, minutes, seconds = 0] = timeOnly.split(':').map(Number);
+      dateObj = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    } else {
+      // Has timezone info or different format, use standard Date parsing
+      dateObj = new Date(date);
+    }
+  } else {
+    dateObj = new Date(date);
+  }
+  
+  const jalali = toJalaliDate(dateObj);
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  
+  return `${toPersianNumber(jalali.day)} ${persianMonths[jalali.month - 1]} ${toPersianNumber(jalali.year)} - ساعت ${toPersianNumber(hours)}:${toPersianNumber(String(minutes).padStart(2, '0'))}`;
+};
+
 function PaymentPage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -292,8 +389,8 @@ function PaymentPage() {
               مدت زمان:
             </Typography>
             <Typography variant="body1">
-              {new Date(booking.startDateTime).toLocaleString('fa-IR')} - 
-              {new Date(booking.endDateTime).toLocaleString('fa-IR')}
+              {formatPersianDateTime(booking.startDateTime)} - 
+              {formatPersianDateTime(booking.endDateTime)}
             </Typography>
           </Box>
 

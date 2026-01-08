@@ -4,15 +4,14 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 
 /**
  * Validator for @FutureUTC annotation that compares LocalDateTime values
- * using UTC timezone for the "now" reference point to avoid timezone-related validation issues.
+ * using Iran timezone (Asia/Tehran) for the "now" reference point.
  * 
- * This validator assumes the LocalDateTime value represents a UTC time and compares it
- * against the current UTC time. This ensures consistent validation regardless of the
- * server's system timezone.
+ * This validator assumes the LocalDateTime value represents Iran time and compares it
+ * against the current Iran time. This ensures consistent validation with Iran timezone.
  */
 public class FutureUTCValidator implements ConstraintValidator<FutureUTC, LocalDateTime> {
     
@@ -28,12 +27,12 @@ public class FutureUTCValidator implements ConstraintValidator<FutureUTC, LocalD
             return true;
         }
         
-        // Compare the LocalDateTime value with the current UTC time
-        // This ensures validation is consistent regardless of server timezone
-        LocalDateTime nowUTC = LocalDateTime.now(ZoneOffset.UTC);
+        // Compare the LocalDateTime value with the current Iran time
+        // This ensures validation is consistent with Iran timezone
+        LocalDateTime nowIran = LocalDateTime.now(ZoneId.of("Asia/Tehran"));
         
-        // The value is valid if it's after the current UTC time
-        return value.isAfter(nowUTC);
+        // The value is valid if it's after the current Iran time
+        return value.isAfter(nowIran);
     }
 }
 

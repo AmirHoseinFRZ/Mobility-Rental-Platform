@@ -1,8 +1,12 @@
 import axios from 'axios';
 
 // API Base URL - uses API Gateway
-// IMPORTANT: Should point to API Gateway (port 8080), NOT directly to services (8082, 8083, etc.)
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// In development: use '' so the dev server proxy (package.json "proxy") forwards to API Gateway — avoids unreachable IPs in .env
+// In production: use REACT_APP_API_URL or fallback to localhost:8080
+const API_BASE_URL =
+  process.env.NODE_ENV === 'development'
+    ? ''
+    : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
 // Payment Gateway Direct URL - bypasses API Gateway for certain payment operations
 const PAYMENT_GATEWAY_URL = process.env.REACT_APP_PAYMENT_GATEWAY_URL || 'http://localhost:8089/api';

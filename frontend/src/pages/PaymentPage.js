@@ -394,12 +394,6 @@ function PaymentPage() {
             </Typography>
           </Box>
 
-          {booking.withDriver && (
-            <Box sx={{ mb: 2 }}>
-              <Chip label="با راننده" color="secondary" size="small" />
-            </Box>
-          )}
-
           <Divider sx={{ my: 2 }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>

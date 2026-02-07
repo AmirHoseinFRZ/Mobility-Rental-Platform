@@ -258,16 +258,6 @@ function VehicleBookingsDialog({ open, onClose, vehicle }) {
                             />
                           </Box>
                         </Grid>
-                        {booking.withDriver && (
-                          <Grid item xs={12}>
-                            <Chip 
-                              label="با راننده"
-                              color="info"
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Grid>
-                        )}
                       </Grid>
                     </Box>
 

@@ -58,8 +58,6 @@ function EditVehiclePage() {
       description: '',
       features: '',
       imageUrl: '',
-      requiresDriver: false,
-      driverPricePerHour: '',
       status: 'AVAILABLE',
     },
     validationSchema,
@@ -130,8 +128,6 @@ function EditVehiclePage() {
           description: vehicle.description || '',
           features: vehicle.features || '',
           imageUrl: vehicle.imageUrl || '',
-          requiresDriver: vehicle.requiresDriver || false,
-          driverPricePerHour: vehicle.driverPricePerHour || '',
           status: vehicle.status || 'AVAILABLE',
         });
 
@@ -351,36 +347,6 @@ function EditVehiclePage() {
                 helperText={formik.touched.pricePerDay && formik.errors.pricePerDay}
               />
             </Grid>
-
-            {/* Requires Driver */}
-            <Grid item xs={12} sm={6}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    id="requiresDriver"
-                    name="requiresDriver"
-                    checked={formik.values.requiresDriver}
-                    onChange={formik.handleChange}
-                  />
-                }
-                label="نیاز به راننده دارد"
-              />
-            </Grid>
-
-            {/* Driver Price Per Hour */}
-            {formik.values.requiresDriver && (
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="driverPricePerHour"
-                  name="driverPricePerHour"
-                  label="قیمت ساعتی راننده (تومان)"
-                  type="number"
-                  value={formik.values.driverPricePerHour}
-                  onChange={formik.handleChange}
-                />
-              </Grid>
-            )}
 
             {/* Vehicle Location */}
             <Grid item xs={12}>

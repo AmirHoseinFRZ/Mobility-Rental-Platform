@@ -26,7 +26,6 @@ import {
   Logout,
   Garage,
   Dashboard,
-  LocalTaxi,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 
@@ -59,14 +58,12 @@ function Navbar() {
   ];
 
   const additionalAuthItems = [
-    { label: 'راننده شوید', path: '/driver-register', icon: <LocalTaxi /> },
     { label: 'افزودن وسیله نقلیه', path: '/add-vehicle', icon: <DirectionsCar /> },
   ];
 
   const authMenuItems = [
     { label: 'رزروهای من', path: '/my-bookings', icon: <BookOnline /> },
     { label: 'وسایل نقلیه من', path: '/my-vehicles', icon: <Garage /> },
-    { label: 'پنل راننده', path: '/driver-dashboard', icon: <LocalTaxi /> },
     { label: 'پروفایل', path: '/profile', icon: <Person /> },
   ];
 
@@ -125,15 +122,6 @@ function Navbar() {
                   {item.label}
                 </Button>
               ))}
-              {isAuthenticated && (
-                <Button
-                  onClick={() => navigate('/driver-register')}
-                  sx={{ color: 'white' }}
-                  startIcon={<LocalTaxi />}
-                >
-                  راننده شوید
-                </Button>
-              )}
             </Box>
           )}
 
@@ -166,9 +154,6 @@ function Navbar() {
                     </MenuItem>
                     <MenuItem onClick={() => { navigate('/my-vehicles'); handleClose(); }}>
                       <Garage sx={{ mr: 1 }} /> وسایل نقلیه من
-                    </MenuItem>
-                    <MenuItem onClick={() => { navigate('/driver-dashboard'); handleClose(); }}>
-                      <LocalTaxi sx={{ mr: 1 }} /> پنل راننده
                     </MenuItem>
                     {isAdmin() && (
                       <MenuItem onClick={() => { navigate('/admin'); handleClose(); }}>

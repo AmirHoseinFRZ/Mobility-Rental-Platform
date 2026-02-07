@@ -18,8 +18,6 @@ import PaymentCallbackPage from './pages/PaymentCallbackPage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
 import EditVehiclePage from './pages/EditVehiclePage';
-import DriverRegisterPage from './pages/DriverRegisterPage';
-import DriverDashboardPage from './pages/DriverDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminVehiclesPage from './pages/AdminVehiclesPage';
@@ -145,22 +143,6 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <EditVehiclePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/driver-register"
-            element={
-              <ProtectedRoute>
-                <DriverRegisterPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/driver-dashboard"
-            element={
-              <ProtectedRoute>
-                <DriverDashboardPage />
               </ProtectedRoute>
             }
           />

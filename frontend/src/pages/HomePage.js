@@ -52,7 +52,7 @@ function HomePage() {
                 اجاره وسایل نقلیه به آسانی
               </Typography>
               <Typography variant="h5" gutterBottom>
-                از بین خودروها، موتورسیکلت‌ها و اسکوترها انتخاب کنید. با یا بدون راننده.
+                از بین خودروها، موتورسیکلت‌ها و اسکوترها انتخاب کنید.
               </Typography>
               <Box sx={{ mt: 4 }}>
                 <TextField

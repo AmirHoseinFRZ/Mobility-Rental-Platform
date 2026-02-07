@@ -41,9 +41,6 @@ function AddVehiclePage() {
     imageUrl: '',
     description: '',
     features: '',
-    requiresDriver: false,
-    driverPricePerHour: '',
-    driverPricePerDay: '',
   });
 
   const handleChange = (e) => {
@@ -74,8 +71,6 @@ function AddVehiclePage() {
         seatingCapacity: parseInt(formData.seatingCapacity),
         pricePerHour: parseFloat(formData.pricePerHour),
         pricePerDay: parseFloat(formData.pricePerDay),
-        driverPricePerHour: formData.driverPricePerHour ? parseFloat(formData.driverPricePerHour) : null,
-        driverPricePerDay: formData.driverPricePerDay ? parseFloat(formData.driverPricePerDay) : null,
         latitude: vehicleLocation.lat,
         longitude: vehicleLocation.lng,
       };

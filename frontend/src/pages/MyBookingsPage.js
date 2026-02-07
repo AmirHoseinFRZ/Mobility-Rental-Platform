@@ -323,10 +323,6 @@ function MyBookingsPage() {
                         </Typography>
                       </Box>
 
-                      {booking.withDriver && (
-                        <Chip label="با راننده" color="secondary" size="small" sx={{ mb: 1 }} />
-                      )}
-
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="body2" color="text.secondary">
                           وضعیت پرداخت:
@@ -525,9 +521,6 @@ function MyBookingsPage() {
                   sx={{ mr: 1 }}
                 />
                 <Chip label={vehicleDetails.vehicleType} variant="outlined" sx={{ mr: 1 }} />
-                {vehicleDetails.requiresDriver && (
-                  <Chip label="راننده موجود" color="secondary" />
-                )}
               </Box>
 
               <Divider sx={{ my: 2 }} />
@@ -619,17 +612,6 @@ function MyBookingsPage() {
                     {formatPrice(vehicleDetails.pricePerDay)} تومان
                   </Typography>
                 </Box>
-                {vehicleDetails.requiresDriver && vehicleDetails.driverPricePerHour && (
-                  <>
-                    <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body1">راننده هر ساعت:</Typography>
-                      <Typography variant="h6" color="secondary">
-                        +{formatPrice(vehicleDetails.driverPricePerHour)} تومان
-                      </Typography>
-                    </Box>
-                  </>
-                )}
               </Box>
 
               {/* Description */}

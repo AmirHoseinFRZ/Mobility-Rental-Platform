@@ -10,8 +10,6 @@ import {
   Box,
   Card,
   CardContent,
-  Switch,
-  FormControlLabel,
   Alert,
   CircularProgress,
   Divider,
@@ -19,7 +17,7 @@ import {
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { vehicleService, pricingService, bookingService, driverService } from '../services/api';
+import { vehicleService, pricingService, bookingService } from '../services/api';
 
 // Convert English numbers to Persian
 const toPersianNumber = (num) => {
@@ -108,16 +106,6 @@ const formatPersianDateTime = (date) => {
   return `${toPersianNumber(jalali.day)} ${persianMonths[jalali.month - 1]} ${toPersianNumber(jalali.year)} - ساعت ${toPersianNumber(hours)}:${toPersianNumber(String(minutes).padStart(2, '0'))}`;
 };
 
-// Format datetime for local input (without timezone offset)
-const formatDateTimeLocal = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
 // Format datetime for backend (assumes user is in Iran timezone)
 // Sends the datetime as-is without timezone conversion
 const formatDateTimeForBackend = (date) => {
@@ -145,16 +133,10 @@ function BookingPage() {
   const getMinStartTime = () => new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
   const [startDateTime, setStartDateTime] = useState(getMinStartTime());
   const [endDateTime, setEndDateTime] = useState(new Date(Date.now() + 90 * 60 * 1000)); // 1.5 hours from now
-  const [withDriver, setWithDriver] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState(null);
-  const [pickupLocation, setPickupLocation] = useState('');
-  const [dropoffLocation, setDropoffLocation] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
-  const [discountCode, setDiscountCode] = useState('');
   
   // Price calculation
   const [priceData, setPriceData] = useState(null);
-  const [nearestDrivers, setNearestDrivers] = useState([]);
 
   useEffect(() => {
     loadVehicle();
@@ -164,13 +146,7 @@ function BookingPage() {
     if (vehicle && startDateTime && endDateTime) {
       calculatePrice();
     }
-  }, [vehicle, startDateTime, endDateTime, withDriver, discountCode]);
-
-  useEffect(() => {
-    if (withDriver && vehicle) {
-      loadNearestDrivers();
-    }
-  }, [withDriver]);
+  }, [vehicle, startDateTime, endDateTime]);
 
   const loadVehicle = async () => {
     try {
@@ -185,26 +161,6 @@ function BookingPage() {
     }
   };
 
-  const loadNearestDrivers = async () => {
-    if (!vehicle.latitude || !vehicle.longitude) return;
-    
-    try {
-      const response = await driverService.findNearestDrivers(
-        vehicle.latitude,
-        vehicle.longitude,
-        5
-      );
-      if (response.success) {
-        setNearestDrivers(response.data || []);
-        if (response.data.length > 0) {
-          setSelectedDriver(response.data[0].id);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load drivers', err);
-    }
-  };
-
   const calculatePrice = async () => {
     if (!vehicle) return;
     
@@ -213,8 +169,8 @@ function BookingPage() {
         vehicleType: vehicle.vehicleType,
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        withDriver,
-        discountCode: discountCode || null,
+        withDriver: false,
+        discountCode: null,
       };
       
       console.log('Calculating price with request:', priceRequest);
@@ -245,7 +201,6 @@ function BookingPage() {
     const remainingHours = totalHours % 24;
     
     let basePrice = 0;
-    let driverPrice = 0;
     
     // محاسبه قیمت پایه
     if (days >= 1) {
@@ -256,16 +211,11 @@ function BookingPage() {
       basePrice = totalHours * vehicle.pricePerHour;
     }
     
-    // محاسبه قیمت راننده (همیشه بر اساس ساعت)
-    if (withDriver && vehicle.driverPricePerHour) {
-      driverPrice = totalHours * vehicle.driverPricePerHour;
-    }
-    
-    const totalPrice = basePrice + driverPrice;
+    const totalPrice = basePrice;
     
     setPriceData({
       basePrice: basePrice.toFixed(2),
-      driverPrice: driverPrice.toFixed(2),
+      driverPrice: '0',
       surgeCharge: 0,
       weekendCharge: 0,
       discountAmount: 0,
@@ -277,7 +227,6 @@ function BookingPage() {
     
     console.log('Price calculated locally:', {
       basePrice,
-      driverPrice,
       totalPrice,
       totalHours,
       days,
@@ -289,29 +238,29 @@ function BookingPage() {
   };
 
   const handleBooking = async () => {
-    if (!pickupLocation) {
-      setError('لطفاً محل تحویل را وارد کنید');
-      return;
-    }
-    
     setBookingLoading(true);
     setError('');
     
     try {
+      const defaultPickupLocation =
+        (vehicle.currentAddress && vehicle.currentAddress.trim()) ||
+        (vehicle.currentCity && vehicle.currentCity.trim()) ||
+        'محل وسیله نقلیه';
+
       const bookingRequest = {
         userId: user.id,
         vehicleId: parseInt(vehicleId),
-        driverId: withDriver ? selectedDriver : null,
+        driverId: null,
         startDateTime: formatDateTimeForBackend(startDateTime),
         endDateTime: formatDateTimeForBackend(endDateTime),
-        pickupLocation,
+        pickupLocation: defaultPickupLocation,
         pickupLatitude: vehicle.latitude,
         pickupLongitude: vehicle.longitude,
-        dropoffLocation: dropoffLocation || null,
-        withDriver,
+        dropoffLocation: null,
+        withDriver: false,
         specialRequests: specialRequests || null,
         vehiclePrice: priceData ? parseFloat(priceData.basePrice) : null,
-        driverPrice: priceData ? parseFloat(priceData.driverPrice) : null,
+        driverPrice: null,
         totalPrice: priceData ? parseFloat(priceData.totalPrice) : null,
       };
       
@@ -364,116 +313,168 @@ function BookingPage() {
                   جزئیات رزرو
                 </Typography>
 
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    label="تاریخ و زمان شروع"
-                    type="datetime-local"
-                    value={formatDateTimeLocal(startDateTime)}
-                    onChange={(e) => {
-                      const selectedDate = new Date(e.target.value);
-                      const minTime = getMinStartTime();
-                      
-                      // Don't allow time before minimum allowed time
-                      if (selectedDate < minTime) {
-                        setError('زمان شروع نمی‌تواند کمتر از نیم ساعت آینده باشد');
-                        setStartDateTime(minTime);
-                      } else {
-                        setError('');
-                        setStartDateTime(selectedDate);
-                        // If end time is before new start time, adjust it
-                        if (endDateTime <= selectedDate) {
-                          setEndDateTime(new Date(selectedDate.getTime() + 60 * 60 * 1000));
-                        }
-                      }
-                    }}
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{
-                      min: formatDateTimeLocal(getMinStartTime())
-                    }}
-                    helperText={startDateTime ? formatPersianDateTime(startDateTime) : ''}
-                    sx={{ mb: 2 }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="تاریخ و زمان پایان"
-                    type="datetime-local"
-                    value={formatDateTimeLocal(endDateTime)}
-                    onChange={(e) => {
-                      const selectedDate = new Date(e.target.value);
-                      
-                      // Don't allow end time before start time
-                      if (selectedDate <= startDateTime) {
-                        setError('زمان پایان باید بعد از زمان شروع باشد');
-                      } else {
-                        setError('');
-                        setEndDateTime(selectedDate);
-                      }
-                    }}
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{
-                      min: formatDateTimeLocal(new Date(startDateTime.getTime() + 60 * 60 * 1000))
-                    }}
-                    helperText={endDateTime ? formatPersianDateTime(endDateTime) : ''}
-                  />
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="محل تحویل"
-                  value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  required
-                  sx={{ mb: 2 }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="محل بازگشت (اختیاری)"
-                  value={dropoffLocation}
-                  onChange={(e) => setDropoffLocation(e.target.value)}
-                  sx={{ mb: 2 }}
-                />
-
-                {vehicle.requiresDriver && (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={withDriver}
-                        onChange={(e) => setWithDriver(e.target.checked)}
-                      />
-                    }
-                    label="رزرو با راننده"
-                    sx={{ mb: 2 }}
-                  />
-                )}
-
-                {withDriver && nearestDrivers.length > 0 && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      رانندگان موجود در نزدیکی:
-                    </Typography>
-                    {nearestDrivers.map((driver) => (
-                      <Card
-                        key={driver.id}
-                        sx={{
-                          mb: 1,
-                          cursor: 'pointer',
-                          border: selectedDriver === driver.id ? '2px solid #1976d2' : '1px solid #ddd',
+                {/* بازهٔ زمانی رزرو */}
+                <Box
+                  sx={{
+                    mb: 3,
+                    p: 2.5,
+                    borderRadius: 2,
+                    bgcolor: 'action.hover',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2, fontWeight: 600 }}>
+                    بازهٔ زمانی رزرو
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <DateTimePicker
+                        label="از تاریخ و زمان"
+                        value={startDateTime}
+                        minDate={new Date()}
+                        shouldDisableDate={(date) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const checkDate = new Date(date);
+                          checkDate.setHours(0, 0, 0, 0);
+                          return checkDate < today;
                         }}
-                        onClick={() => setSelectedDriver(driver.id)}
-                      >
-                        <CardContent>
-                          <Typography variant="body2">
-                            ⭐ {toPersianNumber(driver.rating.toFixed(1))} • {toPersianNumber(driver.totalTrips)} سفر
-                            {driver.distanceKm && ` • ${toPersianNumber(driver.distanceKm.toFixed(1))} کیلومتر فاصله`}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    ))}
+                        shouldDisableTime={(value, view) => {
+                          if (!value) return false;
+                          const minTime = getMinStartTime();
+                          const selectedDate = new Date(value);
+                          
+                          // اگر روز انتخاب‌شده امروز نیست، همه ساعات مجاز هستند
+                          const today = new Date();
+                          if (selectedDate.getDate() !== today.getDate() ||
+                              selectedDate.getMonth() !== today.getMonth() ||
+                              selectedDate.getFullYear() !== today.getFullYear()) {
+                            return false;
+                          }
+                          
+                          // برای امروز، ساعات قبل از minTime را غیرفعال کن
+                          if (view === 'hours') {
+                            return value < minTime.getHours();
+                          }
+                          if (view === 'minutes') {
+                            if (value === minTime.getHours()) {
+                              return selectedDate.getMinutes() < minTime.getMinutes();
+                            }
+                          }
+                          return false;
+                        }}
+                        onChange={(newValue) => {
+                          if (!newValue || isNaN(newValue.getTime())) return;
+                          const minTime = getMinStartTime();
+                          if (newValue < minTime) {
+                            setError('زمان شروع نمی‌تواند کمتر از نیم ساعت آینده باشد');
+                            setStartDateTime(minTime);
+                          } else {
+                            setError('');
+                            setStartDateTime(newValue);
+                            if (endDateTime <= newValue) {
+                              setEndDateTime(new Date(newValue.getTime() + 60 * 60 * 1000));
+                            }
+                          }
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            size="small"
+                            helperText={startDateTime ? formatPersianDateTime(startDateTime) : ''}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <DateTimePicker
+                        label="تا تاریخ و زمان"
+                        value={endDateTime}
+                        minDate={startDateTime}
+                        shouldDisableDate={(date) => {
+                          const startDate = new Date(startDateTime);
+                          startDate.setHours(0, 0, 0, 0);
+                          const checkDate = new Date(date);
+                          checkDate.setHours(0, 0, 0, 0);
+                          return checkDate < startDate;
+                        }}
+                        shouldDisableTime={(value, view) => {
+                          if (!value) return false;
+                          const selectedDate = new Date(value);
+                          const minEndTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+                          
+                          // اگر روز انتخاب‌شده روز شروع نیست، همه ساعات مجاز هستند
+                          if (selectedDate.getDate() !== startDateTime.getDate() ||
+                              selectedDate.getMonth() !== startDateTime.getMonth() ||
+                              selectedDate.getFullYear() !== startDateTime.getFullYear()) {
+                            return false;
+                          }
+                          
+                          // برای همان روز شروع، ساعات قبل از minEndTime را غیرفعال کن
+                          if (view === 'hours') {
+                            return value < minEndTime.getHours();
+                          }
+                          if (view === 'minutes') {
+                            if (selectedDate.getHours() === minEndTime.getHours()) {
+                              return value < minEndTime.getMinutes();
+                            }
+                          }
+                          return false;
+                        }}
+                        onChange={(newValue) => {
+                          if (!newValue || isNaN(newValue.getTime())) return;
+                          if (newValue <= startDateTime) {
+                            setError('زمان پایان باید بعد از زمان شروع باشد');
+                          } else {
+                            setError('');
+                            setEndDateTime(newValue);
+                          }
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            size="small"
+                            helperText={endDateTime ? formatPersianDateTime(endDateTime) : ''}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Box
+                    sx={{
+                      mt: 2,
+                      py: 1.5,
+                      px: 2,
+                      borderRadius: 1,
+                      bgcolor: 'background.paper',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      مدت:
+                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">
+                      {startDateTime && endDateTime && endDateTime > startDateTime
+                        ? (() => {
+                            const hours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
+                            const days = Math.floor(hours / 24);
+                            const h = hours % 24;
+                            if (days > 0) {
+                              return `${toPersianNumber(days)} روز و ${toPersianNumber(h)} ساعت`;
+                            }
+                            return `${toPersianNumber(hours)} ساعت`;
+                          })()
+                        : '—'}
+                    </Typography>
                   </Box>
-                )}
+                </Box>
 
                 <TextField
                   fullWidth
@@ -483,13 +484,6 @@ function BookingPage() {
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   sx={{ mb: 2 }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="کد تخفیف (اختیاری)"
-                  value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
                 />
               </CardContent>
             </Card>
@@ -521,13 +515,6 @@ function BookingPage() {
                       <Typography variant="body2">قیمت پایه:</Typography>
                       <Typography variant="body2">{formatPrice(priceData.basePrice)} تومان</Typography>
                     </Box>
-                    
-                    {priceData.driverPrice > 0 && (
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">هزینه راننده:</Typography>
-                        <Typography variant="body2">{formatPrice(priceData.driverPrice)} تومان</Typography>
-                      </Box>
-                    )}
                     
                     {priceData.surgeCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>

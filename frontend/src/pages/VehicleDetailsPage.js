@@ -122,9 +122,6 @@ function VehicleDetailsPage() {
               sx={{ mr: 1 }}
             />
             <Chip label={vehicle.vehicleType} variant="outlined" sx={{ mr: 1 }} />
-            {vehicle.requiresDriver && (
-              <Chip label="راننده موجود" color="secondary" />
-            )}
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -184,17 +181,6 @@ function VehicleDetailsPage() {
                 {formatPrice(vehicle.pricePerDay)} تومان
               </Typography>
             </Box>
-            {vehicle.requiresDriver && vehicle.driverPricePerHour && (
-              <>
-                <Divider sx={{ my: 1 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body1">راننده هر ساعت:</Typography>
-                  <Typography variant="h6" color="secondary">
-                    +{formatPrice(vehicle.driverPricePerHour)} تومان
-                  </Typography>
-                </Box>
-              </>
-            )}
           </Box>
 
           <Divider sx={{ my: 2 }} />

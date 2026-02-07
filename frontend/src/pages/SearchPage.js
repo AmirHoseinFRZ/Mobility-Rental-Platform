@@ -156,7 +156,6 @@ function SearchPage() {
   const [searchLocation, setSearchLocation] = useState(null);
   const [radius, setRadius] = useState('5');
   const [vehicleType, setVehicleType] = useState('');
-  const [requiresDriver, setRequiresDriver] = useState('');
   
   // Time range filters
   const [useTimeRange, setUseTimeRange] = useState(false);
@@ -222,7 +221,6 @@ function SearchPage() {
         longitude: parseFloat(lon),
         radiusKm: parseFloat(radius),
         vehicleType: vehicleType || null,
-        requiresDriver: requiresDriver === '' ? null : requiresDriver === 'true',
       };
       
       // Add time range if enabled
@@ -351,20 +349,6 @@ function SearchPage() {
                 <MenuItem value="BIKE">موتورسیکلت</MenuItem>
                 <MenuItem value="SCOOTER">اسکوتر</MenuItem>
                 <MenuItem value="BICYCLE">دوچرخه</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>با راننده</InputLabel>
-              <Select
-                value={requiresDriver}
-                label="با راننده"
-                onChange={(e) => setRequiresDriver(e.target.value)}
-              >
-                <MenuItem value="">همه</MenuItem>
-                <MenuItem value="false">بدون راننده</MenuItem>
-                <MenuItem value="true">با راننده</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -567,15 +551,6 @@ function SearchPage() {
                         {formatPrice(vehicle.pricePerDay)} تومان
                       </Typography>
                     </Box>
-
-                    {vehicle.requiresDriver && (
-                      <Chip
-                        label="راننده موجود"
-                        color="secondary"
-                        size="small"
-                        sx={{ mt: 1 }}
-                      />
-                    )}
 
                     <Chip
                       label={vehicle.status}

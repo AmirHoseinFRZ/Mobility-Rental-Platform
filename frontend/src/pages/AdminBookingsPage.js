@@ -269,18 +269,6 @@ function AdminBookingsPage() {
                 ${selectedBooking.finalPrice}
               </Typography>
 
-              <Typography variant="body2" color="text.secondary">With Driver:</Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {selectedBooking.withDriver ? 'Yes' : 'No'}
-              </Typography>
-
-              {selectedBooking.driverId && (
-                <>
-                  <Typography variant="body2" color="text.secondary">Driver ID:</Typography>
-                  <Typography variant="body1" sx={{ mb: 2 }}>{selectedBooking.driverId}</Typography>
-                </>
-              )}
-
               <Typography variant="body2" color="text.secondary">Status:</Typography>
               <Chip
                 label={selectedBooking.status}

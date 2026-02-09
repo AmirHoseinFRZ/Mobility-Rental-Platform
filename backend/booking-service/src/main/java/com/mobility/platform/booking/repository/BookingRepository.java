@@ -63,6 +63,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.actualEndDateTime IS NULL")
     List<Booking> findBookingsToComplete(@Param("now") LocalDateTime now);
     
+    /** CONFIRMED bookings whose end time has passed (vehicle still BOOKED, should be released). */
+    @Query("SELECT b FROM Booking b WHERE b.endDateTime <= :now AND b.status = 'CONFIRMED'")
+    List<Booking> findExpiredConfirmedBookings(@Param("now") LocalDateTime now);
+    
+    /** PENDING bookings whose end time has passed (vehicle still BOOKED, should be released). */
+    @Query("SELECT b FROM Booking b WHERE b.endDateTime <= :now AND b.status = 'PENDING'")
+    List<Booking> findExpiredPendingBookings(@Param("now") LocalDateTime now);
+    
     Optional<Booking> findByPaymentTransactionId(String paymentTransactionId);
 }
 

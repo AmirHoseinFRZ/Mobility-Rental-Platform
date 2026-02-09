@@ -259,6 +259,86 @@ public class BookingService {
         return mapToResponse(booking);
     }
     
+    /**
+     * Process expired bookings: auto-complete ONGOING past end time and release vehicles
+     * for CONFIRMED bookings that ended without being started. Called by scheduler.
+     */
+    public void processExpiredBookings() {
+        LocalDateTime now = LocalDateTime.now();
+        for (Booking b : bookingRepository.findBookingsToComplete(now)) {
+            try {
+                completeExpiredOngoingBooking(b.getId());
+            } catch (Exception e) {
+                log.error("Failed to auto-complete booking {}", b.getId(), e);
+            }
+        }
+        for (Booking b : bookingRepository.findExpiredConfirmedBookings(now)) {
+            try {
+                expireConfirmedBooking(b.getId());
+            } catch (Exception e) {
+                log.error("Failed to expire confirmed booking {}", b.getId(), e);
+            }
+        }
+        for (Booking b : bookingRepository.findExpiredPendingBookings(now)) {
+            try {
+                expirePendingBooking(b.getId());
+            } catch (Exception e) {
+                log.error("Failed to expire pending booking {}", b.getId(), e);
+            }
+        }
+    }
+    
+    @Transactional
+    public void completeExpiredOngoingBooking(Long id) {
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if (booking == null || booking.getStatus() != BookingStatus.ONGOING) return;
+        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setActualEndDateTime(LocalDateTime.now());
+        booking = bookingRepository.save(booking);
+        try {
+            vehicleClient.updateVehicleStatus(booking.getVehicleId(), VehicleStatus.AVAILABLE);
+        } catch (Exception e) {
+            log.error("Failed to update vehicle status for booking {}", id, e);
+        }
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("bookingId", booking.getId());
+        eventData.put("bookingNumber", booking.getBookingNumber());
+        eventPublisher.publishBookingEvent("completed", eventData);
+        log.info("Auto-completed expired booking: {}", id);
+    }
+    
+    @Transactional
+    public void expireConfirmedBooking(Long id) {
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if (booking == null || booking.getStatus() != BookingStatus.CONFIRMED) return;
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancellationReason("Expired - rental period ended without start");
+        booking.setCancelledAt(LocalDateTime.now());
+        booking = bookingRepository.save(booking);
+        try {
+            vehicleClient.updateVehicleStatus(booking.getVehicleId(), VehicleStatus.AVAILABLE);
+        } catch (Exception e) {
+            log.error("Failed to update vehicle status for booking {}", id, e);
+        }
+        log.info("Expired confirmed booking and released vehicle: {}", id);
+    }
+    
+    @Transactional
+    public void expirePendingBooking(Long id) {
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if (booking == null || booking.getStatus() != BookingStatus.PENDING) return;
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancellationReason("Expired - rental period ended");
+        booking.setCancelledAt(LocalDateTime.now());
+        booking = bookingRepository.save(booking);
+        try {
+            vehicleClient.updateVehicleStatus(booking.getVehicleId(), VehicleStatus.AVAILABLE);
+        } catch (Exception e) {
+            log.error("Failed to update vehicle status for booking {}", id, e);
+        }
+        log.info("Expired pending booking and released vehicle: {}", id);
+    }
+    
     @Transactional
     public BookingResponse cancelBooking(Long id, String reason) {
         log.info("Cancelling booking: {}", id);

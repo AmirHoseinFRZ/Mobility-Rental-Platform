@@ -13,7 +13,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { DirectionsCar, LocationOn } from '@mui/icons-material';
+import { DirectionsCar, LocationOn, CloudUpload } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
 import LocationSelector from '../components/LocationSelector';
 
@@ -24,6 +24,8 @@ function AddVehiclePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [vehicleLocation, setVehicleLocation] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [formData, setFormData] = useState({
     vehicleNumber: '',
@@ -51,6 +53,23 @@ function AddVehiclePage() {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('لطفاً یک فایل تصویری (JPEG، PNG، GIF یا WebP) انتخاب کنید');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError('حجم تصویر نباید بیشتر از ۵ مگابایت باشد');
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -64,8 +83,15 @@ function AddVehiclePage() {
     setLoading(true);
 
     try {
+      let imageUrl = formData.imageUrl?.trim() || '';
+      if (imageFile) {
+        const uploadRes = await vehicleService.uploadImage(imageFile);
+        if (uploadRes?.data) imageUrl = uploadRes.data;
+      }
+
       const payload = {
         ...formData,
+        imageUrl: imageUrl || null,
         ownerId: user.id,
         year: parseInt(formData.year),
         seatingCapacity: parseInt(formData.seatingCapacity),
@@ -81,7 +107,7 @@ function AddVehiclePage() {
         navigate('/my-vehicles');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'افزودن وسیله نقلیه ناموفق بود');
+      setError(err?.message || err?.response?.data?.message || 'افزودن وسیله نقلیه ناموفق بود');
     } finally {
       setLoading(false);
     }
@@ -322,17 +348,44 @@ function AddVehiclePage() {
           </Box>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            جزئیات بیشتر
+            تصویر وسیله نقلیه
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                component="label"
+                startIcon={<CloudUpload />}
+                fullWidth
+                sx={{ py: 2 }}
+              >
+                {imageFile ? imageFile.name : 'انتخاب تصویر (JPEG، PNG، GIF یا WebP - حداکثر ۵ مگابایت)'}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={handleImageChange}
+                />
+              </Button>
+              {imagePreview && (
+                <Box sx={{ mt: 2 }}>
+                  <Box
+                    component="img"
+                    src={imagePreview}
+                    alt="پیش‌نمایش"
+                    sx={{ maxWidth: '100%', maxHeight: 200, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}
+                  />
+                </Box>
+              )}
               <TextField
                 fullWidth
-                label="آدرس تصویر"
+                label="یا آدرس تصویر (URL)"
                 name="imageUrl"
                 value={formData.imageUrl}
                 onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
+                sx={{ mt: 2 }}
+                helperText="در صورت آپلود فایل، آدرس ذخیره می‌شود. یا می‌توانید مستقیماً لینک تصویر را وارد کنید."
               />
             </Grid>
             <Grid item xs={12}>

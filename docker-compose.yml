@@ -67,6 +67,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # MinIO Object Storage (vehicle images)
+  minio:
+    image: minio/minio:latest
+    container_name: mobility-minio
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin123}
+      # Override host env so MinIO uses the above credentials, not _FILE paths
+      MINIO_ROOT_USER_FILE: ""
+      MINIO_ROOT_PASSWORD_FILE: ""
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - mobility-network
   # PostgreSQL Admin Tool (pgAdmin) - Optional
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -246,6 +265,11 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-mobility_redis_password}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-admin123}
+      - MINIO_BUCKET=vehicles
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -255,6 +279,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
       interval: 30s
@@ -607,6 +633,8 @@ volumes:
     name: mobility-rabbitmq-logs
   redis_data:
     name: mobility-redis-data
+  minio_data:
+    name: mobility-minio-data
   pgadmin_data:
     name: mobility-pgadmin-data
 

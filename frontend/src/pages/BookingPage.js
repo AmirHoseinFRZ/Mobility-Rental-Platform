@@ -496,6 +496,15 @@ function BookingPage() {
                 <Typography variant="h6" gutterBottom>
                   خلاصه وسیله نقلیه
                 </Typography>
+                {vehicle.imageUrl && (
+                  <Box
+                    component="img"
+                    src={vehicle.imageUrl}
+                    alt={`${vehicle.brand} ${vehicle.model}`}
+                    sx={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 2, mb: 2 }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                )}
                 <Typography variant="body1">
                   {vehicle.brand} {vehicle.model}
                 </Typography>

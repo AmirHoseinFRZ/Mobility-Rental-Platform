@@ -20,6 +20,7 @@ import * as yup from 'yup';
 import { vehicleService } from '../services/api';
 import LocationSelector from '../components/LocationSelector';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import CloudUpload from '@mui/icons-material/CloudUpload';
 
 const validationSchema = yup.object({
   vehicleType: yup.string().required('نوع وسیله نقلیه الزامی است'),
@@ -40,6 +41,8 @@ function EditVehiclePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const formik = useFormik({
     initialValues: {
@@ -73,8 +76,15 @@ function EditVehiclePage() {
       }
 
       try {
+        let imageUrl = values.imageUrl?.trim() || '';
+        if (imageFile) {
+          const uploadRes = await vehicleService.uploadImage(imageFile);
+          if (uploadRes?.data) imageUrl = uploadRes.data;
+        }
+
         const vehicleData = {
           ...values,
+          imageUrl: imageUrl || null,
           ownerId: user.id,
           latitude: selectedLocation.lat,
           longitude: selectedLocation.lng,
@@ -88,7 +98,7 @@ function EditVehiclePage() {
           setError(response.message || 'به‌روزرسانی وسیله نقلیه ناموفق بود');
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'به‌روزرسانی وسیله نقلیه ناموفق بود. لطفاً دوباره تلاش کنید.');
+        setError(err?.message || err?.response?.data?.message || 'به‌روزرسانی وسیله نقلیه ناموفق بود. لطفاً دوباره تلاش کنید.');
       } finally {
         setSubmitting(false);
       }
@@ -393,13 +403,48 @@ function EditVehiclePage() {
               )}
             </Grid>
 
-            {/* Image URL */}
+            {/* Image */}
             <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                تصویر وسیله نقلیه
+              </Typography>
+              {(formik.values.imageUrl || imagePreview) && (
+                <Box sx={{ mb: 2 }}>
+                  <Box
+                    component="img"
+                    src={imagePreview || formik.values.imageUrl}
+                    alt="تصویر وسیله"
+                    sx={{ maxWidth: '100%', maxHeight: 200, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </Box>
+              )}
+              <Button
+                variant="outlined"
+                component="label"
+                startIcon={<CloudUpload />}
+                fullWidth
+                sx={{ py: 1.5, mb: 2 }}
+              >
+                {imageFile ? imageFile.name : 'انتخاب تصویر جدید (JPEG، PNG، GIF یا WebP - حداکثر ۵ مگابایت)'}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </Button>
               <TextField
                 fullWidth
                 id="imageUrl"
                 name="imageUrl"
-                label="آدرس تصویر (URL)"
+                label="یا آدرس تصویر (URL)"
                 value={formik.values.imageUrl}
                 onChange={formik.handleChange}
               />

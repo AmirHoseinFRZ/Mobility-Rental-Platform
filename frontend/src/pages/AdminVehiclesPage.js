@@ -308,6 +308,18 @@ function AdminVehiclesPage() {
         <DialogContent>
           {selectedVehicle && (
             <Box sx={{ pt: 2 }}>
+              {selectedVehicle.imageUrl && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>Image</Typography>
+                  <Box
+                    component="img"
+                    src={selectedVehicle.imageUrl}
+                    alt={`${selectedVehicle.brand} ${selectedVehicle.model}`}
+                    sx={{ maxWidth: '100%', maxHeight: 280, borderRadius: 2, border: '1px solid', borderColor: 'divider', objectFit: 'contain' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </Box>
+              )}
               <Typography variant="body2" color="text.secondary">Vehicle ID:</Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>{selectedVehicle.id}</Typography>
 

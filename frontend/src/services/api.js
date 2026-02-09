@@ -78,6 +78,14 @@ export const vehicleService = {
   updateVehicle: (id, vehicleData) => api.put(`/api/vehicles/${id}`, vehicleData),
   deleteVehicle: (id) => api.delete(`/api/vehicles/${id}`),
   getVehiclesByOwner: (ownerId) => api.get(`/api/vehicles/owner/${ownerId}`),
+  /** Upload vehicle image (multipart). Returns { data: imageUrl } */
+  uploadImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/vehicles/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // ==================== BOOKING SERVICES ====================

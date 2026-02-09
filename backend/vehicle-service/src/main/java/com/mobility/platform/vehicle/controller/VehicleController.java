@@ -6,6 +6,7 @@ import com.mobility.platform.common.enums.VehicleStatus;
 import com.mobility.platform.vehicle.dto.LocationSearchRequest;
 import com.mobility.platform.vehicle.dto.VehicleRequest;
 import com.mobility.platform.vehicle.dto.VehicleResponse;
+import com.mobility.platform.vehicle.service.StorageService;
 import com.mobility.platform.vehicle.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,8 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,6 +33,16 @@ import java.util.List;
 public class VehicleController {
     
     private final VehicleService vehicleService;
+    private final StorageService storageService;
+    
+    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload vehicle image to storage")
+    public ResponseEntity<ApiResponse<String>> uploadVehicleImage(
+            @RequestParam("file") MultipartFile file) {
+        String imageUrl = storageService.uploadVehicleImage(file);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Image uploaded successfully", imageUrl));
+    }
     
     @PostMapping
     @Operation(summary = "Create new vehicle")

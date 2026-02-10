@@ -263,6 +263,25 @@ public class VehicleService {
     }
     
     @Transactional
+    public VehicleResponse updateVehicleRating(Long id, Double rating, Integer totalReviews) {
+        log.info("Updating vehicle rating: {} -> rating={}, totalReviews={}", id, rating, totalReviews);
+        
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle", "id", id));
+        
+        if (rating != null) {
+            vehicle.setRating(rating);
+        }
+        if (totalReviews != null) {
+            vehicle.setTotalReviews(totalReviews);
+        }
+        vehicle = vehicleRepository.save(vehicle);
+        
+        log.info("Vehicle rating updated successfully: {}", id);
+        return mapToResponse(vehicle, null);
+    }
+    
+    @Transactional
     public void deleteVehicle(Long id) {
         log.info("Deleting vehicle: {}", id);
         

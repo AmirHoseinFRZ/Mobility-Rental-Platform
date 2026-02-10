@@ -149,7 +149,7 @@ public class BookingService {
     
     public List<BookingResponse> getVehicleBookings(Long vehicleId) {
         log.info("Fetching bookings for vehicle: {}", vehicleId);
-        List<Booking> bookings = bookingRepository.findByVehicleId(vehicleId);
+        List<Booking> bookings = bookingRepository.findByVehicleIdOrderByCreatedAtDesc(vehicleId);
         return bookings.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -276,7 +276,7 @@ public class BookingService {
             try {
                 expireConfirmedBooking(b.getId());
             } catch (Exception e) {
-                log.error("Failed to expire confirmed booking {}", b.getId(), e);
+                log.error("Failed to process expired confirmed booking {}", b.getId(), e);
             }
         }
         for (Booking b : bookingRepository.findExpiredPendingBookings(now)) {
@@ -306,7 +306,7 @@ public class BookingService {
         eventPublisher.publishBookingEvent("completed", eventData);
         log.info("Auto-completed expired booking: {}", id);
     }
-    
+
     @Transactional
     public void expireConfirmedBooking(Long id) {
         Booking booking = bookingRepository.findById(id).orElse(null);
@@ -339,6 +339,42 @@ public class BookingService {
         log.info("Expired pending booking and released vehicle: {}", id);
     }
     
+    /**
+     * Correct a CANCELLED booking to COMPLETED when it was paid and the rental period has ended.
+     * Use for fixing bookings that were wrongly auto-cancelled by processExpiredBookings.
+     */
+    @Transactional
+    public BookingResponse correctPaidExpiredBookingToCompleted(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", id));
+        if (booking.getStatus() != BookingStatus.CANCELLED) {
+            throw new BusinessException("Only cancelled bookings can be corrected to completed", "INVALID_STATUS");
+        }
+        if (!Boolean.TRUE.equals(booking.getPaymentCompleted())) {
+            throw new BusinessException("Only paid bookings can be corrected to completed", "BOOKING_NOT_PAID");
+        }
+        if (booking.getEndDateTime().isAfter(LocalDateTime.now())) {
+            throw new BusinessException("Rental period has not ended yet", "RENTAL_NOT_ENDED");
+        }
+        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setActualStartDateTime(booking.getStartDateTime());
+        booking.setActualEndDateTime(booking.getEndDateTime());
+        booking.setCancellationReason(null);
+        booking.setCancelledAt(null);
+        booking = bookingRepository.save(booking);
+        try {
+            vehicleClient.updateVehicleStatus(booking.getVehicleId(), VehicleStatus.AVAILABLE);
+        } catch (Exception e) {
+            log.error("Failed to update vehicle status for booking {}", id, e);
+        }
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("bookingId", booking.getId());
+        eventData.put("bookingNumber", booking.getBookingNumber());
+        eventPublisher.publishBookingEvent("completed", eventData);
+        log.info("Corrected cancelled paid booking to completed: {}", id);
+        return mapToResponse(booking);
+    }
+
     @Transactional
     public BookingResponse cancelBooking(Long id, String reason) {
         log.info("Cancelling booking: {}", id);

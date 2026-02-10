@@ -44,6 +44,13 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.success(reviews));
     }
     
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Get reviews by user (to check which bookings already have a review)")
+    public ResponseEntity<ApiResponse<List<ReviewResponse>>> getUserReviews(@PathVariable Long userId) {
+        List<ReviewResponse> reviews = reviewService.getUserReviews(userId);
+        return ResponseEntity.ok(ApiResponse.success(reviews));
+    }
+    
     @GetMapping("/vehicle/{vehicleId}/rating")
     @Operation(summary = "Get average rating for vehicle")
     public ResponseEntity<ApiResponse<Double>> getVehicleRating(@PathVariable Long vehicleId) {

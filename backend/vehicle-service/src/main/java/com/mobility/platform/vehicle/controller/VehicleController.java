@@ -138,6 +138,16 @@ public class VehicleController {
         return ResponseEntity.ok(ApiResponse.success("Vehicle location updated successfully", response));
     }
     
+    @PatchMapping("/{id}/rating")
+    @Operation(summary = "Update vehicle rating and total reviews (e.g. after a new review)")
+    public ResponseEntity<ApiResponse<VehicleResponse>> updateVehicleRating(
+            @PathVariable Long id,
+            @RequestParam Double rating,
+            @RequestParam Integer totalReviews) {
+        VehicleResponse response = vehicleService.updateVehicleRating(id, rating, totalReviews);
+        return ResponseEntity.ok(ApiResponse.success("Vehicle rating updated successfully", response));
+    }
+    
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete vehicle")
     public ResponseEntity<ApiResponse<Void>> deleteVehicle(@PathVariable Long id) {

@@ -93,6 +93,14 @@ public class BookingController {
         BookingResponse response = bookingService.cancelBooking(id, reason);
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", response));
     }
+
+    @PatchMapping("/{id}/correct-to-completed")
+    @Operation(summary = "Correct cancelled paid booking to completed",
+            description = "For bookings that were paid and whose rental period has ended but were wrongly marked cancelled (e.g. by auto-expiry).")
+    public ResponseEntity<ApiResponse<BookingResponse>> correctPaidExpiredBookingToCompleted(@PathVariable Long id) {
+        BookingResponse response = bookingService.correctPaidExpiredBookingToCompleted(id);
+        return ResponseEntity.ok(ApiResponse.success("Booking corrected to completed", response));
+    }
     
     @GetMapping("/booked-vehicles")
     @Operation(summary = "Get list of vehicle IDs that are booked in a time range")

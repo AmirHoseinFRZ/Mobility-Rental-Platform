@@ -155,6 +155,7 @@ export const reviewService = {
   createReview: (reviewData) => api.post('/api/reviews/', reviewData),
   getVehicleReviews: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}`),
   getDriverReviews: (driverId) => api.get(`/api/reviews/driver/${driverId}`),
+  getUserReviews: (userId) => api.get(`/api/reviews/user/${userId}`),
   getVehicleRating: (vehicleId) => api.get(`/api/reviews/vehicle/${vehicleId}/rating`),
   getDriverRating: (driverId) => api.get(`/api/reviews/driver/${driverId}/rating`),
 };

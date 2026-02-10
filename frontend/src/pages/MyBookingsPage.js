@@ -92,6 +92,7 @@ function MyBookingsPage() {
   const [reviewDialog, setReviewDialog] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [reviewedBookingIds, setReviewedBookingIds] = useState(new Set());
   
   // Vehicle details dialog
   const [vehicleDetailsDialog, setVehicleDetailsDialog] = useState(false);
@@ -99,9 +100,24 @@ function MyBookingsPage() {
   const [vehicleLoading, setVehicleLoading] = useState(false);
   const [ownerInfo, setOwnerInfo] = useState(null);
 
+  // Start/Complete action loading (booking id)
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
   useEffect(() => {
     loadBookings();
   }, [user]);
+
+  useEffect(() => {
+    if (user?.id) {
+      reviewService.getUserReviews(user.id)
+        .then((res) => {
+          if (res?.success && Array.isArray(res.data)) {
+            setReviewedBookingIds(new Set(res.data.map((r) => r.bookingId).filter(Boolean)));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.id]);
 
   const loadBookings = async () => {
     try {
@@ -175,6 +191,40 @@ function MyBookingsPage() {
     }
   };
 
+  const handleStartBooking = async (booking) => {
+    try {
+      setActionLoadingId(booking.id);
+      setError('');
+      const response = await bookingService.startBooking(booking.id);
+      if (response.success) {
+        loadBookings();
+      } else {
+        setError(response.message || 'شروع رزرو ناموفق بود');
+      }
+    } catch (err) {
+      setError(err.message || err?.data?.message || 'شروع رزرو ناموفق بود');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleCompleteBooking = async (booking) => {
+    try {
+      setActionLoadingId(booking.id);
+      setError('');
+      const response = await bookingService.completeBooking(booking.id);
+      if (response.success) {
+        loadBookings();
+      } else {
+        setError(response.message || 'اتمام رزرو ناموفق بود');
+      }
+    } catch (err) {
+      setError(err.message || err?.data?.message || 'اتمام رزرو ناموفق بود');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   const handleSubmitReview = async () => {
     try {
       const reviewData = {
@@ -191,10 +241,13 @@ function MyBookingsPage() {
         setReviewDialog(false);
         setComment('');
         setRating(5);
+        setReviewedBookingIds((prev) => new Set([...prev, selectedBooking.id]));
         alert('نظر شما با موفقیت ثبت شد!');
+        loadBookings();
       }
     } catch (err) {
-      setError('ثبت نظر ناموفق بود');
+      const message = err.response?.data?.message || 'ثبت نظر ناموفق بود';
+      setError(message);
     }
   };
 
@@ -378,7 +431,29 @@ function MyBookingsPage() {
                       </Button>
                     )}
 
-                    {booking.status === 'COMPLETED' && (
+                    {booking.status === 'CONFIRMED' && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={actionLoadingId === booking.id}
+                        onClick={() => handleStartBooking(booking)}
+                      >
+                        {actionLoadingId === booking.id ? '...' : 'شروع رزرو'}
+                      </Button>
+                    )}
+
+                    {booking.status === 'ONGOING' && (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        disabled={actionLoadingId === booking.id}
+                        onClick={() => handleCompleteBooking(booking)}
+                      >
+                        {actionLoadingId === booking.id ? '...' : 'اتمام رزرو'}
+                      </Button>
+                    )}
+
+                    {booking.status === 'COMPLETED' && !reviewedBookingIds.has(booking.id) && (
                       <Button
                         variant="contained"
                         onClick={() => {
@@ -388,6 +463,9 @@ function MyBookingsPage() {
                       >
                         ثبت نظر
                       </Button>
+                    )}
+                    {booking.status === 'COMPLETED' && reviewedBookingIds.has(booking.id) && (
+                      <Chip label="نظر ثبت شده" color="default" size="small" />
                     )}
 
                     {!booking.paymentCompleted && 

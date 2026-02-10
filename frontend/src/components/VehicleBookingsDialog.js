@@ -85,7 +85,10 @@ function VehicleBookingsDialog({ open, onClose, vehicle }) {
       setError('');
       const response = await bookingService.getVehicleBookings(vehicle.id);
       console.log('Bookings response:', response);
-      setBookings(response.data || []);
+      const list = response.data || [];
+      // Sort from newest to oldest by createdAt
+      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setBookings(list);
     } catch (err) {
       console.error('Error loading bookings:', err);
       setError('بارگذاری رزروها ناموفق بود');

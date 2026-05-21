@@ -45,6 +45,8 @@ public class VehicleResponse {
     private LocalDate insuranceExpiryDate;
     private Double rating;
     private Integer totalReviews;
+    private Boolean deliveryAvailable;
+    private Integer maxDeliveryRadiusKm;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Double distanceKm; // Distance from search location

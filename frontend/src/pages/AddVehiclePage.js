@@ -12,6 +12,8 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { DirectionsCar, LocationOn, CloudUpload } from '@mui/icons-material';
 import { vehicleService } from '../services/api';
@@ -43,6 +45,8 @@ function AddVehiclePage() {
     imageUrl: '',
     description: '',
     features: '',
+    deliveryAvailable: false,
+    maxDeliveryRadiusKm: '',
   });
 
   const handleChange = (e) => {
@@ -99,6 +103,11 @@ function AddVehiclePage() {
         pricePerDay: parseFloat(formData.pricePerDay),
         latitude: vehicleLocation.lat,
         longitude: vehicleLocation.lng,
+        deliveryAvailable: !!formData.deliveryAvailable,
+        maxDeliveryRadiusKm:
+          formData.deliveryAvailable && formData.maxDeliveryRadiusKm !== ''
+            ? parseInt(formData.maxDeliveryRadiusKm, 10)
+            : null,
       };
 
       await vehicleService.createVehicle(payload);
@@ -346,6 +355,45 @@ function AddVehiclePage() {
               </Typography>
             )}
           </Box>
+
+          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+            تحویل در محل مشتری
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            اگر فعال باشد، مشتری می‌تواند درخواست کند خودرو به محل دلخواهش تحویل داده شود (هزینه بر اساس فاصله محاسبه می‌شود).
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 1 }}>
+            <Grid item xs={12} sm={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={!!formData.deliveryAvailable}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        deliveryAvailable: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="ارائه تحویل در محل"
+              />
+            </Grid>
+            {formData.deliveryAvailable && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="حداکثر شعاع تحویل (کیلومتر)"
+                  name="maxDeliveryRadiusKm"
+                  type="number"
+                  value={formData.maxDeliveryRadiusKm}
+                  onChange={handleChange}
+                  inputProps={{ min: 0, step: 1 }}
+                  helperText="در صورت خالی بودن، محدودیتی اعمال نمی‌شود"
+                />
+              </Grid>
+            )}
+          </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             تصویر وسیله نقلیه

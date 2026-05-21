@@ -2,10 +2,14 @@ package com.mobility.platform.pricing.service;
 
 import com.mobility.platform.common.exception.BusinessException;
 import com.mobility.platform.common.exception.ResourceNotFoundException;
+import com.mobility.platform.pricing.dto.DeliveryFeeRequest;
+import com.mobility.platform.pricing.dto.DeliveryFeeResponse;
 import com.mobility.platform.pricing.dto.PriceCalculationRequest;
 import com.mobility.platform.pricing.dto.PriceCalculationResponse;
+import com.mobility.platform.pricing.entity.DeliveryPricingRule;
 import com.mobility.platform.pricing.entity.Discount;
 import com.mobility.platform.pricing.entity.PricingRule;
+import com.mobility.platform.pricing.repository.DeliveryPricingRuleRepository;
 import com.mobility.platform.pricing.repository.DiscountRepository;
 import com.mobility.platform.pricing.repository.PricingRuleRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,29 @@ public class PricingService {
     
     private final PricingRuleRepository pricingRuleRepository;
     private final DiscountRepository discountRepository;
+    private final DeliveryPricingRuleRepository deliveryPricingRuleRepository;
+
+    private static final BigDecimal DEFAULT_DELIVERY_RATE_PER_KM = BigDecimal.valueOf(10000);
+
+    public DeliveryFeeResponse calculateDeliveryFee(DeliveryFeeRequest request) {
+        log.info("Calculating delivery fee for vehicleType={}, distanceKm={}",
+                request.getVehicleType(), request.getDistanceKm());
+
+        BigDecimal ratePerKm = deliveryPricingRuleRepository
+                .findByVehicleTypeAndActiveTrue(request.getVehicleType())
+                .map(DeliveryPricingRule::getRatePerKm)
+                .orElse(DEFAULT_DELIVERY_RATE_PER_KM);
+
+        BigDecimal distance = BigDecimal.valueOf(Math.max(0.0, request.getDistanceKm()));
+        BigDecimal fee = ratePerKm.multiply(distance).setScale(0, RoundingMode.HALF_UP);
+
+        return DeliveryFeeResponse.builder()
+                .vehicleType(request.getVehicleType())
+                .distanceKm(request.getDistanceKm())
+                .ratePerKm(ratePerKm)
+                .deliveryFee(fee)
+                .build();
+    }
     
     public PriceCalculationResponse calculatePrice(PriceCalculationRequest request) {
         log.info("Calculating price for vehicle type: {}, withDriver: {}", 

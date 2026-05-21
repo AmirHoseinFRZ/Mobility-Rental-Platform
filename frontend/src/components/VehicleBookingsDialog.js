@@ -148,11 +148,21 @@ function VehicleBookingsDialog({ open, onClose, vehicle }) {
                       <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                         شماره رزرو: {booking.bookingNumber}
                       </Typography>
-                      <Chip 
-                        label={statusInfo.label} 
-                        color={statusInfo.color} 
-                        size="small"
-                      />
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                        {booking.deliveryRequested && (
+                          <Chip
+                            icon={<LocationOn />}
+                            label="تحویل در محل"
+                            color="info"
+                            size="small"
+                          />
+                        )}
+                        <Chip
+                          label={statusInfo.label}
+                          color={statusInfo.color}
+                          size="small"
+                        />
+                      </Box>
                     </Box>
 
                     <Divider sx={{ mb: 2 }} />
@@ -215,11 +225,38 @@ function VehicleBookingsDialog({ open, onClose, vehicle }) {
                           </Typography>
                         </Grid>
                         <Grid item xs={12}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                            <LocationOn sx={{ fontSize: 18, color: 'text.secondary' }} />
-                            <Typography variant="body2">
-                              {booking.pickupLocation}
-                            </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1 }}>
+                            <LocationOn sx={{ fontSize: 18, color: booking.deliveryRequested ? 'info.main' : 'text.secondary', mt: 0.3 }} />
+                            <Box>
+                              <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>
+                                {booking.deliveryRequested ? 'محل تحویل (انتخاب مشتری):' : 'محل تحویل:'}
+                              </Typography>
+                              <Typography variant="body2">
+                                {booking.pickupLocation}
+                              </Typography>
+                              {booking.deliveryRequested && booking.pickupLatitude != null && booking.pickupLongitude != null && (
+                                <Typography variant="body2">
+                                  <a
+                                    href={`https://www.openstreetmap.org/?mlat=${booking.pickupLatitude}&mlon=${booking.pickupLongitude}&zoom=16`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ color: 'inherit' }}
+                                  >
+                                    {toPersianNumber(booking.pickupLatitude.toFixed(5))}, {toPersianNumber(booking.pickupLongitude.toFixed(5))} (مشاهده روی نقشه)
+                                  </a>
+                                </Typography>
+                              )}
+                              {booking.deliveryRequested && booking.deliveryDistanceKm != null && (
+                                <Typography variant="body2" color="text.secondary">
+                                  فاصله از محل خودرو: {toPersianNumber(booking.deliveryDistanceKm.toFixed(1))} کیلومتر
+                                </Typography>
+                              )}
+                              {booking.deliveryRequested && booking.deliveryFee != null && (
+                                <Typography variant="body2" color="text.secondary">
+                                  هزینه تحویل: {formatPrice(booking.deliveryFee)} تومان
+                                </Typography>
+                              )}
+                            </Box>
                           </Box>
                         </Grid>
                         {booking.dropoffLocation && (

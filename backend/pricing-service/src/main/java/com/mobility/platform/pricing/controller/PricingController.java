@@ -1,6 +1,8 @@
 package com.mobility.platform.pricing.controller;
 
 import com.mobility.platform.common.dto.ApiResponse;
+import com.mobility.platform.pricing.dto.DeliveryFeeRequest;
+import com.mobility.platform.pricing.dto.DeliveryFeeResponse;
 import com.mobility.platform.pricing.dto.PriceCalculationRequest;
 import com.mobility.platform.pricing.dto.PriceCalculationResponse;
 import com.mobility.platform.pricing.service.PricingService;
@@ -30,6 +32,14 @@ public class PricingController {
         return ResponseEntity.ok(ApiResponse.success("Price calculated successfully", response));
     }
     
+    @PostMapping("/delivery-fee")
+    @Operation(summary = "Calculate distance-based delivery fee")
+    public ResponseEntity<ApiResponse<DeliveryFeeResponse>> calculateDeliveryFee(
+            @Valid @RequestBody DeliveryFeeRequest request) {
+        DeliveryFeeResponse response = pricingService.calculateDeliveryFee(request);
+        return ResponseEntity.ok(ApiResponse.success("Delivery fee calculated", response));
+    }
+
     @PostMapping("/apply-discount/{discountCode}")
     @Operation(summary = "Apply discount code (increment usage count)")
     public ResponseEntity<ApiResponse<Void>> applyDiscount(@PathVariable String discountCode) {

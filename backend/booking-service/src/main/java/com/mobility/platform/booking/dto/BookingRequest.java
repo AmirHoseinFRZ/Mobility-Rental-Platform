@@ -52,6 +52,8 @@ public class BookingRequest {
     private BigDecimal vehiclePrice;
     private BigDecimal driverPrice;
     private BigDecimal totalPrice;
+
+    private Boolean deliveryRequested;
 }
 
 

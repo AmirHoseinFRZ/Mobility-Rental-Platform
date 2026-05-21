@@ -13,11 +13,37 @@ import {
   Alert,
   CircularProgress,
   Divider,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { vehicleService, pricingService, bookingService } from '../services/api';
+import LocationSelector from '../components/LocationSelector';
+
+// Haversine straight-line distance in km
+const haversineKm = (lat1, lon1, lat2, lon2) => {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const r1 = toRad(lat1);
+  const r2 = toRad(lat2);
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(r1) * Math.cos(r2) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+// Per-vehicle-type fallback rate (تومان/km) — mirrors backend defaults
+const FALLBACK_DELIVERY_RATE = {
+  CAR: 15000,
+  BIKE: 8000,
+  SCOOTER: 8000,
+  BICYCLE: 5000,
+  VAN: 20000,
+  TRUCK: 25000,
+};
 
 // Convert English numbers to Persian
 const toPersianNumber = (num) => {
@@ -138,6 +164,15 @@ function BookingPage() {
   // Price calculation
   const [priceData, setPriceData] = useState(null);
 
+  // Delivery
+  const [deliveryEnabled, setDeliveryEnabled] = useState(false);
+  const [deliveryPoint, setDeliveryPoint] = useState(null); // { lat, lng }
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryDistanceKm, setDeliveryDistanceKm] = useState(null);
+  const [deliveryFee, setDeliveryFee] = useState(null);
+  const [deliveryError, setDeliveryError] = useState('');
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+
   useEffect(() => {
     loadVehicle();
   }, [vehicleId]);
@@ -147,6 +182,97 @@ function BookingPage() {
       calculatePrice();
     }
   }, [vehicle, startDateTime, endDateTime]);
+
+  // Recalculate delivery distance + fee whenever the selected point changes
+  useEffect(() => {
+    if (!deliveryEnabled || !deliveryPoint || !vehicle || vehicle.latitude == null || vehicle.longitude == null) {
+      setDeliveryDistanceKm(null);
+      setDeliveryFee(null);
+      setDeliveryError('');
+      return;
+    }
+    const dist = haversineKm(
+      vehicle.latitude,
+      vehicle.longitude,
+      deliveryPoint.lat,
+      deliveryPoint.lng
+    );
+    setDeliveryDistanceKm(dist);
+
+    if (
+      vehicle.maxDeliveryRadiusKm != null &&
+      dist > vehicle.maxDeliveryRadiusKm
+    ) {
+      setDeliveryError('این نقطه خارج از محدوده تحویل این خودرو است.');
+      setDeliveryFee(null);
+      return;
+    }
+    setDeliveryError('');
+
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      setDeliveryLoading(true);
+      try {
+        const response = await pricingService.calculateDeliveryFee(
+          vehicle.vehicleType,
+          dist
+        );
+        if (!cancelled && response?.success && response.data) {
+          setDeliveryFee(parseFloat(response.data.deliveryFee));
+        } else if (!cancelled) {
+          const rate = FALLBACK_DELIVERY_RATE[vehicle.vehicleType] || 10000;
+          setDeliveryFee(Math.round(rate * dist));
+        }
+      } catch (e) {
+        if (!cancelled) {
+          const rate = FALLBACK_DELIVERY_RATE[vehicle.vehicleType] || 10000;
+          setDeliveryFee(Math.round(rate * dist));
+        }
+      } finally {
+        if (!cancelled) setDeliveryLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [deliveryEnabled, deliveryPoint, vehicle]);
+
+  // Reverse-geocode the delivery point via Nominatim (debounced)
+  useEffect(() => {
+    if (!deliveryEnabled || !deliveryPoint) {
+      setDeliveryAddress('');
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${deliveryPoint.lat}&lon=${deliveryPoint.lng}&accept-language=fa`;
+        const res = await fetch(url, {
+          headers: { 'Accept-Language': 'fa' },
+        });
+        if (!res.ok) throw new Error('reverse geocode failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setDeliveryAddress(
+            data.display_name ||
+              `موقعیت انتخاب‌شده (${deliveryPoint.lat.toFixed(5)}, ${deliveryPoint.lng.toFixed(5)})`
+          );
+        }
+      } catch (_) {
+        if (!cancelled) {
+          setDeliveryAddress(
+            `موقعیت انتخاب‌شده (${deliveryPoint.lat.toFixed(5)}, ${deliveryPoint.lng.toFixed(5)})`
+          );
+        }
+      }
+    }, 600);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [deliveryEnabled, deliveryPoint]);
 
   const loadVehicle = async () => {
     try {
@@ -240,12 +366,28 @@ function BookingPage() {
   const handleBooking = async () => {
     setBookingLoading(true);
     setError('');
-    
+
     try {
       const defaultPickupLocation =
         (vehicle.currentAddress && vehicle.currentAddress.trim()) ||
         (vehicle.currentCity && vehicle.currentCity.trim()) ||
         'محل وسیله نقلیه';
+
+      const usingDelivery = deliveryEnabled && deliveryPoint && !deliveryError;
+
+      const pickupLocation = usingDelivery
+        ? deliveryAddress ||
+          `موقعیت انتخاب‌شده (${deliveryPoint.lat.toFixed(5)}, ${deliveryPoint.lng.toFixed(5)})`
+        : defaultPickupLocation;
+      const pickupLatitude = usingDelivery ? deliveryPoint.lat : vehicle.latitude;
+      const pickupLongitude = usingDelivery ? deliveryPoint.lng : vehicle.longitude;
+
+      const basePrice = priceData ? parseFloat(priceData.basePrice) : null;
+      const baseTotal = priceData ? parseFloat(priceData.totalPrice) : null;
+      const totalWithDelivery =
+        baseTotal != null && usingDelivery && deliveryFee != null
+          ? baseTotal + deliveryFee
+          : baseTotal;
 
       const bookingRequest = {
         userId: user.id,
@@ -253,15 +395,16 @@ function BookingPage() {
         driverId: null,
         startDateTime: formatDateTimeForBackend(startDateTime),
         endDateTime: formatDateTimeForBackend(endDateTime),
-        pickupLocation: defaultPickupLocation,
-        pickupLatitude: vehicle.latitude,
-        pickupLongitude: vehicle.longitude,
+        pickupLocation,
+        pickupLatitude,
+        pickupLongitude,
         dropoffLocation: null,
         withDriver: false,
         specialRequests: specialRequests || null,
-        vehiclePrice: priceData ? parseFloat(priceData.basePrice) : null,
+        vehiclePrice: basePrice,
         driverPrice: null,
-        totalPrice: priceData ? parseFloat(priceData.totalPrice) : null,
+        totalPrice: totalWithDelivery,
+        deliveryRequested: !!usingDelivery,
       };
       
       console.log('Creating booking with request:', bookingRequest);
@@ -485,6 +628,103 @@ function BookingPage() {
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   sx={{ mb: 2 }}
                 />
+
+                {vehicle.deliveryAvailable && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: 'action.hover',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={deliveryEnabled}
+                          onChange={(e) => {
+                            setDeliveryEnabled(e.target.checked);
+                            if (!e.target.checked) {
+                              setDeliveryPoint(null);
+                              setDeliveryAddress('');
+                              setDeliveryDistanceKm(null);
+                              setDeliveryFee(null);
+                              setDeliveryError('');
+                            }
+                          }}
+                        />
+                      }
+                      label="تحویل در محل من"
+                    />
+                    {vehicle.maxDeliveryRadiusKm != null && (
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                        حداکثر شعاع تحویل: {toPersianNumber(vehicle.maxDeliveryRadiusKm)} کیلومتر
+                      </Typography>
+                    )}
+
+                    {deliveryEnabled && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          روی نقشه کلیک کنید تا نقطه تحویل را انتخاب کنید
+                        </Typography>
+                        <LocationSelector
+                          position={
+                            deliveryPoint ||
+                            (vehicle.latitude && vehicle.longitude
+                              ? { lat: vehicle.latitude, lng: vehicle.longitude }
+                              : null)
+                          }
+                          onLocationSelect={(lat, lng) => setDeliveryPoint({ lat, lng })}
+                          height={320}
+                          label="نقطه تحویل"
+                          zoom={14}
+                        />
+
+                        {deliveryError && (
+                          <Alert severity="error" sx={{ mt: 2 }}>
+                            {deliveryError}
+                          </Alert>
+                        )}
+
+                        {deliveryPoint && !deliveryError && (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              آدرس انتخاب‌شده:
+                            </Typography>
+                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                              {deliveryAddress ||
+                                `${deliveryPoint.lat.toFixed(5)}, ${deliveryPoint.lng.toFixed(5)}`}
+                            </Typography>
+                            {deliveryDistanceKm != null && (
+                              <Typography variant="body2" color="text.secondary">
+                                فاصله از محل خودرو:{' '}
+                                <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                                  {toPersianNumber(deliveryDistanceKm.toFixed(1))} کیلومتر
+                                </Box>
+                              </Typography>
+                            )}
+                            {deliveryLoading ? (
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                در حال محاسبه هزینه تحویل...
+                              </Typography>
+                            ) : (
+                              deliveryFee != null && (
+                                <Typography variant="body2" color="text.secondary">
+                                  هزینه تحویل:{' '}
+                                  <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                                    {formatPrice(deliveryFee)} تومان
+                                  </Box>
+                                </Typography>
+                              )
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
@@ -525,6 +765,13 @@ function BookingPage() {
                       <Typography variant="body2">{formatPrice(priceData.basePrice)} تومان</Typography>
                     </Box>
                     
+                    {deliveryEnabled && deliveryFee != null && !deliveryError && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2">هزینه تحویل:</Typography>
+                        <Typography variant="body2">{formatPrice(deliveryFee)} تومان</Typography>
+                      </Box>
+                    )}
+
                     {priceData.surgeCharge > 0 && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2">هزینه اضافی:</Typography>
@@ -561,7 +808,13 @@ function BookingPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="h6">مجموع:</Typography>
                       <Typography variant="h6" color="primary">
-                        {formatPrice(priceData.totalPrice)} تومان
+                        {formatPrice(
+                          parseFloat(priceData.totalPrice) +
+                            (deliveryEnabled && deliveryFee != null && !deliveryError
+                              ? deliveryFee
+                              : 0)
+                        )}{' '}
+                        تومان
                       </Typography>
                     </Box>
                   </Box>
@@ -576,7 +829,12 @@ function BookingPage() {
                   variant="contained"
                   size="large"
                   onClick={handleBooking}
-                  disabled={bookingLoading || !priceData}
+                  disabled={
+                    bookingLoading ||
+                    !priceData ||
+                    (deliveryEnabled &&
+                      (!deliveryPoint || !!deliveryError || deliveryFee == null))
+                  }
                   sx={{ mt: 3 }}
                 >
                   {bookingLoading ? 'در حال پردازش...' : 'ادامه به پرداخت'}

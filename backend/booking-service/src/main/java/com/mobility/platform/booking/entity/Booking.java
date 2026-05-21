@@ -97,9 +97,16 @@ public class Booking extends BaseEntity {
     
     @Column(name = "payment_transaction_id")
     private String paymentTransactionId;
-    
+
     @Column(length = 2000)
     private String notes;
+
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private Boolean deliveryRequested = false;
+
+    private BigDecimal deliveryFee;
+
+    private Double deliveryDistanceKm;
 }
 
 

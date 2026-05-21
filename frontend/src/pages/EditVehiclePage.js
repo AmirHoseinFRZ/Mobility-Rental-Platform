@@ -62,6 +62,8 @@ function EditVehiclePage() {
       features: '',
       imageUrl: '',
       status: 'AVAILABLE',
+      deliveryAvailable: false,
+      maxDeliveryRadiusKm: '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -88,6 +90,11 @@ function EditVehiclePage() {
           ownerId: user.id,
           latitude: selectedLocation.lat,
           longitude: selectedLocation.lng,
+          deliveryAvailable: !!values.deliveryAvailable,
+          maxDeliveryRadiusKm:
+            values.deliveryAvailable && values.maxDeliveryRadiusKm !== ''
+              ? parseInt(values.maxDeliveryRadiusKm, 10)
+              : null,
         };
 
         const response = await vehicleService.updateVehicle(id, vehicleData);
@@ -139,6 +146,9 @@ function EditVehiclePage() {
           features: vehicle.features || '',
           imageUrl: vehicle.imageUrl || '',
           status: vehicle.status || 'AVAILABLE',
+          deliveryAvailable: !!vehicle.deliveryAvailable,
+          maxDeliveryRadiusKm:
+            vehicle.maxDeliveryRadiusKm != null ? vehicle.maxDeliveryRadiusKm : '',
         });
 
         // Set initial location if available
@@ -401,6 +411,46 @@ function EditVehiclePage() {
                   انتخاب شده: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
                 </Typography>
               )}
+            </Grid>
+
+            {/* Delivery */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                تحویل در محل مشتری
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                اگر فعال باشد، مشتری می‌تواند درخواست تحویل خودرو در محل خود را داشته باشد. هزینه بر اساس فاصله محاسبه می‌شود.
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={!!formik.values.deliveryAvailable}
+                        onChange={(e) =>
+                          formik.setFieldValue('deliveryAvailable', e.target.checked)
+                        }
+                      />
+                    }
+                    label="ارائه تحویل در محل"
+                  />
+                </Grid>
+                {formik.values.deliveryAvailable && (
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      id="maxDeliveryRadiusKm"
+                      name="maxDeliveryRadiusKm"
+                      label="حداکثر شعاع تحویل (کیلومتر)"
+                      type="number"
+                      value={formik.values.maxDeliveryRadiusKm}
+                      onChange={formik.handleChange}
+                      inputProps={{ min: 0, step: 1 }}
+                      helperText="در صورت خالی بودن، محدودیتی اعمال نمی‌شود"
+                    />
+                  </Grid>
+                )}
+              </Grid>
             </Grid>
 
             {/* Image */}

@@ -105,9 +105,14 @@ public class Vehicle extends BaseEntity {
     
     @Column(nullable = false)
     private Double rating = 0.0;
-    
+
     @Column(nullable = false)
     private Integer totalReviews = 0;
+
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private Boolean deliveryAvailable = false;
+
+    private Integer maxDeliveryRadiusKm;
 }
 
 

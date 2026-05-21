@@ -67,8 +67,13 @@ public class VehicleRequest {
     private Boolean requiresDriver;
     
     private BigDecimal driverPricePerHour;
-    
+
     private BigDecimal driverPricePerDay;
+
+    private Boolean deliveryAvailable;
+
+    @Min(value = 0, message = "Max delivery radius must be non-negative")
+    private Integer maxDeliveryRadiusKm;
 }
 
 

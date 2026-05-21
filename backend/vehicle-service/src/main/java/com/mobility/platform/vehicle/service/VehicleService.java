@@ -327,6 +327,11 @@ public class VehicleService {
         vehicle.setRequiresDriver(request.getRequiresDriver() != null ? request.getRequiresDriver() : false);
         vehicle.setDriverPricePerHour(request.getDriverPricePerHour());
         vehicle.setDriverPricePerDay(request.getDriverPricePerDay());
+        vehicle.setDeliveryAvailable(Boolean.TRUE.equals(request.getDeliveryAvailable()));
+        vehicle.setMaxDeliveryRadiusKm(
+                Boolean.TRUE.equals(request.getDeliveryAvailable())
+                        ? request.getMaxDeliveryRadiusKm()
+                        : null);
         
         if (request.getLatitude() != null && request.getLongitude() != null) {
             Point location = createPoint(request.getLatitude(), request.getLongitude());
@@ -372,6 +377,8 @@ public class VehicleService {
         response.setInsuranceExpiryDate(vehicle.getInsuranceExpiryDate());
         response.setRating(vehicle.getRating());
         response.setTotalReviews(vehicle.getTotalReviews());
+        response.setDeliveryAvailable(Boolean.TRUE.equals(vehicle.getDeliveryAvailable()));
+        response.setMaxDeliveryRadiusKm(vehicle.getMaxDeliveryRadiusKm());
         response.setCreatedAt(vehicle.getCreatedAt());
         response.setUpdatedAt(vehicle.getUpdatedAt());
         response.setDistanceKm(distanceKm);

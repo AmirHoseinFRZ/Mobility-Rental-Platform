@@ -55,6 +55,11 @@ public class BookingResponse {
     private String userLastName;
     private String userPhoneNumber;
     private String userEmail;
+
+    // Delivery
+    private Boolean deliveryRequested;
+    private BigDecimal deliveryFee;
+    private Double deliveryDistanceKm;
 }
 
 

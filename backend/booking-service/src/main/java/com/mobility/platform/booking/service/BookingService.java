@@ -1,5 +1,6 @@
 package com.mobility.platform.booking.service;
 
+import com.mobility.platform.booking.client.PricingClient;
 import com.mobility.platform.booking.client.UserClient;
 import com.mobility.platform.booking.client.VehicleClient;
 import com.mobility.platform.booking.dto.BookingRequest;
@@ -38,6 +39,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final VehicleClient vehicleClient;
     private final UserClient userClient;
+    private final PricingClient pricingClient;
     private final EventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
     
@@ -64,7 +66,7 @@ public class BookingService {
         BigDecimal vehiclePrice = request.getVehiclePrice();
         BigDecimal driverPrice = request.getDriverPrice();
         BigDecimal totalPrice = request.getTotalPrice();
-        
+
         // If prices not provided, calculate them (fallback for backward compatibility)
         if (totalPrice == null) {
             totalPrice = calculatePrice(request);
@@ -79,7 +81,51 @@ public class BookingService {
                 driverPrice = request.getWithDriver() ? BigDecimal.valueOf(50) : BigDecimal.ZERO;
             }
         }
-        
+
+        // Validate and recompute delivery (server-authoritative).
+        boolean deliveryRequested = Boolean.TRUE.equals(request.getDeliveryRequested());
+        BigDecimal deliveryFee = null;
+        Double deliveryDistanceKm = null;
+        if (deliveryRequested) {
+            Map<String, Object> vehicleData = fetchVehicleData(request.getVehicleId());
+            if (!Boolean.TRUE.equals(vehicleData.get("deliveryAvailable"))) {
+                throw new BusinessException(
+                        "این خودرو امکان تحویل در محل را ندارد.",
+                        "DELIVERY_NOT_AVAILABLE");
+            }
+            Double vehicleLat = toDouble(vehicleData.get("latitude"));
+            Double vehicleLon = toDouble(vehicleData.get("longitude"));
+            if (vehicleLat == null || vehicleLon == null
+                    || request.getPickupLatitude() == null
+                    || request.getPickupLongitude() == null) {
+                throw new BusinessException(
+                        "مختصات تحویل نامعتبر است.",
+                        "INVALID_DELIVERY_COORDINATES");
+            }
+            deliveryDistanceKm = haversineKm(
+                    vehicleLat, vehicleLon,
+                    request.getPickupLatitude(), request.getPickupLongitude());
+
+            Integer maxRadius = vehicleData.get("maxDeliveryRadiusKm") != null
+                    ? Integer.valueOf(vehicleData.get("maxDeliveryRadiusKm").toString())
+                    : null;
+            if (maxRadius != null && deliveryDistanceKm > maxRadius) {
+                throw new BusinessException(
+                        "این نقطه خارج از محدوده تحویل این خودرو است.",
+                        "DELIVERY_OUT_OF_RADIUS");
+            }
+
+            String vehicleType = vehicleData.get("vehicleType") != null
+                    ? vehicleData.get("vehicleType").toString()
+                    : null;
+            deliveryFee = computeDeliveryFee(vehicleType, deliveryDistanceKm);
+
+            // Server-authoritative total: vehicle base + driver + delivery.
+            BigDecimal baseSum = (vehiclePrice != null ? vehiclePrice : BigDecimal.ZERO)
+                    .add(driverPrice != null ? driverPrice : BigDecimal.ZERO);
+            totalPrice = baseSum.add(deliveryFee);
+        }
+
         // Create booking
         Booking booking = new Booking();
         booking.setBookingNumber(generateBookingNumber());
@@ -101,6 +147,9 @@ public class BookingService {
         booking.setTotalPrice(totalPrice);
         booking.setFinalPrice(totalPrice);
         booking.setSpecialRequests(request.getSpecialRequests());
+        booking.setDeliveryRequested(deliveryRequested);
+        booking.setDeliveryFee(deliveryFee);
+        booking.setDeliveryDistanceKm(deliveryDistanceKm);
         
         booking = bookingRepository.save(booking);
         
@@ -425,6 +474,67 @@ public class BookingService {
     private String generateBookingNumber() {
         return "BK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> fetchVehicleData(Long vehicleId) {
+        try {
+            ApiResponse<Object> response = vehicleClient.getVehicleById(vehicleId);
+            if (response == null || response.getData() == null) {
+                throw new BusinessException("اطلاعات خودرو در دسترس نیست.", "VEHICLE_FETCH_FAILED");
+            }
+            return objectMapper.convertValue(response.getData(), Map.class);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to fetch vehicle {} from vehicle-service", vehicleId, e);
+            throw new BusinessException("اطلاعات خودرو در دسترس نیست.", "VEHICLE_FETCH_FAILED");
+        }
+    }
+
+    private Double toDouble(Object value) {
+        if (value == null) return null;
+        if (value instanceof Number) return ((Number) value).doubleValue();
+        try {
+            return Double.parseDouble(value.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+        double r1 = Math.toRadians(lat1);
+        double r2 = Math.toRadians(lat2);
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(r1) * Math.cos(r2)
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return 6371.0 * c;
+    }
+
+    @SuppressWarnings("unchecked")
+    private BigDecimal computeDeliveryFee(String vehicleType, double distanceKm) {
+        try {
+            Map<String, Object> req = new HashMap<>();
+            req.put("vehicleType", vehicleType);
+            req.put("distanceKm", distanceKm);
+            ApiResponse<Map<String, Object>> response = pricingClient.calculateDeliveryFee(req);
+            if (response != null && response.getData() != null) {
+                Object fee = response.getData().get("deliveryFee");
+                if (fee != null) {
+                    return new BigDecimal(fee.toString());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to compute delivery fee via pricing-service, falling back. Error: {}",
+                    e.getMessage());
+        }
+        // Fallback: use a conservative default rate (matches pricing-service default).
+        return BigDecimal.valueOf(10000)
+                .multiply(BigDecimal.valueOf(distanceKm))
+                .setScale(0, java.math.RoundingMode.HALF_UP);
+    }
     
     private BookingResponse mapToResponse(Booking booking) {
         BookingResponse response = new BookingResponse();
@@ -457,6 +567,9 @@ public class BookingService {
         response.setDistanceKm(booking.getDistanceKm());
         response.setSpecialRequests(booking.getSpecialRequests());
         response.setNotes(booking.getNotes());
+        response.setDeliveryRequested(Boolean.TRUE.equals(booking.getDeliveryRequested()));
+        response.setDeliveryFee(booking.getDeliveryFee());
+        response.setDeliveryDistanceKm(booking.getDeliveryDistanceKm());
         response.setCreatedAt(booking.getCreatedAt());
         response.setUpdatedAt(booking.getUpdatedAt());
         

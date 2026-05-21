@@ -104,6 +104,8 @@ export const bookingService = {
 export const pricingService = {
   calculatePrice: (priceData) => api.post('/api/pricing/calculate', priceData),
   applyDiscount: (code) => api.post(`/api/pricing/apply-discount/${code}`),
+  calculateDeliveryFee: (vehicleType, distanceKm) =>
+    api.post('/api/pricing/delivery-fee', { vehicleType, distanceKm }),
 };
 
 // ==================== PAYMENT SERVICES ====================

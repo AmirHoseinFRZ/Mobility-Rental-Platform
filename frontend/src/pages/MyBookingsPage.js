@@ -338,20 +338,51 @@ function MyBookingsPage() {
                         ایجاد شده: {formatDateOnlyPersian(booking.createdAt)}
                       </Typography>
                     </Box>
-                    <Chip
-                      label={booking.status}
-                      color={getStatusColor(booking.status)}
-                    />
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {booking.deliveryRequested && (
+                        <Chip
+                          icon={<LocationOn />}
+                          label="تحویل در محل"
+                          color="info"
+                          size="small"
+                        />
+                      )}
+                      <Chip
+                        label={booking.status}
+                        color={getStatusColor(booking.status)}
+                      />
+                    </Box>
                   </Box>
 
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <Typography variant="body2" color="text.secondary">
-                        محل تحویل:
+                        {booking.deliveryRequested ? 'محل تحویل (انتخاب شما):' : 'محل تحویل:'}
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         {booking.pickupLocation}
                       </Typography>
+
+                      {booking.deliveryRequested && (
+                        <Box sx={{ mb: 1 }}>
+                          {booking.deliveryDistanceKm != null && (
+                            <Typography variant="body2" color="text.secondary">
+                              فاصله از محل خودرو:{' '}
+                              <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                                {toPersianNumber(booking.deliveryDistanceKm.toFixed(1))} کیلومتر
+                              </Box>
+                            </Typography>
+                          )}
+                          {booking.deliveryFee != null && (
+                            <Typography variant="body2" color="text.secondary">
+                              هزینه تحویل:{' '}
+                              <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                                {formatPrice(booking.deliveryFee)} تومان
+                              </Box>
+                            </Typography>
+                          )}
+                        </Box>
+                      )}
 
                       <Typography variant="body2" color="text.secondary">
                         زمان شروع:

@@ -1,0 +1,637 @@
+<title>سکوی اجارهٔ وسایل حمل‌ونقل — ارائهٔ فنی</title>
+<style>
+  :root{
+    --ink:#16202E; --ink-2:#2A3646; --paper:#EDEFF2; --card:#FFFFFF;
+    --muted:#5C6B7E; --line:#D6DCE4; --line-soft:#E4E9EF;
+    --signal:#FF5D2E; --signal-ink:#C8340D; --route:#1AA394; --route-ink:#0F766E;
+    --shadow:0 1px 2px rgba(20,32,46,.05),0 12px 32px -12px rgba(20,32,46,.16);
+    --shadow-sm:0 1px 2px rgba(20,32,46,.06),0 4px 12px -6px rgba(20,32,46,.12);
+    --radius:16px; --radius-sm:10px;
+    --fa:"Vazirmatn","IRANSans","Sahel","Segoe UI",Tahoma,-apple-system,system-ui,sans-serif;
+    --mono:ui-monospace,"Cascadia Code","JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --maxw:1120px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#EAEEF4; --ink-2:#C4CDD9; --paper:#0C121B; --card:#141C28;
+      --muted:#8595A8; --line:#243040; --line-soft:#1C2634;
+      --signal:#FF6E44; --signal-ink:#FF8A66; --route:#2BC0B1; --route-ink:#5AD6C9;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -14px rgba(0,0,0,.6);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 6px 16px -8px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="light"]{
+    --ink:#16202E; --ink-2:#2A3646; --paper:#EDEFF2; --card:#FFFFFF;
+    --muted:#5C6B7E; --line:#D6DCE4; --line-soft:#E4E9EF;
+    --signal:#FF5D2E; --signal-ink:#C8340D; --route:#1AA394; --route-ink:#0F766E;
+    --shadow:0 1px 2px rgba(20,32,46,.05),0 12px 32px -12px rgba(20,32,46,.16);
+    --shadow-sm:0 1px 2px rgba(20,32,46,.06),0 4px 12px -6px rgba(20,32,46,.12);
+  }
+  :root[data-theme="dark"]{
+    --ink:#EAEEF4; --ink-2:#C4CDD9; --paper:#0C121B; --card:#141C28;
+    --muted:#8595A8; --line:#243040; --line-soft:#1C2634;
+    --signal:#FF6E44; --signal-ink:#FF8A66; --route:#2BC0B1; --route-ink:#5AD6C9;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -14px rgba(0,0,0,.6);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 6px 16px -8px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  .wrap{
+    direction:rtl; font-family:var(--fa); background:var(--paper); color:var(--ink);
+    line-height:1.75; font-size:17px; letter-spacing:0; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .wrap ::selection{background:var(--signal);color:#fff}
+  h1,h2,h3,h4{margin:0;line-height:1.3;text-wrap:balance;font-weight:800}
+  p{margin:0}
+  a{color:var(--route-ink);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+  a:hover{border-color:var(--route)}
+  :focus-visible{outline:2.5px solid var(--signal);outline-offset:3px;border-radius:4px}
+
+  /* progress bar */
+  .progress{position:fixed;top:0;right:0;left:0;height:3px;z-index:60;background:transparent}
+  .progress__fill{height:100%;width:0;background:linear-gradient(90deg,var(--route),var(--signal));transition:width .12s linear}
+
+  /* theme toggle */
+  .toggle{position:fixed;top:16px;left:16px;z-index:61;display:inline-flex;align-items:center;gap:7px;
+    background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px;
+    padding:8px 14px;font-family:var(--fa);font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm)}
+  .toggle:hover{border-color:var(--signal)}
+
+  section{scroll-margin-top:40px}
+  .shell{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;padding:112px 0 72px;overflow:hidden}
+  .hero__grid{position:absolute;inset:0;opacity:.5;
+    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(120% 90% at 80% 0%,#000 30%,transparent 78%);
+    -webkit-mask-image:radial-gradient(120% 90% at 80% 0%,#000 30%,transparent 78%)}
+  .hero__inner{position:relative}
+  .kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--route-ink);font-weight:600;
+    background:color-mix(in srgb,var(--route) 12%,transparent);border:1px solid color-mix(in srgb,var(--route) 30%,transparent);
+    padding:7px 14px;border-radius:999px;direction:ltr}
+  .hero h1{font-size:clamp(2.6rem,6.2vw,4.7rem);font-weight:900;letter-spacing:-.01em;margin:26px 0 0;line-height:1.08}
+  .hero h1 .accent{color:var(--signal)}
+  .hero__sub{font-size:clamp(1.05rem,2vw,1.32rem);color:var(--ink-2);max-width:60ch;margin-top:22px;font-weight:500}
+  .hero__meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:8px 15px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-sm)}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--signal)}
+  .chip .dot.r{background:var(--route)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--signal)}
+  .stat:nth-child(2)::before{background:var(--route)}
+  .stat:nth-child(3)::before{background:var(--signal)}
+  .stat:nth-child(4)::before{background:var(--route)}
+  .stat .num{font-size:2.5rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .stat .lbl{color:var(--muted);font-size:13.5px;font-weight:600;margin-top:9px}
+
+  /* ===== ROUTE / STATIONS ===== */
+  .route{position:relative;padding:56px 0 40px}
+  .route::before{content:"";position:absolute;top:0;bottom:0;right:calc(24px + 15px);width:2px;
+    background:linear-gradient(var(--line),var(--line));z-index:0}
+  @media(max-width:760px){.route::before{right:calc(24px + 9px)}}
+  .station{position:relative;padding:0 0 8px}
+  .station__head{display:flex;align-items:center;gap:18px;padding:34px 0 20px;position:relative;z-index:1}
+  .station__dot{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--card);
+    border:2px solid var(--signal);display:grid;place-items:center;font-family:var(--mono);
+    font-size:12px;font-weight:700;color:var(--signal-ink);box-shadow:0 0 0 6px var(--paper)}
+  @media(max-width:760px){.station__dot{width:20px;height:20px;font-size:0}}
+  .station__t{flex:1}
+  .station__eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;direction:ltr;text-align:right}
+  .station__title{font-size:clamp(1.5rem,3.2vw,2.05rem);font-weight:800;letter-spacing:-.01em;margin-top:3px}
+  .station__body{padding-inline-start:50px}
+  @media(max-width:760px){.station__body{padding-inline-start:38px}}
+
+  .lead{font-size:1.08rem;color:var(--ink-2);max-width:70ch;font-weight:500}
+  .mt{margin-top:20px}.mt-s{margin-top:12px}
+
+  /* cards */
+  .cards{display:grid;gap:16px;margin-top:26px}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-sm)}
+  .card h4{font-size:1.06rem;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+  .card p{color:var(--muted);font-size:14.5px}
+  .card .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:0 0 auto;
+    background:color-mix(in srgb,var(--signal) 14%,transparent);color:var(--signal-ink);font-size:16px}
+  .card .ic.r{background:color-mix(in srgb,var(--route) 14%,transparent);color:var(--route-ink)}
+
+  /* table */
+  .tblwrap{overflow-x:auto;margin-top:24px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card);min-width:520px}
+  th,td{text-align:right;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+  thead th{background:color-mix(in srgb,var(--ink) 4%,var(--card));font-weight:800;font-size:13px;color:var(--ink);position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:color-mix(in srgb,var(--route) 5%,transparent)}
+  td .mono,th .mono{font-family:var(--mono);font-size:13px;direction:ltr;unicode-bidi:embed;font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:6px;direction:ltr;
+    background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink-2);font-weight:600}
+
+  /* bars (service sizing) */
+  .bars{display:flex;flex-direction:column;gap:11px;margin-top:26px}
+  .bar{display:grid;grid-template-columns:190px 1fr 46px;align-items:center;gap:14px;font-size:14px}
+  @media(max-width:640px){.bar{grid-template-columns:120px 1fr 40px;gap:10px;font-size:13px}}
+  .bar__name{font-weight:700;display:flex;flex-direction:column;gap:1px}
+  .bar__name .mono{font-family:var(--mono);font-size:11px;color:var(--muted);direction:ltr;font-weight:500}
+  .bar__track{height:26px;background:color-mix(in srgb,var(--ink) 6%,transparent);border-radius:7px;overflow:hidden;position:relative}
+  .bar__fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--signal),var(--signal-ink));width:0;transition:width 1s cubic-bezier(.2,.7,.2,1)}
+  .bar__fill.r{background:linear-gradient(90deg,var(--route),var(--route-ink))}
+  .bar__fill.n{background:color-mix(in srgb,var(--muted) 55%,transparent)}
+  .bar__val{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;text-align:left;direction:ltr}
+
+  /* architecture diagram */
+  .arch{margin-top:28px;border:1px solid var(--line);border-radius:var(--radius);background:
+    radial-gradient(120% 120% at 50% 0%,color-mix(in srgb,var(--route) 6%,var(--card)),var(--card));
+    padding:26px 20px;box-shadow:var(--shadow-sm);overflow-x:auto}
+  .arch__inner{min-width:640px;display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .layer{display:flex;flex-direction:column;gap:8px}
+  .layer__lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;direction:ltr;text-align:center}
+  .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 15px;text-align:center;
+    font-weight:700;font-size:13.5px;box-shadow:var(--shadow-sm);min-width:120px}
+  .node .p{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);font-weight:500;margin-top:2px;direction:ltr}
+  .node.edge{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 8%,var(--card))}
+  .node.geo{border-color:var(--route)}
+  .node.geo::after{content:"PostGIS";display:block;font-family:var(--mono);font-size:9px;color:var(--route-ink);margin-top:2px;font-weight:700;direction:ltr}
+  .node.pay{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 10%,var(--card));min-width:260px}
+  .node.infra{min-width:100px;font-size:12.5px}
+  .grid8{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:640px){.grid8{grid-template-columns:repeat(2,1fr)}}
+  .connector{height:20px;position:relative}
+  .connector::before{content:"";position:absolute;top:0;bottom:0;right:50%;width:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+
+  /* steps (user guide) */
+  .steps{counter-reset:step;display:grid;gap:14px;margin-top:26px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:18px 20px 18px 20px;
+    display:flex;gap:16px;align-items:flex-start;box-shadow:var(--shadow-sm);position:relative}
+  .step__n{counter-increment:step;flex:0 0 auto;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+    background:var(--signal);color:#fff;font-family:var(--mono);font-weight:700;font-size:15px}
+  .step__n::before{content:counter(step,decimal)}
+  .step h4{font-size:1.02rem;margin-bottom:4px}
+  .step p{color:var(--muted);font-size:14px}
+
+  /* flow (payment) */
+  .flow{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;align-items:stretch}
+  .flow__step{flex:1;min-width:180px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px 18px;box-shadow:var(--shadow-sm)}
+  .flow__step .num{font-family:var(--mono);font-size:12px;color:var(--signal-ink);font-weight:700;direction:ltr}
+  .flow__step h4{font-size:.98rem;margin:6px 0 5px}
+  .flow__step p{color:var(--muted);font-size:13.5px}
+
+  .callout{margin-top:24px;border-inline-start:4px solid var(--route);background:color-mix(in srgb,var(--route) 7%,transparent);
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:16px 20px}
+  .callout strong{color:var(--route-ink)}
+
+  ul.clean{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:9px}
+  ul.clean li{position:relative;padding-inline-start:24px;color:var(--ink-2);font-size:15px}
+  ul.clean li::before{content:"";position:absolute;inset-inline-start:2px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--signal)}
+  ul.clean li b{color:var(--ink);font-weight:700}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .pill{font-family:var(--mono);font-size:12.5px;font-weight:600;direction:ltr;background:var(--card);
+    border:1px solid var(--line);border-radius:8px;padding:7px 12px;box-shadow:var(--shadow-sm)}
+  .pill b{color:var(--signal-ink)}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}
+    .bar__fill{transition:none}.progress__fill{transition:none}}
+
+  footer{margin-top:64px;border-top:1px solid var(--line);padding:44px 0 60px;text-align:center}
+  footer .big{font-size:1.35rem;font-weight:900}
+  footer .sm{color:var(--muted);font-size:13.5px;margin-top:10px;font-family:var(--mono);direction:ltr}
+
+  @media(max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .cols-2,.cols-3{grid-template-columns:1fr}
+    .hero{padding:92px 0 52px}
+  }
+</style>
+
+<div class="wrap">
+  <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+  <button class="toggle" id="themeBtn" aria-label="تغییر تم">
+    <span id="themeIc">◐</span><span>تم</span>
+  </button>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <div class="hero__grid" aria-hidden="true"></div>
+    <div class="shell hero__inner">
+      <span class="kicker reveal">Microservices · Spring Boot · React · PostGIS</span>
+      <h1 class="reveal">سکوی اجارهٔ<br><span class="accent">وسایل حمل‌ونقل</span></h1>
+      <p class="hero__sub reveal">یک پلتفرم کامل و مقیاس‌پذیر برای اجارهٔ خودرو، موتور، اسکوتر و دوچرخه —
+      جست‌وجوی نقشه‌محور، رزرو با/بدون راننده، تحویل در محل، و پرداخت از طریق درگاه بانکی واقعی.</p>
+      <div class="hero__meta reveal">
+        <span class="chip"><span class="dot"></span> نسخهٔ نهایی · Production-Ready</span>
+        <span class="chip"><span class="dot r"></span> Java 17 · Spring Boot 3.2</span>
+        <span class="chip"><span class="dot"></span> React 18 · Material-UI</span>
+        <span class="chip"><span class="dot r"></span> PostgreSQL 16 + PostGIS</span>
+      </div>
+      <div class="stats">
+        <div class="stat reveal"><div class="num" data-count="11">۰</div><div class="lbl">Microservice + درگاه پرداخت</div></div>
+        <div class="stat reveal"><div class="num" data-count="45" data-suffix="+">۰</div><div class="lbl">Endpoint API</div></div>
+        <div class="stat reveal"><div class="num" data-count="19">۰</div><div class="lbl">صفحهٔ React</div></div>
+        <div class="stat reveal"><div class="num" data-count="3">۰</div><div class="lbl">سرویس مکانی PostGIS</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <div class="route">
+
+      <!-- 01 ضرورت -->
+      <section class="station" id="s1">
+        <div class="station__head reveal">
+          <div class="station__dot">01</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Why it matters</div>
+            <h2 class="station__title">ضرورت و اهمیت پروژه</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">الگوی مصرف از «مالکیت» به «دسترسی لحظه‌ای» تغییر کرده است. اقتصاد اشتراکی،
+          مسئلهٔ حمل‌ونقل «آخرین‌کیلومتر»، و نیاز به یک بازار دوطرفهٔ شفاف، این پلتفرم را ضروری می‌کند.</p>
+          <div class="cards cols-3">
+            <div class="card reveal"><h4><span class="ic">↺</span> دسترسی به‌جای مالکیت</h4><p>پرداخت به‌ازای استفاده به‌جای خرید و نگهداری وسیله؛ یک بازار بزرگ و رو به رشد.</p></div>
+            <div class="card reveal"><h4><span class="ic r">◎</span> آخرین‌کیلومتر</h4><p>جابه‌جایی کوتاه شهری با اسکوتر/دوچرخه/موتور؛ سریع‌تر، ارزان‌تر و کم‌آلاینده‌تر.</p></div>
+            <div class="card reveal"><h4><span class="ic">₪</span> درآمد برای مالکان</h4><p>هر کاربر می‌تواند نقش Owner داشته باشد و وسیله‌اش را با قیمت و شعاع تحویل دلخواه عرضه کند.</p></div>
+            <div class="card reveal"><h4><span class="ic r">✓</span> اعتماد و شفافیت</h4><p>قیمت‌گذاری پویا، نمایش لحظه‌ای هزینه، سیستم امتیاز، و درگاه پرداخت امن.</p></div>
+            <div class="card reveal"><h4><span class="ic">♻</span> اثر محیط‌زیستی</h4><p>کاهش خودروهای بلااستفاده و ترافیک؛ تشویق گزینه‌های سبک و برقی.</p></div>
+            <div class="card reveal"><h4><span class="ic r">⌘</span> ارزش فنی</h4><p>نمونهٔ عملی و کامل از معماری Microservices مدرن با تمام مفاهیم کلیدی مهندسی نرم‌افزار.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 دلیل پیاده‌سازی -->
+      <section class="station" id="s2">
+        <div class="station__head reveal">
+          <div class="station__dot">02</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Rationale</div>
+            <h2 class="station__title">دلیل پیاده‌سازی و انتخاب رویکرد</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">هر دامنه (کاربر، وسیله، رزرو، پرداخت…) منطق و نرخ تغییر متفاوتی دارد. معماری Microservices
+          امکان توسعه، استقرار و مقیاس‌پذیری مستقل هر سرویس را می‌دهد.</p>
+          <div class="tblwrap reveal">
+            <table>
+              <thead><tr><th>نیاز کسب‌وکار</th><th>تصمیم معماری</th><th>فایده</th></tr></thead>
+              <tbody>
+                <tr><td>دامنه‌های متفاوت با نرخ تغییر متفاوت</td><td>تفکیک به سرویس‌های مستقل</td><td>توسعه و استقرار مستقل</td></tr>
+                <tr><td>بار متفاوت روی جست‌وجو و رزرو</td><td>مقیاس‌پذیری افقی سرویس‌به‌سرویس</td><td>مصرف بهینهٔ منابع</td></tr>
+                <tr><td>خرابی یک بخش نباید کل سیستم را بخواباند</td><td>ایزوله‌سازی خطا</td><td>تاب‌آوری بالاتر</td></tr>
+                <tr><td>نیاز به تکنولوژی متفاوت در هر دامنه</td><td><span class="mono">Database-per-Service</span></td><td>جفت‌شدگی کم</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pills reveal">
+            <span class="pill"><b>Spring Cloud</b> Gateway + Eureka + Feign</span>
+            <span class="pill"><b>PostGIS</b> پرس‌وجوی مکانی بومی</span>
+            <span class="pill"><b>RabbitMQ</b> رویدادمحور</span>
+            <span class="pill"><b>Redis</b> کش</span>
+            <span class="pill"><b>MinIO</b> ذخیرهٔ تصویر</span>
+            <span class="pill"><b>Multi-bank</b> درگاه پرداخت واقعی</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 نیازمندی‌ها -->
+      <section class="station" id="s3">
+        <div class="station__head reveal">
+          <div class="station__dot">03</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Requirements</div>
+            <h2 class="station__title">نیازمندی‌ها — تحلیل و مستندسازی</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">چهار ذی‌نفع اصلی: کاربر/مشتری، مالک وسیله، راننده، و مدیر. نیازمندی‌ها به‌صورت
+          عملکردی و غیرعملکردی تحلیل و مستند شده‌اند.</p>
+
+          <h3 class="mt reveal" style="font-size:1.1rem">نیازمندی‌های عملکردی (Functional)</h3>
+          <div class="tblwrap reveal">
+            <table>
+              <thead><tr><th>#</th><th>نیازمندی</th><th>سرویس مسئول</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">FR-1</td><td>احراز هویت مبتنی بر JWT و مدیریت نقش‌ها</td><td><span class="tag">user-service</span></td></tr>
+                <tr><td class="mono">FR-4</td><td>جست‌وجوی وسایل بر اساس موقعیت و شعاع (nearest)</td><td><span class="tag">vehicle · PostGIS</span></td></tr>
+                <tr><td class="mono">FR-6</td><td>محاسبهٔ لحظه‌ای قیمت (پایه/اوج/آخرهفته/تخفیف)</td><td><span class="tag">pricing-service</span></td></tr>
+                <tr><td class="mono">FR-8</td><td>چرخهٔ حیات رزرو (ایجاد/تأیید/شروع/پایان/لغو)</td><td><span class="tag">booking-service</span></td></tr>
+                <tr><td class="mono">FR-9</td><td>رزرو با راننده + یافتن نزدیک‌ترین رانندهٔ موجود</td><td><span class="tag">driver · PostGIS</span></td></tr>
+                <tr><td class="mono">FR-10</td><td>ایجاد و تأیید تراکنش پرداخت (Create/Verify)</td><td><span class="tag">booking ↔ gateway</span></td></tr>
+                <tr><td class="mono">FR-11</td><td>تحویل وسیله در محل با هزینهٔ مبتنی بر فاصله</td><td><span class="tag">booking + pricing</span></td></tr>
+                <tr><td class="mono">FR-12</td><td>ثبت نظر و امتیاز وسیله/راننده + میانگین</td><td><span class="tag">review-service</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="mt reveal" style="font-size:1.1rem">نیازمندی‌های غیرعملکردی (Non-Functional)</h3>
+          <div class="cards cols-3">
+            <div class="card reveal"><h4><span class="ic">⇗</span> Scalability</h4><p>مقیاس‌پذیری افقی مستقل، کش Redis، صف‌بندی RabbitMQ برای جذب پیک.</p></div>
+            <div class="card reveal"><h4><span class="ic r">⛨</span> Resilience</h4><p>ایزوله‌سازی خطا، Health Check، fallback قیمت، Optimistic Locking.</p></div>
+            <div class="card reveal"><h4><span class="ic">🔒</span> Security</h4><p>JWT، کنترل دسترسی نقش‌محور، اعتبارسنجی سمت سرور.</p></div>
+            <div class="card reveal"><h4><span class="ic r">◱</span> Observability</h4><p>Actuator/Health، لاگ، آماده برای Prometheus/Micrometer.</p></div>
+            <div class="card reveal"><h4><span class="ic">⚙</span> Maintainability</h4><p><span class="tag">common-lib</span> مشترک، الگوی DTO/MapStruct، مرزبندی دامنه.</p></div>
+            <div class="card reveal"><h4><span class="ic r">ع</span> RTL / فارسی</h4><p>رابط کاربری کامل راست‌به‌چپ فارسی.</p></div>
+          </div>
+
+          <div class="callout reveal">
+            <strong>مستند نیازمندی رسمی:</strong> فیچر «تحویل در محل» در فایل
+            <span class="mono" style="direction:ltr">DELIVERY_FEATURE_REQUIREMENTS.md</span>
+            به‌صورت کامل مستند شده — شامل User Stories، Data Model، API Contract، Edge Cases و Acceptance Criteria.
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 معماری -->
+      <section class="station" id="s4">
+        <div class="station__head reveal">
+          <div class="station__dot">04</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Design &amp; Architecture</div>
+            <h2 class="station__title">طراحی و معماری سیستم</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">API Gateway تنها نقطهٔ ورود است؛ سرویس‌ها با Eureka یکدیگر را پیدا می‌کنند و
+          هر کدام دیتابیس مستقل خود را دارند.</p>
+
+          <div class="arch reveal">
+            <div class="arch__inner">
+              <div class="layer">
+                <div class="layer__lbl">Client Layer</div>
+                <div class="row"><div class="node edge">React 18 SPA<span class="p">MUI · Leaflet · RTL · :3000</span></div></div>
+              </div>
+              <div class="connector"></div>
+              <div class="layer">
+                <div class="layer__lbl">Edge Layer</div>
+                <div class="row">
+                  <div class="node edge">API Gateway<span class="p">Spring Cloud · :8080</span></div>
+                  <div class="node">Eureka<span class="p">Discovery · :8761</span></div>
+                </div>
+              </div>
+              <div class="connector"></div>
+              <div class="layer">
+                <div class="layer__lbl">Microservices</div>
+                <div class="grid8">
+                  <div class="node">user<span class="p">:8081</span></div>
+                  <div class="node geo">vehicle<span class="p">:8082</span></div>
+                  <div class="node">booking<span class="p">:8083</span></div>
+                  <div class="node">pricing<span class="p">:8084</span></div>
+                  <div class="node geo">driver<span class="p">:8085</span></div>
+                  <div class="node">review<span class="p">:8086</span></div>
+                  <div class="node geo">location<span class="p">:8087</span></div>
+                  <div class="node">maintenance<span class="p">:8088</span></div>
+                </div>
+              </div>
+              <div class="connector"></div>
+              <div class="layer">
+                <div class="layer__lbl">Payment</div>
+                <div class="row"><div class="node pay">internal-payment-gateway<span class="p">Mellat · Saman · Pasargad · Saderat · Sandbox · :8089</span></div></div>
+              </div>
+              <div class="connector"></div>
+              <div class="layer">
+                <div class="layer__lbl">Infrastructure</div>
+                <div class="row">
+                  <div class="node infra">PostgreSQL<span class="p">+PostGIS</span></div>
+                  <div class="node infra">RabbitMQ<span class="p">events</span></div>
+                  <div class="node infra">Redis<span class="p">cache</span></div>
+                  <div class="node infra">MinIO<span class="p">images</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cards cols-2">
+            <div class="card reveal"><h4><span class="ic">▤</span> Database-per-Service</h4><p>هر سرویس دیتابیس منطقی مستقل دارد؛ بدون اشتراک مستقیم جدول — جفت‌شدگی کم.</p></div>
+            <div class="card reveal"><h4><span class="ic r">↹</span> Service Discovery</h4><p>سرویس‌ها در Eureka ثبت می‌شوند و Gateway با <span class="mono">lb://</span> بار را توزیع می‌کند.</p></div>
+            <div class="card reveal"><h4><span class="ic">🛡</span> Server-Authoritative</h4><p>قیمت و فاصله همیشه سمت سرور بازمحاسبه می‌شوند — به قیمت کلاینت اعتماد نمی‌شود.</p></div>
+            <div class="card reveal"><h4><span class="ic r">◈</span> Shared Kernel</h4><p><span class="mono">common-lib</span>: BaseEntity، DTOها، Enumها، مدیریت خطا و EventPublisher.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 سایز اجزا -->
+      <section class="station" id="s5">
+        <div class="station__head reveal">
+          <div class="station__dot">05</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Component Sizing</div>
+            <h2 class="station__title">Microserviceها و سایز اجزا</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">سایز نسبی هر جزء بر اساس تحلیل واقعی کد (تعداد فایل‌های Java). درگاه پرداخت
+          بزرگ‌ترین جزء و <span class="mono">booking-service</span> بزرگ‌ترین سرویس دست‌اول است.</p>
+
+          <div class="bars reveal" id="bars">
+            <div class="bar"><div class="bar__name">درگاه پرداخت<span class="mono">payment-gateway</span></div><div class="bar__track"><div class="bar__fill" data-w="100"></div></div><div class="bar__val">108</div></div>
+            <div class="bar"><div class="bar__name">رزرو<span class="mono">booking-service</span></div><div class="bar__track"><div class="bar__fill" data-w="19"></div></div><div class="bar__val">21</div></div>
+            <div class="bar"><div class="bar__name">کتابخانهٔ مشترک<span class="mono">common-lib</span></div><div class="bar__track"><div class="bar__fill r" data-w="16"></div></div><div class="bar__val">17</div></div>
+            <div class="bar"><div class="bar__name">قیمت‌گذاری<span class="mono">pricing-service</span></div><div class="bar__track"><div class="bar__fill" data-w="15"></div></div><div class="bar__val">16</div></div>
+            <div class="bar"><div class="bar__name">وسیله<span class="mono">vehicle-service</span></div><div class="bar__track"><div class="bar__fill r" data-w="11"></div></div><div class="bar__val">12</div></div>
+            <div class="bar"><div class="bar__name">نظر و امتیاز<span class="mono">review-service</span></div><div class="bar__track"><div class="bar__fill" data-w="11"></div></div><div class="bar__val">12</div></div>
+            <div class="bar"><div class="bar__name">کاربر<span class="mono">user-service</span></div><div class="bar__track"><div class="bar__fill" data-w="9"></div></div><div class="bar__val">10</div></div>
+            <div class="bar"><div class="bar__name">راننده<span class="mono">driver-service</span></div><div class="bar__track"><div class="bar__fill r" data-w="7"></div></div><div class="bar__val">8</div></div>
+            <div class="bar"><div class="bar__name">مکان / نگهداری<span class="mono">location · maintenance</span></div><div class="bar__track"><div class="bar__fill n" data-w="2"></div></div><div class="bar__val">2</div></div>
+            <div class="bar"><div class="bar__name">Gateway / Eureka<span class="mono">infra apps</span></div><div class="bar__track"><div class="bar__fill n" data-w="1"></div></div><div class="bar__val">1</div></div>
+          </div>
+
+          <div class="callout reveal">
+            درگاه پرداخت (۱۰۸ فایل) یک PSP کامل چندبانکی با امنیت <span class="mono">Client-Token</span>،
+            پایداری تراکنش و Audit با <span class="mono">Hibernate Envers</span> است. سرویس‌های
+            <span class="mono">location</span> و <span class="mono">maintenance</span> عمداً به‌صورت اسکلت با
+            PostGIS آمادهٔ توسعه‌اند.
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 ارتباط -->
+      <section class="station" id="s6">
+        <div class="station__head reveal">
+          <div class="station__dot">06</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Communication</div>
+            <h2 class="station__title">الگوهای ارتباطی و جریان داده</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <div class="cards cols-3">
+            <div class="card reveal"><h4><span class="ic">⇄</span> همگام — REST / Feign</h4><p>ارتباط بین سرویس‌ها با OpenFeign و Load Balancing روی Eureka. <span class="mono">booking → vehicle · user · pricing · gateway</span></p></div>
+            <div class="card reveal"><h4><span class="ic r">◷</span> ناهمگام — RabbitMQ</h4><p>انتشار رویدادها روی Exchange با نام <span class="mono">mobility.events</span> — پایهٔ معماری Event-Driven.</p></div>
+            <div class="card reveal"><h4><span class="ic">🖼</span> فایل — MinIO</h4><p>تصاویر وسایل هنگام آپلود در Object Storage ذخیره و URL آن‌ها نگهداری می‌شود.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 پرداخت و تحویل -->
+      <section class="station" id="s7">
+        <div class="station__head reveal">
+          <div class="station__dot">07</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Payment &amp; Delivery Flow</div>
+            <h2 class="station__title">جریان پرداخت و تحویل</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <p class="lead reveal">پرداخت در سه مرحله و به‌صورت Idempotent انجام می‌شود؛ تأیید در برابر هم‌زمانی مقاوم است.</p>
+          <div class="flow reveal">
+            <div class="flow__step"><span class="num">01 · Create</span><h4>ایجاد تراکنش</h4><p>نیازمند احراز هویت. booking-service با Feign به درگاه <span class="mono">/api/new</span> می‌زند و <span class="mono">transactionId</span> را روی رزرو ذخیره می‌کند.</p></div>
+            <div class="flow__step"><span class="num">02 · Pay</span><h4>پرداخت روی درگاه</h4><p>Frontend مستقیماً صفحهٔ پرداخت بانک را باز می‌کند (<span class="mono">:8089</span>).</p></div>
+            <div class="flow__step"><span class="num">03 · Verify</span><h4>تأیید و CONFIRM</h4><p>با <span class="mono">inquiry</span> وضعیت گرفته و رزرو از PENDING به CONFIRMED می‌رود. Idempotent + Optimistic Locking.</p></div>
+          </div>
+          <div class="callout reveal">
+            <strong>تحویل در محل:</strong> سرور فاصله را با <span class="mono">Haversine</span> بازمحاسبه می‌کند؛
+            بیرون از شعاع مجاز با <span class="mono">DELIVERY_OUT_OF_RADIUS</span> رد می‌شود و هزینه =
+            <span class="mono">ratePerKm × distance</span> از pricing-service محاسبه می‌شود. قیمت کلاینت هرگز مبنا نیست.
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 راهنمای استفاده -->
+      <section class="station" id="s8">
+        <div class="station__head reveal">
+          <div class="station__dot">08</div>
+          <div class="station__t">
+            <div class="station__eyebrow">User Guide</div>
+            <h2 class="station__title">راهنمای استفاده</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <div class="steps">
+            <div class="step reveal"><div class="step__n"></div><div><h4>ثبت‌نام و ورود</h4><p>به <span class="mono">localhost:3000</span> بروید و ثبت‌نام کنید؛ توکن JWT صادر و وارد می‌شوید.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>جست‌وجوی وسیله</h4><p>موقعیت را روی نقشه انتخاب و شعاع و نوع را تعیین کنید؛ PostGIS نزدیک‌ترین وسایل را مرتب بر اساس فاصله نشان می‌دهد.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>مشاهدهٔ جزئیات</h4><p>مشخصات، تصاویر، نظرات کاربران و میانگین امتیاز وسیله را ببینید.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>رزرو</h4><p>تاریخ را انتخاب، در صورت نیاز «با راننده» یا «تحویل در محل» را فعال کنید؛ قیمت لحظه‌ای + کد تخفیف نمایش داده می‌شود.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>پرداخت</h4><p>به درگاه هدایت می‌شوید؛ پس از پرداخت، سیستم تراکنش را Verify و رزرو را CONFIRMED می‌کند.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>مدیریت و ثبت نظر</h4><p>از «رزروهای من» رزروها را مدیریت/لغو و پس از اتمام، امتیاز و نظر ثبت کنید.</p></div></div>
+          </div>
+          <div class="callout reveal">
+            <strong>مالک:</strong> از «وسایل من» وسیله ثبت/ویرایش، تصویر آپلود و «امکان تحویل» و شعاع را تنظیم می‌کند.
+            &nbsp;•&nbsp; <strong>مدیر:</strong> از داشبورد، کاربران/وسایل/رزروها را مدیریت می‌کند.
+          </div>
+          <h3 class="mt reveal" style="font-size:1.1rem">راه‌اندازی یک‌دستوری</h3>
+          <div class="pills reveal">
+            <span class="pill">$ ./start-all.sh</span>
+            <span class="pill">Frontend <b>:3000</b></span>
+            <span class="pill">Gateway <b>:8080</b></span>
+            <span class="pill">Eureka <b>:8761</b></span>
+            <span class="pill">RabbitMQ <b>:15672</b></span>
+            <span class="pill">MinIO <b>:9001</b></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 دمو + راه آینده -->
+      <section class="station" id="s9">
+        <div class="station__head reveal">
+          <div class="station__dot">09</div>
+          <div class="station__t">
+            <div class="station__eyebrow">Demo &amp; Roadmap</div>
+            <h2 class="station__title">سناریوی دمو و نقشهٔ راه</h2>
+          </div>
+        </div>
+        <div class="station__body">
+          <div class="cards cols-2">
+            <div class="card reveal">
+              <h4><span class="ic">▶</span> سناریوی دموی ~۷ دقیقه‌ای</h4>
+              <ul class="clean">
+                <li>بالا آوردن سیستم + نمایش <b>Eureka Dashboard</b></li>
+                <li>ثبت‌نام و ورود کاربر</li>
+                <li>جست‌وجوی نقشه‌محور (<b>PostGIS</b>)</li>
+                <li>رزرو با فعال‌سازی <b>تحویل در محل</b> + نمایش زندهٔ فاصله و هزینه</li>
+                <li>پرداخت در <b>Sandbox</b> → تأیید خودکار و CONFIRM</li>
+                <li>ثبت نظر و تأثیر روی میانگین امتیاز</li>
+              </ul>
+            </div>
+            <div class="card reveal">
+              <h4><span class="ic r">→</span> نقشهٔ راه آینده</h4>
+              <ul class="clean">
+                <li>افزودن <b>Event Consumers</b> (<span class="mono">@RabbitListener</span>) برای اعلان و گزارش</li>
+                <li>مهاجرت مسیرهای پرترافیک به <b>gRPC</b></li>
+                <li>تکمیل <b>location / maintenance</b> (Geofencing، زمان‌بندی)</li>
+                <li>Observability کامل: <b>Prometheus + Grafana + Tracing</b></li>
+                <li><b>CI/CD</b> و استقرار روی <b>Kubernetes</b></li>
+                <li>اپ موبایل و پیش‌بینی تقاضا با AI</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="shell">
+      <div class="big">سکوی اجارهٔ وسایل حمل‌ونقل</div>
+      <div class="sm">Microservices · Spring Boot 3.2 · React 18 · PostgreSQL + PostGIS · v1.0</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  // theme toggle
+  var btn=document.getElementById('themeBtn'), ic=document.getElementById('themeIc');
+  function cur(){var t=root.getAttribute('data-theme');if(t)return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    ic.textContent=next==='dark'?'☾':'☀';
+  });
+
+  // progress bar
+  var pfill=document.getElementById('pfill');
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    pfill.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  // count-up (Persian digits)
+  function toFa(n){return String(n).replace(/[0-9]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d];});}
+  function animateCount(el){
+    var target=+el.getAttribute('data-count'), suf=el.getAttribute('data-suffix')||'';
+    var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(reduce){el.textContent=toFa(target)+suf;return;}
+    var start=null, dur=1100;
+    function step(ts){if(!start)start=ts;var p=Math.min((ts-start)/dur,1);
+      var v=Math.round(target*(1-Math.pow(1-p,3)));el.textContent=toFa(v)+suf;
+      if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);
+  }
+
+  // reveal + triggers
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      e.target.classList.add('in');
+      if(e.target.id==='bars'){
+        e.target.querySelectorAll('.bar__fill').forEach(function(f){f.style.width=f.getAttribute('data-w')+'%';});
+      }
+      var c=e.target.querySelector?e.target.querySelector('[data-count]'):null;
+      io.unobserve(e.target);
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  var barsEl=document.getElementById('bars'); if(barsEl)io.observe(barsEl);
+
+  // count-up when stats visible
+  var statIo=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){animateCount(e.target);statIo.unobserve(e.target);}});
+  },{threshold:.5});
+  document.querySelectorAll('[data-count]').forEach(function(el){statIo.observe(el);});
+})();
+</script>

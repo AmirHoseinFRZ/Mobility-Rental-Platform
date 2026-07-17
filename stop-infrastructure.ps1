@@ -1,4 +1,4 @@
-# Stop Infrastructure Services for Mobility Rental Platform
+﻿# Stop Infrastructure Services for Mobility Rental Platform
 # This script stops all running Docker containers
 
 param(

@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Mobility Rental Platform - Stop All Services (Windows PowerShell)
 # ============================================================================
 
@@ -31,11 +31,22 @@ function Write-Success($message) {
 
 Write-Header "STOPPING MOBILITY RENTAL PLATFORM"
 
-# Stop all Java processes (Spring Boot services)
+# Stop all Java / Maven processes belonging to the backend microservices.
+# We match on the command line so Eureka, the gateway and every service are
+# caught regardless of window title.
 Write-Step "Stopping backend services..."
-$javaProcesses = Get-Process -Name "java" -ErrorAction SilentlyContinue
-if ($javaProcesses) {
-    $javaProcesses | Where-Object { $_.MainWindowTitle -like "*Service*" -or $_.MainWindowTitle -like "*Gateway*" } | Stop-Process -Force
+$backendProcs = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.CommandLine -and (
+        $_.CommandLine -like "*spring-boot:run*" -or
+        $_.CommandLine -like "*internal-payment-gateway*" -or
+        $_.CommandLine -like "*\backend\*"
+    ) -and ($_.Name -match "^(java|javaw|mvn|mvnw|cmd|conhost)")
+}
+if ($backendProcs) {
+    foreach ($p in $backendProcs) {
+        # /T kills the whole child tree (mvn -> java), /F forces it
+        cmd /c "taskkill /PID $($p.ProcessId) /T /F" *> $null
+    }
     Write-Success "Backend services stopped"
 } else {
     Write-Success "No backend services running"
@@ -43,12 +54,21 @@ if ($javaProcesses) {
 
 # Stop Node.js processes (React frontend)
 Write-Step "Stopping frontend..."
-$nodeProcesses = Get-Process -Name "node" -ErrorAction SilentlyContinue
-if ($nodeProcesses) {
-    $nodeProcesses | Where-Object { $_.MainWindowTitle -like "*React*" -or $_.MainWindowTitle -like "*Frontend*" } | Stop-Process -Force
+$nodeProcs = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.CommandLine -and ($_.CommandLine -like "*react-scripts*" -or $_.CommandLine -like "*npm*start*")
+}
+if ($nodeProcs) {
+    foreach ($p in $nodeProcs) {
+        cmd /c "taskkill /PID $($p.ProcessId) /T /F" *> $null
+    }
     Write-Success "Frontend stopped"
 } else {
     Write-Success "No frontend running"
+}
+
+# Clean up any PID files left by the scripts/ helpers
+if (Test-Path "logs") {
+    Get-ChildItem "logs\*.pid" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
 # Stop Docker containers

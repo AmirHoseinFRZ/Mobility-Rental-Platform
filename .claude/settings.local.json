@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn -pl common-lib,vehicle-service,pricing-service,booking-service -am -q compile -DskipTests)",
+      "Bash(mvn -pl common-lib,vehicle-service,pricing-service,booking-service -am compile -DskipTests)",
+      "Bash(mvn -pl common-lib,vehicle-service,pricing-service,booking-service -am clean compile -DskipTests)"
+    ]
+  }
+}

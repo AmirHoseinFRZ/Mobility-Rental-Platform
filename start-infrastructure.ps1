@@ -1,4 +1,4 @@
-# Start Infrastructure Services for Mobility Rental Platform
+﻿# Start Infrastructure Services for Mobility Rental Platform
 # This script starts PostgreSQL, RabbitMQ, and Redis using Docker Compose
 
 Write-Host "========================================" -ForegroundColor Cyan

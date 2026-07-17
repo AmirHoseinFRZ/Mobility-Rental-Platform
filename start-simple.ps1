@@ -1,4 +1,4 @@
-# Simple Startup Script
+﻿# Simple Startup Script
 Write-Host "Starting Mobility Rental Platform..." -ForegroundColor Yellow
 
 # Start Infrastructure

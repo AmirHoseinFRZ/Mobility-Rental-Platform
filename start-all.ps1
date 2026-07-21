@@ -249,7 +249,7 @@ Write-Host ""
 Write-Host "Service URLs:" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Frontend Application:" -ForegroundColor White
-Write-Host "    http://localhost:3000" -ForegroundColor Green
+Write-Host "    http://localhost:3100" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Service Discovery:" -ForegroundColor White
 Write-Host "    Eureka Server:   http://localhost:8761" -ForegroundColor Green

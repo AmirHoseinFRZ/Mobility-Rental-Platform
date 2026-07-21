@@ -85,7 +85,7 @@ Write-Host "======================================" -ForegroundColor Yellow
 Write-Host "  STARTUP COMPLETE" -ForegroundColor Yellow
 Write-Host "======================================" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Frontend: http://localhost:3000" -ForegroundColor Green
+Write-Host "Frontend: http://localhost:3100" -ForegroundColor Green
 Write-Host "API Gateway: http://localhost:8080" -ForegroundColor Green
 Write-Host "RabbitMQ: http://localhost:15672" -ForegroundColor Green
 Write-Host ""

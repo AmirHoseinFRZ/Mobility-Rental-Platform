@@ -14,7 +14,7 @@
   @media (prefers-color-scheme:dark){
     :root{
       --ink:#EAEEF4; --ink-2:#C4CDD9; --paper:#0C121B; --card:#141C28;
-      --muted:#8595A8; --line:#243040; --line-soft:#1C2634;
+      --muted:#A2B1C6; --line:#3A4B64; --line-soft:#2E3D55;
       --signal:#FF6E44; --signal-ink:#FF8A66; --route:#2BC0B1; --route-ink:#5AD6C9;
       --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -14px rgba(0,0,0,.6);
       --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 6px 16px -8px rgba(0,0,0,.5);
@@ -29,7 +29,7 @@
   }
   :root[data-theme="dark"]{
     --ink:#EAEEF4; --ink-2:#C4CDD9; --paper:#0C121B; --card:#141C28;
-    --muted:#8595A8; --line:#243040; --line-soft:#1C2634;
+    --muted:#A2B1C6; --line:#3A4B64; --line-soft:#2E3D55;
     --signal:#FF6E44; --signal-ink:#FF8A66; --route:#2BC0B1; --route-ink:#5AD6C9;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -14px rgba(0,0,0,.6);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 6px 16px -8px rgba(0,0,0,.5);
@@ -124,11 +124,13 @@
   .card .ic.r{background:color-mix(in srgb,var(--route) 14%,transparent);color:var(--route-ink)}
 
   /* table */
-  .tblwrap{overflow-x:auto;margin-top:24px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+  .tblwrap{overflow-x:auto;margin-top:24px;border:1px solid color-mix(in srgb,var(--ink) 20%,transparent);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
   table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card);min-width:520px}
-  th,td{text-align:right;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+  th,td{text-align:right;padding:13px 16px;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);color:var(--ink)}
+  tbody td{color:var(--ink);font-weight:500}
   thead th{background:color-mix(in srgb,var(--ink) 4%,var(--card));font-weight:800;font-size:13px;color:var(--ink);position:sticky;top:0}
   tbody tr:last-child td{border-bottom:0}
+  tbody tr:nth-child(even){background:color-mix(in srgb,var(--ink) 3%,transparent)}
   tbody tr:hover{background:color-mix(in srgb,var(--route) 5%,transparent)}
   td .mono,th .mono{font-family:var(--mono);font-size:13px;direction:ltr;unicode-bidi:embed;font-variant-numeric:tabular-nums}
   .tag{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:6px;direction:ltr;
@@ -266,6 +268,13 @@
             <div class="card reveal"><h4><span class="ic r">✓</span> اعتماد و شفافیت</h4><p>قیمت‌گذاری پویا، نمایش لحظه‌ای هزینه، سیستم امتیاز، و درگاه پرداخت امن.</p></div>
             <div class="card reveal"><h4><span class="ic">♻</span> اثر محیط‌زیستی</h4><p>کاهش خودروهای بلااستفاده و ترافیک؛ تشویق گزینه‌های سبک و برقی.</p></div>
             <div class="card reveal"><h4><span class="ic r">⌘</span> ارزش فنی</h4><p>نمونهٔ عملی و کامل از معماری Microservices مدرن با تمام مفاهیم کلیدی مهندسی نرم‌افزار.</p></div>
+          </div>
+          <div class="callout reveal">
+            <strong>«آخرین‌کیلومتر» (Last Mile) چیست؟</strong> اصطلاحی در حوزهٔ حمل‌ونقل و لجستیک است که به
+            کوتاه‌ترین و آخرین بخش یک سفر شهری اشاره دارد؛ یعنی همان مسافت کوتاهی که کاربر باید از ایستگاه
+            حمل‌ونقل عمومی (مترو/اتوبوس) تا مقصد نهایی طی کند، یا به‌طور کلی جابه‌جایی‌های کوتاه درون‌شهری.
+            وسایلی مانند اسکوتر، دوچرخه و موتور برای همین مسافت‌ها ایده‌آل‌اند و این پلتفرم دقیقاً به این نیاز
+            پاسخ می‌دهد.
           </div>
         </div>
       </section>

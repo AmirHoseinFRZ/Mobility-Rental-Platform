@@ -230,7 +230,7 @@
       <span class="kicker reveal">Microservices · Spring Boot · React · PostGIS</span>
       <h1 class="reveal">سکوی اجارهٔ<br><span class="accent">وسایل حمل‌ونقل</span></h1>
       <p class="hero__sub reveal">یک پلتفرم کامل و مقیاس‌پذیر برای اجارهٔ خودرو، موتور، اسکوتر و دوچرخه —
-      جست‌وجوی نقشه‌محور، رزرو با/بدون راننده، تحویل در محل، و پرداخت از طریق درگاه بانکی واقعی.</p>
+      جست‌وجوی نقشه‌محور، رزرو و تحویل در محل، و پرداخت از طریق درگاه بانکی واقعی.</p>
       <div class="hero__meta reveal">
         <span class="chip"><span class="dot"></span> نسخهٔ نهایی · Production-Ready</span>
         <span class="chip"><span class="dot r"></span> Java 17 · Spring Boot 3.2</span>
@@ -335,7 +335,6 @@
                 <tr><td class="mono">FR-4</td><td>جست‌وجوی وسایل بر اساس موقعیت و شعاع (nearest)</td><td><span class="tag">vehicle · PostGIS</span></td></tr>
                 <tr><td class="mono">FR-6</td><td>محاسبهٔ لحظه‌ای قیمت (پایه/اوج/آخرهفته/تخفیف)</td><td><span class="tag">pricing-service</span></td></tr>
                 <tr><td class="mono">FR-8</td><td>چرخهٔ حیات رزرو (ایجاد/تأیید/شروع/پایان/لغو)</td><td><span class="tag">booking-service</span></td></tr>
-                <tr><td class="mono">FR-9</td><td>رزرو با راننده + یافتن نزدیک‌ترین رانندهٔ موجود</td><td><span class="tag">driver · PostGIS</span></td></tr>
                 <tr><td class="mono">FR-10</td><td>ایجاد و تأیید تراکنش پرداخت (Create/Verify)</td><td><span class="tag">booking ↔ gateway</span></td></tr>
                 <tr><td class="mono">FR-11</td><td>تحویل وسیله در محل با هزینهٔ مبتنی بر فاصله</td><td><span class="tag">booking + pricing</span></td></tr>
                 <tr><td class="mono">FR-12</td><td>ثبت نظر و امتیاز وسیله/راننده + میانگین</td><td><span class="tag">review-service</span></td></tr>
@@ -520,7 +519,7 @@
             <div class="step reveal"><div class="step__n"></div><div><h4>ثبت‌نام و ورود</h4><p>به <span class="mono">localhost:3000</span> بروید و ثبت‌نام کنید؛ توکن JWT صادر و وارد می‌شوید.</p></div></div>
             <div class="step reveal"><div class="step__n"></div><div><h4>جست‌وجوی وسیله</h4><p>موقعیت را روی نقشه انتخاب و شعاع و نوع را تعیین کنید؛ PostGIS نزدیک‌ترین وسایل را مرتب بر اساس فاصله نشان می‌دهد.</p></div></div>
             <div class="step reveal"><div class="step__n"></div><div><h4>مشاهدهٔ جزئیات</h4><p>مشخصات، تصاویر، نظرات کاربران و میانگین امتیاز وسیله را ببینید.</p></div></div>
-            <div class="step reveal"><div class="step__n"></div><div><h4>رزرو</h4><p>تاریخ را انتخاب، در صورت نیاز «با راننده» یا «تحویل در محل» را فعال کنید؛ قیمت لحظه‌ای + کد تخفیف نمایش داده می‌شود.</p></div></div>
+            <div class="step reveal"><div class="step__n"></div><div><h4>رزرو</h4><p>تاریخ را انتخاب، در صورت نیاز «تحویل در محل» را فعال کنید؛ قیمت لحظه‌ای + کد تخفیف نمایش داده می‌شود.</p></div></div>
             <div class="step reveal"><div class="step__n"></div><div><h4>پرداخت</h4><p>به درگاه هدایت می‌شوید؛ پس از پرداخت، سیستم تراکنش را Verify و رزرو را CONFIRMED می‌کند.</p></div></div>
             <div class="step reveal"><div class="step__n"></div><div><h4>مدیریت و ثبت نظر</h4><p>از «رزروهای من» رزروها را مدیریت/لغو و پس از اتمام، امتیاز و نظر ثبت کنید.</p></div></div>
           </div>
@@ -565,6 +564,7 @@
             <div class="card reveal">
               <h4><span class="ic r">→</span> نقشهٔ راه آینده</h4>
               <ul class="clean">
+                <li>افزودن <b>اجارهٔ همراه با راننده</b> و تخصیص نزدیک‌ترین رانندهٔ موجود</li>
                 <li>افزودن <b>Event Consumers</b> (<span class="mono">@RabbitListener</span>) برای اعلان و گزارش</li>
                 <li>مهاجرت مسیرهای پرترافیک به <b>gRPC</b></li>
                 <li>تکمیل <b>location / maintenance</b> (Geofencing، زمان‌بندی)</li>
